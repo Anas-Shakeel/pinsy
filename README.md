@@ -1,7 +1,6 @@
 ## Pins (*P*rints & *in*put*s*)
 
-#### Outdated README:
-Almost everything is updated (changed) since i last wrote this readme.
+#### Outdated README: Almost everything is updated (changed) since i last wrote this readme.
 
 A Helper Module For `Print` and `Input` related functions to speed up the
 workflow of creating user-friendly command-line applications.
