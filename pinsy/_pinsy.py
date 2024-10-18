@@ -1,5 +1,5 @@
 # Copyright 2024 Anas Shakeel
-from __future__ import annotations
+# from __future__ import annotations
 
 import sys
 import json
@@ -26,7 +26,7 @@ from .utils import get_terminal_size, typecheck
 from ._others import (PromptChar, FillChar, Charset, YAlign, XAlign, Bullet,
                       StrConstraint, Callback, ErrorHandling,
                       ERROR_HANDLING, CONSTRAINTS, CHARSETS, REGEX_PATTERNS)
-from typing import Tuple, Iterable, Callable, Literal, Optional, Union, Any
+from typing import List, Tuple, Dict, Iterable, Callable, Literal, Optional, Union, Any
 
 
 class Pins:
@@ -2335,11 +2335,16 @@ class Pins:
         seconds = delta.seconds
         minutes = seconds // 60
         hours = minutes // 60
-        days = hours // 24
+
+        days = delta.days
         months = days // 30
         years = months // 12
+        centuries = years // 100
 
         # Format and return
+        if centuries > 0:
+            unit = "century" if centuries == 1 else "centuries"
+            return f"{centuries} {unit} ago"
         if years > 0:
             unit = "year" if years == 1 else "years"
             return f"{years} {unit} ago"
