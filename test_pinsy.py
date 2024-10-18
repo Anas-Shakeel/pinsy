@@ -77,6 +77,49 @@ dummy_dict = {
 
 # pinsy.Pins Tests
 
+def test_pins():
+    p = Pins()
+
+    # Colormodes
+    p.set_colormode(4)
+    p.set_colormode(8)
+    p.set_colormode(24)
+    with raises(AssertionError):
+        p.set_colormode(250)
+    with raises(AssertionError):
+        p.set_colormode("invalid colormode")
+
+    # Promptchars
+    assert p.promptize("prompt: ") == '>> prompt: '
+    assert p.promptize("Your name: ", prompt_char=">") == '> Your name: '
+    assert p.promptize("Your name: ", prompt_char=123) == '123 Your name: '
+
+    # Charsets
+    assert p.create_hr(5) == '-----'
+    p.set_charset("box")
+    assert p.create_hr(5) == '─────'
+    p.set_charset("blocks")
+    assert p.create_hr(5) == '■■■■■'
+
+    with raises(AssertionError):
+        p.set_charset("invalid charset")
+    with raises(AssertionError):
+        p.set_charset(123)
+
+    with raises(AssertionError):
+        Pins(handle_errors=123)
+    with raises(ValueError):
+        Pins(handle_errors="something")
+
+    # Renew Pins instance
+    p = Pins()
+    assert p.colorize("testing", "red") == '\x1b[31mtesting\x1b[0m'
+
+    p.disable_colors()
+    assert p.colorize("testing", "red") == 'testing'
+    p.enable_colors()
+
+
 def test_colorize_4bit():
     # Test 4-bit
     assert pins.colorize(dummy) == "This is a dummy string."
@@ -165,21 +208,34 @@ def test_colorize_24bit():
 def test_colorize_regex():
     assert pins.colorize_regex("", "", "red") == ""
     assert pins.colorize_regex(dummy, "") == "This is a dummy string."
+    assert pins.colorize_regex("8008135 is a number", re.compile(r"[0-9]+"),
+                               fgcolor="red") == '\x1b[31m8008135\x1b[0m is a number'
 
     assert pins.colorize_regex(dummy, pattern="This", fgcolor="yellow", bgcolor="dark_grey", attrs=[
                                'strike']) == "\x1b[9m\x1b[100m\x1b[33mThis\x1b[0m is a dummy string."
-    assert pins.colorize_regex(
-        dummy, pattern="s", fgcolor="yellow") == "Thi\x1b[33ms\x1b[0m i\x1b[33ms\x1b[0m a dummy \x1b[33ms\x1b[0mtring."
+    assert pins.colorize_regex(dummy, pattern="s",
+                               fgcolor="yellow") == "Thi\x1b[33ms\x1b[0m i\x1b[33ms\x1b[0m a dummy \x1b[33ms\x1b[0mtring."
 
-    pattern = re.compile(r"[ast]")
-    assert pins.colorize_regex(
-        dummy, pattern=pattern, fgcolor="yellow") == "Thi\x1b[33ms\x1b[0m i\x1b[33ms\x1b[0m \x1b[33ma\x1b[0m dummy \x1b[33ms\x1b[0m\x1b[33mt\x1b[0mring."
+    assert pins.colorize_regex(dummy, pattern=re.compile(r"[ast]"),
+                               fgcolor="yellow") == "Thi\x1b[33ms\x1b[0m i\x1b[33ms\x1b[0m \x1b[33ma\x1b[0m dummy \x1b[33ms\x1b[0m\x1b[33mt\x1b[0mring."
+    assert pins.colorize_regex(dummy, re.compile(
+        r"\s"), bgcolor="light_red") == 'This\x1b[101m \x1b[0mis\x1b[101m \x1b[0ma\x1b[101m \x1b[0mdummy\x1b[101m \x1b[0mstring.'
+
+    with raises(TypeError):
+        pins.colorize_regex("None", None)
+
+    with raises(AssertionError):
+        pins.colorize_regex(None, "s", "yellow")
 
     with raises(AssertionError):
         pins.colorize_regex(123, "s", "yellow")
 
     with raises(AssertionError):
         pins.colorize_regex(dummy, "This", attrs="bol")
+    with raises(AssertionError):
+        pins.colorize_regex(dummy, "This", attrs=1234)
+    with raises(AttributeError):
+        pins.colorize_regex(dummy, "This", attrs=["bold", "underfine"])
 
     with raises(exceptions.InvalidColorError):
         pins.colorize_regex(dummy, "This", "yellows")
@@ -189,26 +245,32 @@ def test_colorize_regex():
 
 
 def test_create_hr():
-    pins.create_hr(None) # Should run successfully
-    pins.create_hr(2, charset=None) # Should run successfully
-    
+    pins.create_hr(None)  # Should run successfully
+    pins.create_hr(2, charset=None)  # Should run successfully
+
     assert len(pins.create_hr(10)) == 10
     assert len(pins.create_hr(90)) == 90
     assert len(pins.create_hr(10, align="left")) == 10
     assert pins.create_hr(10, fill_char="-") == "----------"
     assert pins.create_hr(10, pad_x=2) == "--------"
 
-    with raises(AssertionError): # Invalid width
-        pins.create_hr(0) # must be greater than 0
+    with raises(AssertionError):  # Invalid width
+        pins.create_hr(0)  # must be greater than 0
+
     with raises(AssertionError):
         pins.create_hr(-500)
-        
-    with raises(TypeError): # Invalid fillchar
+
+    with raises(TypeError):  # Invalid fillchar
         pins.create_hr(10, fill_char=1)
-    with raises(AssertionError):# Invalid charset
+
+    with raises(AssertionError):  # Invalid charset
         pins.create_hr(10, charset="invalidcharset")
-    with raises(AssertionError): # Invalid align
+
+    with raises(AssertionError):  # Invalid align
         pins.create_hr(10, align="something")
+
+    with raises(exceptions.InvalidColorError):  # Invalid Color
+        pins.create_hr(10, color="redish")
 
 
 def test_create_status():
@@ -221,21 +283,23 @@ def test_create_status():
     assert pins.create_status(label, dummy, "light_blue", "dark_grey", ['bold'],
                               "light_green", "dark_grey", ['italic']) == "\x1b[1m\x1b[100m\x1b[94m█ test: \x1b[0m\x1b[3m\x1b[100m\x1b[92mThis is a dummy string.\x1b[0m"
 
+    # Label and text
     with raises(AssertionError):
         pins.create_status(123, 1.25)
-
     with raises(AssertionError):
         pins.create_status(None, None)
 
+    # Colors
     with raises(exceptions.InvalidColorError):
-        pins.create_status(label, dummy, "asdf")
+        pins.create_status(label, dummy, label_fg="asdf")
+    with raises(exceptions.InvalidColorError):
+        pins.create_status(label, dummy, label_fg="red", text_fg="redish")
 
+    # Attrs
     with raises(AttributeError):
         pins.create_status(label, dummy, text_attrs=['vold'])
-
     with raises(AssertionError):
         pins.create_status(label, dummy, text_attrs=123)
-
     with raises(AssertionError):
         pins.create_status(label, dummy, text_attrs="bold")
 
@@ -255,7 +319,7 @@ def test_boxify():
         pins.boxify(123456)
     with raises(TypeError):
         pins.boxify(None)
-        
+
     with raises(TypeError):
         pins.boxify(dummy, "123")
 
@@ -268,7 +332,7 @@ def test_boxify():
         pins.boxify(dummy, border_color="cyanish")
     with raises(exceptions.InvalidColorError):
         pins.boxify(dummy, border_color=404)
-        
+
     with raises(exceptions.InvalidColorError):
         pins.boxify(dummy, text_color="cyanish")
     with raises(exceptions.InvalidColorError):
@@ -361,15 +425,21 @@ def test_promptize():
     assert pins.promptize(123) == ">> 123"
     assert pins.promptize(None, prompt_char="PROMPT") == "PROMPT None"
     assert pins.promptize(dummy) == ">> This is a dummy string."
-    assert pins.promptize(dummy, "green", "dark_grey", [
-                          'bold'], prompt_char=">") == '\x1b[1m\x1b[100m\x1b[32m> This is a dummy string.\x1b[0m'
+    assert pins.promptize(
+        dummy, "red") == '\x1b[31m>> This is a dummy string.\x1b[0m'
+    assert pins.promptize(dummy, "green", "dark_grey", ['bold'],
+                          prompt_char=">") == '\x1b[1m\x1b[100m\x1b[32m> This is a dummy string.\x1b[0m'
 
     with raises(exceptions.InvalidColorError):
         pins.promptize(None, fgcolor="li")
     with raises(exceptions.InvalidColorError):
         pins.promptize(None, bgcolor="li")
+    with raises(exceptions.InvalidColorError):
+        pins.promptize(None, fgcolor="red", bgcolor="li")
     with raises(AttributeError):
         pins.promptize(None, attrs=["li"])
+    with raises(AttributeError):
+        pins.promptize(None, attrs=["bold", 123])
 
 
 def test_textalign_x():
@@ -434,6 +504,8 @@ def test_splice_text():
     assert pins.splice_text(dummy, "(+)", -50) == "(+)".join(dummy)
     assert pins.splice_text(dummy, "(+)", 0) == "(+)".join(dummy)
 
+    with raises(TypeError):
+        pins.splice_text(None)
     with raises(TypeError):
         pins.splice_text(1234, "+", 4)
     with raises(TypeError):
@@ -549,9 +621,13 @@ def test_format_date():
     assert pins.format_date(pins.now(dt_format), dt_format) == "Just now"
 
     with raises(TypeError):
-        pins.format_date(123, "123")
+        pins.format_date(None, None)
+    with raises(TypeError):
+        pins.format_date(None, 'None')
     with raises(TypeError):
         pins.format_date('None', None)
+    with raises(TypeError):
+        pins.format_date(123, "123")
     with raises(TypeError):
         pins.format_date("", 123)
 
@@ -672,7 +748,15 @@ def test__validate_colors():
 
 def test__validate_attrs():
     assert pins._validate_attrs([("attrs", list(ATTRIBUTES.keys()))])
+    assert pins._validate_attrs([("attrs", None)])
 
+    # Invalid attr type
+    with raises(AssertionError):
+        pins._validate_attrs([("attr1", 123)])
+    with raises(AssertionError):
+        pins._validate_attrs([("attr1", "string")])
+
+    # Invalid attr
     with raises(AttributeError):
         pins._validate_attrs([("attr1", ['bolf', 'underfine'])])
     with raises(AttributeError):
@@ -1112,10 +1196,6 @@ def test_type_match():
     assert not type_match(None, set)
     assert not type_match(True, set)
 
-    # Dummy function
-    def dummy():
-        pass
-
     # Complex Types
     assert type_match([1, 2, 3], List[int])
     assert not type_match([1, "2", 3], List[int])
@@ -1156,6 +1236,7 @@ def test_type_match():
     assert not type_match(None, Iterable[str])
     assert not type_match(True, Iterable[str])
 
+    assert type_match("None", Union[int, str, None])
     assert type_match(10, Union[int, str])
     assert type_match("10", Union[int, str])
     assert not type_match(["10", 12], Union[int, str])
@@ -1165,6 +1246,7 @@ def test_type_match():
     assert type_match(10, Optional[int])
     assert type_match(None, Optional[int])
     assert type_match(("10", 123), Optional[tuple])
+    assert not type_match("10", Optional[float])
     assert not type_match("10", Optional[int])
     assert not type_match(True, Optional[int])
 
@@ -1211,31 +1293,31 @@ def test_type_check():
         complex_types({"1": [1, 2, 3, "str"]})
     with raises(TypeError):
         complex_types({"key": [1, 2, 3,]}, False)
-        
-        
+
     # Skip test
+
     @typecheck(skip=['b', 'c'])
-    def skip_test(a:int, b:int, c:int):
+    def skip_test(a: int, b: int, c: int):
         return a + b + c
-    
+
     assert skip_test(1, 3.5, 2.5) == 7
     with raises(TypeError):
         skip_test(1.5, 3.5, 2)
-    
+
     # Only test
     @typecheck(only=['b'])
-    def only_test(a:int, b:int, c:int):
+    def only_test(a: int, b: int, c: int):
         return a + b + c
-    
+
     assert only_test(1.5, 3, 2.5) == 7
     with raises(TypeError):
         only_test(1, 3.5, 2)
-    
+
     # Only Test 2
     try:
         # skip and only are mutually exclusive: Raise AssertionError if both provided
         @typecheck(only=['b'], skip=['a'])
-        def only_test_2(a:int, b:int, c:int):
+        def only_test_2(a: int, b: int, c: int):
             return a + b + c
     except AssertionError:
         pass
@@ -1243,6 +1325,7 @@ def test_type_check():
 
 if __name__ == "__main__":
     all_functions = [
+        (test_pins, "test_pins"),
         (test_colorize_4bit, "test_colorize_4bit"),
         (test_colorize_8bit, "test_colorize_8bit"),
         (test_colorize_24bit, "test_colorize_24bit"),
