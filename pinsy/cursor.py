@@ -13,6 +13,7 @@
 ## Cursor
 A simple module to hide/show cursor in the terminal 
 """
+from __future__ import annotations
 
 import sys
 import os
