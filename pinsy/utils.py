@@ -19,6 +19,7 @@ A simple module that provides utility functions related to ANSI functionality.
 
 """
 
+from __future__ import annotations
 
 import sys
 import os
@@ -199,7 +200,7 @@ def get_terminal_size() -> tuple[int, int]:
     return tuple(os.get_terminal_size())
 
 
-def type_match(value, expected_type):
+def type_match(value:Any, expected_type:Any) -> bool:
     """ 
     ### Type Match
     Checks if a value is an instance of the expected type, supporting complex 
@@ -296,15 +297,15 @@ def type_match(value, expected_type):
             item, type_args[0]) for item in value)
         return isinstance(value, set) and items_check
 
+    # Handle Union
+    if origin_type is Union:
+        return any(type_match(value, arg) for arg in type_args)
+    
     # Handle Optional (equivalent to Union[Any, None])
     if origin_type is Union and type(None) in type_args:
         actual_type = type_args[0] if type_args[1] is type(
             None) else type_args[1]
         return value is None or type_match(value, actual_type)
-
-    # Handle Union
-    if origin_type is Union:
-        return any(type_match(value, arg) for arg in type_args)
 
     # Handle Iterable
     if origin_type is Iterable:
@@ -482,74 +483,3 @@ def _normalize_hint(hint) -> str:
     
     # IF Not from above, return back
     return hint
-
-
-def typecheck_old(func):
-    """ 
-    ### Type Check
-    A decorator that enforces type checking on function arguments and return values
-    based on the type hints provided in the function.
-
-    If an argument doesn't match the specified type, a `TypeError` is raised with 
-    a message.
-
-    #### Supported Types:
-    It supports simple types like:
-    - `int`,`float`,`str`,`bool`,`None`,`list`,`tuple`,`dict`,`bytes`
-
-    As well as complex types (from `typing` module) like:
-    - `Any` a value of any type (skips type checking)
-    - `Dict[str, int]`
-    - `Iterable[int]`
-    - `List[int]`
-    - `Optional[int]` indicates an optional value that can either be int or None
-    - `Set[int]`
-    - `Tuple[str, int]`
-    - `Union[int, str]`
-
-    #### Example:
-    ```
-    @typecheck
-    >> def add(a:int, b:int) -> int:
-    ..    return a + b
-    ..
-    >> add(1, 2) # Works fine, returns 3
-    >> add(1, "2") # Raises TypeError
-    TypeError: Argument 'b' must be <class 'int'>, but got <class 'str'>
-    ```
-
-    Raises `TypeError` if argument types or return type do not match annotated type hints.
-    """
-    @wraps(func)  # Preserve the original function's metadata
-    def wrapper(*args, **kwargs):
-        # Get the function signature and annotations (type hints)
-        sig = signature(func)
-        hints = func.__annotations__
-
-        # bind the arguments to their names (mapping argument values to parameter names)
-        bound_args = sig.bind(*args, **kwargs)
-        bound_args.apply_defaults()
-
-        # Return Prematurely, if no hints given
-        if not hints:
-            return func(*args, **kwargs)
-
-        # Check the types of each argument against the type hints
-        for arg_name, arg_value in bound_args.arguments.items():
-            if arg_name in hints:  # Only check if there's a type hint
-                expected_type = hints[arg_name]
-                if not type_match(arg_value, expected_type):
-                    raise TypeError(f"Argument '{arg_name}' must be {
-                                    expected_type}, but got {type(arg_value)}")
-
-        # Execute the function and capture result
-        result = func(*args, **kwargs)
-
-        # Check return type (if there's a return type)
-        if 'return' in hints:
-            if not type_match(result, hints['return']):
-                raise TypeError(f"Return value must be {
-                                hints['return']}, but got {type(result)}")
-
-        return result
-    return wrapper
