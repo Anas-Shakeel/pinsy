@@ -1,9 +1,12 @@
 # Copyright 2024 Anas Shakeel
+from __future__ import annotations
 
 import sys
 import json
 import platform
 import ipaddress
+import re
+from re import Pattern
 from math import floor, ceil
 from textwrap import fill
 from getpass import getpass
@@ -13,18 +16,17 @@ from time import sleep
 from calendar import month as calendar_month
 from itertools import batched
 from os.path import isfile, isdir, splitext, join as path_join, sep as path_sep, normpath
-from re import match as re_match, finditer as re_finditer, Pattern
-from typing import Tuple, Iterable, Callable, Literal, Optional, Union, Any, AnyStr
-from ansy.exceptions import InvalidColorError
 from ansy import (colored, colored_ansy, make_ansi, de_ansi,
                   create_style, is_valid_color, ANSI_REGEX,
                   ANSI_CODES, ATTRIBUTES, Attribute, Color, ColorMode)
+from ansy.exceptions import InvalidColorError
 from .cursor import HiddenCursor
 from . import utils
 from .utils import get_terminal_size, typecheck
 from ._others import (PromptChar, FillChar, Charset, YAlign, XAlign, Bullet,
                       StrConstraint, Callback, ErrorHandling,
                       ERROR_HANDLING, CONSTRAINTS, CHARSETS, REGEX_PATTERNS)
+from typing import Tuple, Iterable, Callable, Literal, Optional, Union, Any
 
 
 class Pins:
@@ -62,11 +64,11 @@ class Pins:
             Pins.fix_windows_console()
 
         # Erros and Callbacks
-        self._validate_types([('handle_errors', handle_errors, str)])
+        assert isinstance(handle_errors, str), \
+            "handle_errors must be a string."
 
         if handle_errors not in ERROR_HANDLING:
-            raise ValueError(f"Invalid handle_errors: '{
-                             handle_errors}'")
+            raise ValueError(f"Invalid handle_errors: '{handle_errors}'")
 
         if handle_errors == "callback":
             if not error_callback:
@@ -81,23 +83,15 @@ class Pins:
         self.handle_errors = handle_errors
         self.USE_COLORS: bool = use_colors
 
-        # Colormode validation
-        if color_mode not in {4, 8, 24}:
-            raise ValueError(f"Invalid color_mode: {color_mode}")
-        self.COLORMODE = color_mode
+        # Set self.COLORMODE & self.DEFAULT_COLORS
+        self.set_colormode(color_mode)
 
-        # Get default colors
-        self.DEFAULT_COLORS = self._assign_colors()
+        # Set self.CHARSET & self.charset_name
+        self.set_charset(charset)
 
         # Char used in make_status
         self.STATUS_CHAR = "█"
         self.PROMPT_CHAR = prompt_char if prompt_char else ">>"
-
-        # Default Charset
-        if charset not in CHARSETS:
-            raise KeyError(f"Invalid charset: '{charset}'")
-        self.CHARSET: dict = CHARSETS[charset]
-        self.charset_name: str = charset
 
     @classmethod
     def fix_windows_console(cls):
@@ -118,11 +112,15 @@ class Pins:
         self.USE_COLORS = False
 
     def set_colormode(self, mode: int):
-        """ Override pins.COLORMODE. """
+        """
+        ### Set Colormode
+        Change/override the pins.COLORMODE. 
+        
+        Raises `AssertionError` if:
+        - `mode` is not `4`, `8` or `24`.
+        """
         assert mode in (4, 8, 24), f"Invalid mode: {mode}"
         self.COLORMODE = mode
-
-        # Reassign default colors
         self.DEFAULT_COLORS = self._assign_colors()
 
     def set_default_colors(self, error: Color = None,
@@ -141,8 +139,24 @@ class Pins:
         self.DEFAULT_COLORS['success'] = success if success else self.DEFAULT_COLORS['success']
         self.DEFAULT_COLORS['warn'] = warn if warn else self.DEFAULT_COLORS['warn']
 
+    def set_charset(self, charset:Charset):
+        """  
+        ### Set Charset
+        Change/override the pins.CHARSET.
+        
+        Raises `AssertionError` if:
+        - `charset` is invalid
+        """
+        assert charset in CHARSETS, f"Invalid charset: '{charset}'"
+        self.CHARSET: dict = CHARSETS[charset]
+        self.charset_name: str = charset
+    
+
     def colorize(self, text: str, fgcolor: Color = None, bgcolor: Color = None,
-                 attrs: Iterable[Attribute] = None, color_mode: int = None) -> str:
+                 attrs: Iterable[Attribute] = None, color_mode: int = None,
+                 *, 
+                 no_color: Optional[bool] = None,
+                 force_color: Optional[bool] = None) -> str:
         """ 
         ### Colorize
         Colorize the `text` using the color mode specified by `color_mode`.
@@ -196,14 +210,16 @@ class Pins:
                 "attrs must be a list or tuple"
 
         color_mode = color_mode if color_mode else self.COLORMODE
+        no_color = no_color if no_color else not self.USE_COLORS
+        
+        return colored(text, fgcolor, bgcolor, attrs, color_mode,
+                       no_color=no_color, force_color=force_color)
 
-        if not self.USE_COLORS:
-            fgcolor, bgcolor = None, None
-
-        return colored(text, fgcolor, bgcolor, attrs, color_mode)
-
-    def colorize_regex(self, text: str, pattern: Pattern, fgcolor: Color = None,
-                       bgcolor: Color = None, attrs: Iterable[Attribute] = None) -> str:
+    def colorize_regex(self, text: str,
+                       pattern: Union[Pattern, str],
+                       fgcolor: Color = None,
+                       bgcolor: Color = None,
+                       attrs: Iterable[Attribute] = None) -> str:
         """ 
         ### Colorize Regex
         Colorize all matches of `pattern` found in `text`.
@@ -229,34 +245,28 @@ class Pins:
 
         Raises `AssertionError` if:
         - `text` is not a string
-        - `attrs` is not a string
+        - `attrs` is not a tuple or list
+
+        Raises `AttributeError` if:
+        - `attrs` contains an invalid attribute
 
         Raises `InvalidColorError` if:
         - `fgcolor` is unrecognized
         - `bgcolor` is unrecognized
         """
         assert isinstance(text, str), "text is not a str"
-        if text == "":
+        if not text:
             return text
 
-        self._validate_colors([('fgcolor', fgcolor), ('bgcolor', bgcolor)])
-        if attrs:
-            assert isinstance(attrs, (tuple, list)), \
-                "attrs must be a list or tuple"
+        self._validate_attrs([('attrs', attrs)])
 
         ansi_fmt = self.create_ansi_fmt(fgcolor, bgcolor, attrs)
 
-        # Put all matches in chunks
-        chunks = set()
-        for m in re_finditer(pattern, text):
-            chunks.add(text[m.start():m.end()])
+        # Colorizes the match
+        def colorize_match_(m):
+            return ansi_fmt % m.group(0)
 
-        # Format and replace all chunks
-        newtext = text
-        for chunk in chunks:
-            newtext = newtext.replace(chunk, ansi_fmt % chunk)
-
-        return newtext
+        return re.sub(pattern, colorize_match_, text)
 
     def inputc(self, prompt: object = "",
                prompt_fg: Color = None,
@@ -270,8 +280,9 @@ class Pins:
         Python's `input()` with color support. All three color modes are supported.
 
         ##### NOTE:
-        This method is not a replacement for the built-in `input()`. It should
-        only be used when you need color support and don't care about performance.
+        This method is not a replacement for the built-in `input()`.
+        Although, It's not drastically slow, It should only be used
+        when you need color support.
 
         #### ARGS:
         - `prompt`: prompt message
@@ -340,7 +351,6 @@ class Pins:
         'Lorem ipsum dolor sit amet consectetur, adipisicing elit.\\nAt ab quidem itaque mollitia dolorum expedita.'
         ```
         """
-
         stop_word = stop_word.lower()
         print(self.promptize(prompt, prompt_fg, prompt_bg, prompt_attrs), end='')
         userinput = ""
@@ -484,7 +494,7 @@ class Pins:
             sys.exit(1)
 
     def input_str(self, prompt: str = '', empty_allowed: bool = False,
-                  constraint: StrConstraint = '',
+                  constraint: Union[StrConstraint, str, None] = None,
                   min_length: int = None, max_length: int = None,
                   prompt_color: Color = None,
                   prompt_attrs: Iterable[Attribute] = None,
@@ -503,14 +513,13 @@ class Pins:
             - `only_alpha`: only alphabets allowed
             - `only_digits`: only digits allowed
             - `only_alnum`: only alphanumerics allowed
+            - `None`: all characters allowed
         - `min_length`: minimum length of input (`None` removes minimum constraint)
         - `max_length`: maximum length of input (`None` removes maximum constraint)
         - `prompt_color`: foreground color of prompt message (`None` uses the default color)
         - `prompt_attrs`: attributes for prompt message (default is `None`)
         - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
         - `input_attrs`: attributes for input that user types (default is `None`)
-
-        (by default, `constraint` is set to `''` meaning every character is allowed.)
 
         ```
         # Example
@@ -519,18 +528,17 @@ class Pins:
         'this is a string'
         ```
 
-        Raises a `TypeError` if:
+        Raises a `AssertionError` if:
         - `constraint` is not a `str`
+        - `constraint` is invalid
 
         Raises `ValueError` if:
-        - `constraint` is an unrecognized string.
-
+        - `min_length` is greater than max_length
         """
         # Constraint validations
-        self._validate_types([('constraint', constraint, str)])
-
-        if constraint != "" and constraint not in CONSTRAINTS:
-            raise ValueError(f"Unrecognized constraint: '{constraint}'")
+        if constraint:
+            assert isinstance(constraint, str), "constraint must be a string."
+            assert constraint in CONSTRAINTS, f"Invalid constraint: '{constraint}'"
 
         # Minlength, MaxLength validation
         if (min_length != None and max_length != None) and min_length > max_length:
@@ -694,10 +702,11 @@ class Pins:
             # Exit for `quit`
             sys.exit(1)
 
+    @typecheck(only=['prompt', 'custom_regex', 'custom_regex_error'])
     def input_password(self, prompt: str = '',
                        confirm: bool = False,
                        require_strong: bool = False,
-                       custom_regex: Pattern = None,
+                       custom_regex: Union[Pattern, str, None] = None,
                        custom_regex_error: str = '',
                        prompt_color: Color = None,
                        prompt_attrs: Iterable[Attribute] = None) -> str:
@@ -730,23 +739,14 @@ class Pins:
         .. >> Enter password (hidden on purpose): 
         'root'
         ```
-
-        Raises a `TypeError` if:
-        - `constraint` is not a `str`
-        Raises `ValueError` if:
-        - `constraint` is an unrecognized string
-
         """
-        if custom_regex != None:
-            assert isinstance(custom_regex, (str, Pattern)), \
-                "custom_regex must be a string or a compiled pattern or None."
         self._validate_colors([("prompt_color", prompt_color)])
 
         prompt = prompt if prompt else "Enter password (hidden on purpose): "
         custom_regex_error = custom_regex_error if custom_regex_error else "Invalid password, try again!"
         prompt = self.promptize(prompt, prompt_color, attrs=prompt_attrs)
-        prompt_confirm = self.promptize("Confirm password: ",
-                                        prompt_color, attrs=prompt_attrs)
+        prompt_confirm = self.promptize("Confirm password: ",prompt_color,
+                                        attrs=prompt_attrs)
         try:
             while True:
                 p = getpass(prompt)
@@ -758,8 +758,8 @@ class Pins:
                     self.print_error(
                         """Password must have length between 8-500 and must contain atleast one lowercase letter, one uppercase letter, one digit and one special character.""")
                     continue
-
-                if custom_regex and not re_match(custom_regex, p):
+                
+                if custom_regex and not re.fullmatch(custom_regex, p):
                     self.print_error(custom_regex_error)
                     continue
 
@@ -778,8 +778,9 @@ class Pins:
             # Exit for `quit`
             sys.exit(1)
 
+    @typecheck(only=['prompt', 'extension', 'max_length'])
     def input_file(self, prompt: str = '',
-                   extension: str | None = "*",
+                   extension: Optional[str] = "*",
                    max_length: int = 250,
                    must_exist: bool = True,
                    prompt_color: Color = None,
@@ -813,16 +814,13 @@ class Pins:
         'somefolder/somefile.txt'
         ```
 
-        Raises `ValueError` if:
-        - `extension` is empty `''`
-        - `extension` does not startswith `.` (except `*`)
+        Raises `AssertionError` if:
+        - `extension` is an empty string
 
+        Raises `ValueError` if:
+        - `extension` does not startswith `.` (except `*`)
         """
-        assert self._validate_types([('extension', extension, (str, None))]), \
-            "extension must be a string or None."
-        if extension != None:
-            assert extension != "", \
-                "extension cannot be empty."
+        assert extension != "", "extension cannot be empty."
 
         if extension != None and (extension != "*" and not extension.startswith(".")):
             raise ValueError("extension must start with a period ('.').")
@@ -953,8 +951,7 @@ class Pins:
         - `version` is not 4 or 6
 
         """
-        assert version in {4, 6}, \
-            "version must be 4 or 6."
+        assert version in {4, 6}, "version must be 4 or 6."
 
         self._validate_colors([("prompt_color", prompt_color)])
 
@@ -1086,10 +1083,8 @@ class Pins:
         Raises all exceptions that `ansy` would raise for 
         invalid colors and attributes.
         """
-        assert type(options) == list, \
-            "options is expected to be a list"
-        assert type(bullet) == str, \
-            "bullet is expected to be a str"
+        assert type(options) == list, "options is expected to be a list"
+        assert type(bullet) == str, "bullet is expected to be a str"
 
         # Ansi formatting
         bullet = self.colorize(bullet, bullet_fg, bullet_bg, bullet_attrs)
@@ -1113,14 +1108,11 @@ class Pins:
                 # Wait for a keypress
                 key = utils.read_key()
 
-                if key == utils.UP and selected_index > 0:
-                    # Is Key UP
+                if key == utils.UP and selected_index > 0: # UP
                     selected_index -= 1
-                elif key == utils.DOWN and selected_index < total_options - 1:
-                    # Is Key DOWN
+                elif key == utils.DOWN and selected_index < total_options - 1: # DOWN
                     selected_index += 1
-                elif key == '\r':
-                    # Is Key ENTER
+                elif key == '\r': # ENTER
                     return selected_index + 1
 
     def print_error(self, error: str, quit_too: bool = False):
@@ -1348,7 +1340,7 @@ class Pins:
             except KeyboardInterrupt:
                 utils.clear_line()
 
-    def print_pages(self, text: str, lines_per_page=10,
+    def print_pages(self, text: str, lines_per_page:int=10,
                     prompt: str = "",
                     prompt_fg: Color = None,
                     prompt_bg: Color = None,
@@ -1408,7 +1400,7 @@ class Pins:
                         break
         utils.clear_line()
 
-    def paginate(self, text: str, lines_per_page=10):
+    def paginate(self, text: str, lines_per_page:int=10):
         """ 
         ### Paginate
         Paginates a multiline lengthy text. Returns a generator object which,
@@ -1438,10 +1430,8 @@ class Pins:
         - `text` is not str
         - `lines_per_page` is lesser than 1
         """
-        assert type(text) == str, \
-            "text must be a string"
-        assert lines_per_page > 0, \
-            "lines_per_page cannot be lesser than 1"
+        assert type(text) == str, "text must be a string"
+        assert lines_per_page > 0, "lines_per_page cannot be lesser than 1"
 
         with Batched(text.splitlines(), lines_per_page) as pages:
             for page in pages.iterate():
@@ -1576,9 +1566,6 @@ class Pins:
         assert charset == None or charset in CHARSETS, f"Invalid charset: {charset}"
         assert align in ("center", "left", "right"), f"Invalid align: '{align}'"
 
-        # Color validation
-        self._validate_colors([('color', color)])
-
         # Ensure padding is non-negative
         pad_x = max(pad_x, 0)
 
@@ -1630,36 +1617,25 @@ class Pins:
         Raises `AssertionError` if:
         - `label` is not a `str`
         - `text` is not a `str`
-        - `label_attr` is not a list or tuple
-        - `text_attr` is not a list or tuple
 
         Raises `InvalidColorError` if:
         - `label_color` is unrecognized
         - `text_color` is unrecognized
 
         Raises `AttributeError` if:
-        - `label_attr` is unrecognized
-        - `text_attr` is unrecognized
+        - `label_attr` contains an invalid attribute
+        - `text_attr` contains an invalid attribute
         """
         # Type validation
         assert isinstance(label, str), "label must be a string."
         assert isinstance(text, str), "text must be a string."
 
-        if text == "" or label == "":
+        if not text or not label:
             return ""
-
-        if label_attrs:
-            assert isinstance(label_attrs, (tuple, list)), \
-                "label_attrs must be a list or tuple"
-        if text_attrs:
-            assert isinstance(text_attrs, (tuple, list)), \
-                "text_attrs must be a list or tuple"
 
         # Color validation
         if not self.USE_COLORS:
             label_fg, label_bg, text_fg, text_bg = None, None, None, None
-        self._validate_colors([('label_fg', label_fg), ('label_bg', label_bg),
-                               ('text_fg', text_fg), ('text_bg', text_bg)])
 
         self._validate_attrs([('label_attrs', label_attrs),
                               ('text_attrs', text_attrs)])
@@ -2008,11 +1984,6 @@ class Pins:
         '$ this is prompt'
         ```
         """
-        if fgcolor:
-            self._validate_colors([('fgcolor', fgcolor), ('bgcolor', bgcolor)])
-        if attrs:
-            self._validate_attrs([('attrs', attrs)])
-
         prompt_char = prompt_char if prompt_char else self.PROMPT_CHAR
         s = f"{prompt_char} {prompt}"
         return self.colorize(s, fgcolor, bgcolor, attrs=attrs)
@@ -2610,7 +2581,7 @@ class Pins:
         Extracts `pattern` from `text` and yields a match on each iteration.
         Returns a generator object.
         """
-        for m in re_finditer(pattern, text):
+        for m in re.finditer(pattern, text):
             yield m.group(1)
 
     def _make_ansi(self, fgcolor: Color = None, bgcolor: Color = None,
@@ -2752,23 +2723,28 @@ class Pins:
         """ 
         ### Validate Attrs
         Validate the attrs in `attributes`. Returns `True` if all attrs are valid.
-        Raises `AttributeError` if an attribute is invalid. It iterates through 
-        the `attributes` list and validates each tuple.
+        It iterates through the `attributes` list and validates each tuple.
 
         #### Syntax for `attributes`:
         - `[(str, list),(...),...,(...)]`
         - `('name of var', value of var (attrs list))`
 
+        #### Example
         ```
-        >> # Example
-        >> attrs = ['bolf']
-        >> pins.validate_attrs([('attrs', attrs)])
+        >> pins.validate_attrs([('attrs', attrs=['bold'])])
+        True
+        >> pins.validate_attrs([('attrs', attrs=None)])
+        True
+        >> pins.validate_attrs([('attrs', attrs=['bolf'])])
         AttributeError: Invalid attribute in attrs: 'bolf'
+        >> pins.validate_attrs([('attrs', attrs=123)])
+        AssertionError: attrs must be a list or tuple
         ```
         """
-
         for name, attrs in attributes:
             if attrs != None:
+                assert isinstance(attrs, (list, tuple)), \
+                    f"{name} must be a list or tuple"
                 # Iterate through attrs
                 for a in attrs:
                     if a not in ATTRIBUTES:
@@ -3358,7 +3334,7 @@ class Validator:
         if not password:
             return False
 
-        if re_match(REGEX_PATTERNS['password'], password):
+        if re.match(REGEX_PATTERNS['password'], password):
             return True
         return False
 
@@ -3555,7 +3531,7 @@ class Validator:
         - `email` is not a string
         """
         assert type(email) == str, "email must be a string."
-        if re_match(REGEX_PATTERNS['email'], email):
+        if re.match(REGEX_PATTERNS['email'], email):
             return True
         return False
 
@@ -3577,7 +3553,7 @@ class Validator:
         - `url` is not a string
         """
         assert type(url) == str, "url must be a string."
-        if re_match(REGEX_PATTERNS['url'], url):
+        if re.match(REGEX_PATTERNS['url'], url):
             return True
         return False
 
