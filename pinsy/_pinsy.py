@@ -2298,8 +2298,7 @@ class Pins:
         """ 
         ### Format Date
         Converts a date/time string to a human-readable format like `10 minutes ago` or 
-        `6 years ago` etc. by subtracting the date/time from `date_string`
-        from current date/time.
+        `6 years ago` etc.
 
         #### ARGS:
         - `date_string`: string containing the datetime (e.g `25-09-2024 13:40:00`)
@@ -2327,42 +2326,60 @@ class Pins:
         >> pins.format_date(time_string, format_="%H:%M:%S")
         '3 seconds ago'
         ```
+        
+        Raises `ValueError` if:
+        - `date_string` doesn't match the `format_`
         """
-        # Find Delta
-        delta = datetime.now() - datetime.strptime(date_string, format_)
+        # Parse the date string
+        try:
+            past_date = datetime.strptime(date_string, format_)
+        except ValueError:
+            raise ValueError("Date string doesn't match the format")
 
+        now = datetime.now()
+        
+         # Handle time-only strings by assuming today's date
+        if '%H' in format_ or '%I' in format_: # Hour in format?
+            if '%Y' not in format_ and '%d' not in format_: # Year and Day not in format?
+                # Add past_date's time in today's date
+                past_date = now.replace(hour=past_date.hour,
+                                        minute=past_date.minute,
+                                        second=past_date.second,
+                                        microsecond=0)
+
+        diff = now - past_date
+        
         # Convert to base units
-        seconds = delta.seconds
-        minutes = seconds // 60
-        hours = minutes // 60
+        seconds = diff.seconds
+        minutes = int(seconds // 60)
+        hours = int(minutes // 60)
 
-        days = delta.days
-        months = days // 30
-        years = months // 12
-        centuries = years // 100
+        days = diff.days
+        weeks = int(days // 7)
+        months = int(days // 30)
+        years = int(days // 365)
+        decades = int(years // 10)
+        centuries = int(decades // 10)
 
         # Format and return
         if centuries > 0:
-            unit = "century" if centuries == 1 else "centuries"
-            return f"{centuries} {unit} ago"
+            return f"{centuries} centur{'ies' if centuries > 1 else 'y'} ago"
+        if decades > 0:
+            return f"{decades} decade{'s' if decades > 1 else ''} ago"
         if years > 0:
-            unit = "year" if years == 1 else "years"
-            return f"{years} {unit} ago"
+            return f"{years} year{'s' if years > 1 else ''} ago"
         if months > 0:
-            unit = "month" if months == 1 else "months"
-            return f"{months} {unit} ago"
+            return f"{months} month{'s' if months > 1 else ''} ago"
+        if weeks > 0:
+            return f"{weeks} week{'s' if weeks > 1 else ''} ago"
         if days > 0:
-            unit = "day" if days == 1 else "days"
-            return f"{days} {unit} ago"
+            return f"{days} day{'s' if days > 1 else ''} ago"
         if hours > 0:
-            unit = "hour" if hours == 1 else "hours"
-            return f"{hours} {unit} ago"
+            return f"{hours} hour{'s' if hours > 1 else ''} ago"
         if minutes > 0:
-            unit = "minute" if minutes == 1 else "minutes"
-            return f"{minutes} {unit} ago"
+            return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
         if seconds > 0:
-            unit = "second" if seconds == 1 else "seconds"
-            return f"{seconds} {unit} ago"
+            return f"{seconds} second{'s' if seconds > 1 else ''} ago"
         else:
             return f"Just now"
 
