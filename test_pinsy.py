@@ -613,12 +613,26 @@ def test_for_each():
 def test_format_date():
     from time import sleep
 
-    dt_format = "%I:%M:%S %p"
+    today = datetime.today()
+    d_fmt = "%d-%m-%Y"
+    dt_fmt = "%I:%M:%S %p"
 
-    time = pins.now(dt_format)
-    sleep(1)
-    assert pins.format_date(time, dt_format) == "1 second ago"
-    assert pins.format_date(pins.now(dt_format), dt_format) == "Just now"
+    # Just now test
+    assert pins.format_date(pins.now(dt_fmt), dt_fmt) == "Just now"
+
+    # Years test
+    dt = datetime(year=2022, month=1, day=1)
+    assert pins.format_date(dt.strftime(d_fmt),
+                            d_fmt) == f"{today.year - 2022} years ago"
+    
+    # Decades test
+    dt = datetime(year=int(today.year - 20), month=1, day=1)
+    assert pins.format_date(dt.strftime(d_fmt), d_fmt) == f"2 decades ago"
+    
+    # Century test
+    dt = datetime(year=1500, month=1, day=1)
+    d_fmt = "%d-%m-%Y %H:%M:%S"
+    assert pins.format_date(dt.strftime(d_fmt), d_fmt) == "5 centuries ago"
 
     with raises(TypeError):
         pins.format_date(None, None)
@@ -1365,7 +1379,7 @@ if __name__ == "__main__":
 
     # Skip these tests
     to_skip = [
-        "test_format_date"
+        # "test_format_date"
     ]
 
     failed = []
