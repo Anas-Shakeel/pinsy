@@ -2294,9 +2294,9 @@ class Pins:
         return datetime.now().strftime(format_)
 
     @typecheck()
-    def format_date(self, date_string: str, format_: str) -> str:
+    def time_ago(self, date_string: str, format_: str) -> str:
         """ 
-        ### Format Date
+        ### Time Ago
         Converts a date/time string to a human-readable format like `10 minutes ago` or 
         `6 years ago` etc.
 
@@ -2309,21 +2309,17 @@ class Pins:
 
         ```
         # Example
-        >> datetime_string = "25-09-2024 14:02:00"
-        >> pins.format_date(datetime_string, format_="%d-%m-%Y %H:%M:%S")
-        '22 minutes ago'
-        >>
         >> date_string = "25-09-2024"
-        >> pins.format_date(date_string, format_="%d-%m-%Y")
+        >> pins.time_ago(date_string, format_="%d-%m-%Y")
         '14 hours ago'
         >>
-        >> time_string = "14:02:00"
-        >> pins.format_date(time_string, format_="%H:%M:%S")
+        >> datetime_string = "25-09-2024 14:02:00"
+        >> pins.time_ago(datetime_string, format_="%d-%m-%Y %H:%M:%S")
         '22 minutes ago'
         >>
         >> time_string = pins.now("%H:%M:%S")
         >> time.sleep(3)
-        >> pins.format_date(time_string, format_="%H:%M:%S")
+        >> pins.time_ago(time_string, format_="%H:%M:%S")
         '3 seconds ago'
         ```
         

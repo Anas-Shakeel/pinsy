@@ -618,32 +618,32 @@ def test_format_date():
     dt_fmt = "%I:%M:%S %p"
 
     # Just now test
-    assert pins.format_date(pins.now(dt_fmt), dt_fmt) == "Just now"
+    assert pins.time_ago(pins.now(dt_fmt), dt_fmt) == "Just now"
 
     # Years test
     dt = datetime(year=2022, month=1, day=1)
-    assert pins.format_date(dt.strftime(d_fmt),
+    assert pins.time_ago(dt.strftime(d_fmt),
                             d_fmt) == f"{today.year - 2022} years ago"
     
     # Decades test
     dt = datetime(year=int(today.year - 20), month=1, day=1)
-    assert pins.format_date(dt.strftime(d_fmt), d_fmt) == f"2 decades ago"
+    assert pins.time_ago(dt.strftime(d_fmt), d_fmt) == f"2 decades ago"
     
     # Century test
     dt = datetime(year=1500, month=1, day=1)
     d_fmt = "%d-%m-%Y %H:%M:%S"
-    assert pins.format_date(dt.strftime(d_fmt), d_fmt) == "5 centuries ago"
+    assert pins.time_ago(dt.strftime(d_fmt), d_fmt) == "5 centuries ago"
 
     with raises(TypeError):
-        pins.format_date(None, None)
+        pins.time_ago(None, None)
     with raises(TypeError):
-        pins.format_date(None, 'None')
+        pins.time_ago(None, 'None')
     with raises(TypeError):
-        pins.format_date('None', None)
+        pins.time_ago('None', None)
     with raises(TypeError):
-        pins.format_date(123, "123")
+        pins.time_ago(123, "123")
     with raises(TypeError):
-        pins.format_date("", 123)
+        pins.time_ago("", 123)
 
 
 def test_get_calendar():
