@@ -1,0 +1,12 @@
+/build/
+/dist/
+/ansy-egg-info/
+/assets/
+/backups/
+/MANIFEST.in
+/.pytest_cache/
+/__pycache__/
+*/__pycache__/
+/TODO.md
+/main.py
+/examples.py
