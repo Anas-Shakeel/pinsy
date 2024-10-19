@@ -60,7 +60,6 @@ class Pins:
         if self.OS == "Windows":
             Pins.fix_windows_console()
 
-        self.ARGS: dict = {}
         self.USE_COLORS: bool = use_colors
 
         # Set self.COLORMODE & self.DEFAULT_COLORS
