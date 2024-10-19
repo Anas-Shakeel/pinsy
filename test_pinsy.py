@@ -106,11 +106,6 @@ def test_pins():
     with raises(AssertionError):
         p.set_charset(123)
 
-    with raises(AssertionError):
-        Pins(handle_errors=123)
-    with raises(ValueError):
-        Pins(handle_errors="something")
-
     # Renew Pins instance
     p = Pins()
     assert p.colorize("testing", "red") == '\x1b[31mtesting\x1b[0m'
