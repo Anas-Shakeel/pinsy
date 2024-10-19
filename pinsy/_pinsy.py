@@ -115,7 +115,7 @@ class Pins:
         """
         ### Set Colormode
         Change/override the pins.COLORMODE. 
-        
+
         Raises `AssertionError` if:
         - `mode` is not `4`, `8` or `24`.
         """
@@ -139,22 +139,21 @@ class Pins:
         self.DEFAULT_COLORS['success'] = success if success else self.DEFAULT_COLORS['success']
         self.DEFAULT_COLORS['warn'] = warn if warn else self.DEFAULT_COLORS['warn']
 
-    def set_charset(self, charset:Charset):
+    def set_charset(self, charset: Charset):
         """  
         ### Set Charset
         Change/override the pins.CHARSET.
-        
+
         Raises `AssertionError` if:
         - `charset` is invalid
         """
         assert charset in CHARSETS, f"Invalid charset: '{charset}'"
         self.CHARSET: dict = CHARSETS[charset]
         self.charset_name: str = charset
-    
 
     def colorize(self, text: str, fgcolor: Color = None, bgcolor: Color = None,
                  attrs: Iterable[Attribute] = None, color_mode: int = None,
-                 *, 
+                 *,
                  no_color: Optional[bool] = None,
                  force_color: Optional[bool] = None) -> str:
         """ 
@@ -211,7 +210,7 @@ class Pins:
 
         color_mode = color_mode if color_mode else self.COLORMODE
         no_color = no_color if no_color else not self.USE_COLORS
-        
+
         return colored(text, fgcolor, bgcolor, attrs, color_mode,
                        no_color=no_color, force_color=force_color)
 
@@ -538,7 +537,8 @@ class Pins:
         # Constraint validations
         if constraint:
             assert isinstance(constraint, str), "constraint must be a string."
-            assert constraint in CONSTRAINTS, f"Invalid constraint: '{constraint}'"
+            assert constraint in CONSTRAINTS, f"Invalid constraint: '{
+                constraint}'"
 
         # Minlength, MaxLength validation
         if (min_length != None and max_length != None) and min_length > max_length:
@@ -745,7 +745,7 @@ class Pins:
         prompt = prompt if prompt else "Enter password (hidden on purpose): "
         custom_regex_error = custom_regex_error if custom_regex_error else "Invalid password, try again!"
         prompt = self.promptize(prompt, prompt_color, attrs=prompt_attrs)
-        prompt_confirm = self.promptize("Confirm password: ",prompt_color,
+        prompt_confirm = self.promptize("Confirm password: ", prompt_color,
                                         attrs=prompt_attrs)
         try:
             while True:
@@ -758,7 +758,7 @@ class Pins:
                     self.print_error(
                         """Password must have length between 8-500 and must contain atleast one lowercase letter, one uppercase letter, one digit and one special character.""")
                     continue
-                
+
                 if custom_regex and not re.fullmatch(custom_regex, p):
                     self.print_error(custom_regex_error)
                     continue
@@ -1108,11 +1108,11 @@ class Pins:
                 # Wait for a keypress
                 key = utils.read_key()
 
-                if key == utils.UP and selected_index > 0: # UP
+                if key == utils.UP and selected_index > 0:  # UP
                     selected_index -= 1
-                elif key == utils.DOWN and selected_index < total_options - 1: # DOWN
+                elif key == utils.DOWN and selected_index < total_options - 1:  # DOWN
                     selected_index += 1
-                elif key == '\r': # ENTER
+                elif key == '\r':  # ENTER
                     return selected_index + 1
 
     def print_error(self, error: str, quit_too: bool = False):
@@ -1340,7 +1340,7 @@ class Pins:
             except KeyboardInterrupt:
                 utils.clear_line()
 
-    def print_pages(self, text: str, lines_per_page:int=10,
+    def print_pages(self, text: str, lines_per_page: int = 10,
                     prompt: str = "",
                     prompt_fg: Color = None,
                     prompt_bg: Color = None,
@@ -1400,7 +1400,7 @@ class Pins:
                         break
         utils.clear_line()
 
-    def paginate(self, text: str, lines_per_page:int=10):
+    def paginate(self, text: str, lines_per_page: int = 10):
         """ 
         ### Paginate
         Paginates a multiline lengthy text. Returns a generator object which,
@@ -1563,8 +1563,10 @@ class Pins:
         - `align` is not a valid alignment
         """
         assert width == None or width > 0, "width must be greater than 0"
-        assert charset == None or charset in CHARSETS, f"Invalid charset: {charset}"
-        assert align in ("center", "left", "right"), f"Invalid align: '{align}'"
+        assert charset == None or charset in CHARSETS, f"Invalid charset: {
+            charset}"
+        assert align in ("center", "left", "right"), f"Invalid align: '{
+            align}'"
 
         # Ensure padding is non-negative
         pad_x = max(pad_x, 0)
@@ -1795,7 +1797,7 @@ class Pins:
         2. item 2
         3. and so on.
         ```
-        
+
         Raises `InvalidColorError` if:
         - `num_color` is invalid
         - `item_color` is invalid
@@ -2322,7 +2324,7 @@ class Pins:
         >> pins.time_ago(time_string, format_="%H:%M:%S")
         '3 seconds ago'
         ```
-        
+
         Raises `ValueError` if:
         - `date_string` doesn't match the `format_`
         """
@@ -2333,10 +2335,10 @@ class Pins:
             raise ValueError("Date string doesn't match the format")
 
         now = datetime.now()
-        
-         # Handle time-only strings by assuming today's date
-        if '%H' in format_ or '%I' in format_: # Hour in format?
-            if '%Y' not in format_ and '%d' not in format_: # Year and Day not in format?
+
+        # Handle time-only strings by assuming today's date
+        if '%H' in format_ or '%I' in format_:  # Hour in format?
+            if '%Y' not in format_ and '%d' not in format_:  # Year and Day not in format?
                 # Add past_date's time in today's date
                 past_date = now.replace(hour=past_date.hour,
                                         minute=past_date.minute,
@@ -2344,7 +2346,7 @@ class Pins:
                                         microsecond=0)
 
         diff = now - past_date
-        
+
         # Convert to base units
         seconds = diff.seconds
         minutes = int(seconds // 60)
