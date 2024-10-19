@@ -1,5 +1,4 @@
 # Copyright 2024 Anas Shakeel
-# from __future__ import annotations
 
 import sys
 import json
@@ -53,8 +52,6 @@ class Pins:
     """
 
     def __init__(self, use_colors: bool = True,
-                 handle_errors: ErrorHandling = 'quit',
-                 error_callback: Callback | None = None,
                  charset: Charset = 'ascii',
                  prompt_char: PromptChar = '>>',
                  color_mode: int = 4) -> None:
@@ -63,24 +60,7 @@ class Pins:
         if self.OS == "Windows":
             Pins.fix_windows_console()
 
-        # Erros and Callbacks
-        assert isinstance(handle_errors, str), \
-            "handle_errors must be a string."
-
-        if handle_errors not in ERROR_HANDLING:
-            raise ValueError(f"Invalid handle_errors: '{handle_errors}'")
-
-        if handle_errors == "callback":
-            if not error_callback:
-                raise NameError(
-                    "cannot set handle_errors to 'callback' without providing a callback.")
-            elif not callable(error_callback):
-                raise TypeError(f"'error_callback' expects a function not {
-                                type(error_callback)}")
-
         self.ARGS: dict = {}
-        self.error_callback = error_callback
-        self.handle_errors = handle_errors
         self.USE_COLORS: bool = use_colors
 
         # Set self.COLORMODE & self.DEFAULT_COLORS
@@ -399,34 +379,25 @@ class Pins:
 
         prompt = prompt if prompt else "Enter an integer: "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                try:
-                    i = int(self.inputc(prompt, prompt_fg=prompt_color,
-                                        prompt_attrs=prompt_attrs,
-                                        input_fg=input_color,
-                                        input_attrs=input_attrs))
-                except ValueError:
-                    self.print_error("Only integers accepted.")
-                    continue
+        while True:
+            try:
+                i = int(self.inputc(prompt, prompt_fg=prompt_color,
+                                    prompt_attrs=prompt_attrs,
+                                    input_fg=input_color,
+                                    input_attrs=input_attrs))
+            except ValueError:
+                self.print_error("Only integers accepted.")
+                continue
 
-                # Range Validation
-                if min_ != None and i < min_:
-                    self.print_error(f"integer must be atleast {min_}")
-                    continue
-                if max_ != None and i > max_:
-                    self.print_error(f"integer must be atmost {max_}")
-                    continue
+            # Range Validation
+            if min_ != None and i < min_:
+                self.print_error(f"integer must be atleast {min_}")
+                continue
+            if max_ != None and i > max_:
+                self.print_error(f"integer must be atmost {max_}")
+                continue
 
-                return i
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            return i
 
     def input_float(self, prompt: str = '', min_: float = None, max_: float = None,
                     prompt_color: Color = None, prompt_attrs: Iterable[Attribute] = None,
@@ -463,34 +434,25 @@ class Pins:
 
         prompt = prompt if prompt else "Enter a float: "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                try:
-                    i = float(self.inputc(prompt, prompt_fg=prompt_color,
-                                          prompt_attrs=prompt_attrs,
-                                          input_fg=input_color,
-                                          input_attrs=input_attrs))
-                except ValueError:
-                    self.print_error("Only numbers accepted.")
-                    continue
+        while True:
+            try:
+                i = float(self.inputc(prompt, prompt_fg=prompt_color,
+                                      prompt_attrs=prompt_attrs,
+                                      input_fg=input_color,
+                                      input_attrs=input_attrs))
+            except ValueError:
+                self.print_error("Only numbers accepted.")
+                continue
 
-                # Range Validation
-                if min_ != None and i < min_:
-                    self.print_error(f"float must be atleast {min_}")
-                    continue
-                if max_ != None and i > max_:
-                    self.print_error(f"float must be atmost {max_}")
-                    continue
+            # Range Validation
+            if min_ != None and i < min_:
+                self.print_error(f"float must be atleast {min_}")
+                continue
+            if max_ != None and i > max_:
+                self.print_error(f"float must be atmost {max_}")
+                continue
 
-                return i
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            return i
 
     def input_str(self, prompt: str = '', empty_allowed: bool = False,
                   constraint: Union[StrConstraint, str, None] = None,
@@ -548,51 +510,41 @@ class Pins:
 
         prompt = prompt if prompt else "Enter a string: "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                inp = self.inputc(prompt, prompt_fg=prompt_color,
-                                  prompt_attrs=prompt_attrs,
-                                  input_fg=input_color,
-                                  input_attrs=input_attrs)
-                if not empty_allowed and not inp:
-                    # If empty not allowed and input is empty
-                    self.print_error("Field cannot be empty.")
+        while True:
+            inp = self.inputc(prompt, prompt_fg=prompt_color,
+                              prompt_attrs=prompt_attrs,
+                              input_fg=input_color,
+                              input_attrs=input_attrs)
+            if not empty_allowed and not inp:
+                # If empty not allowed and input is empty
+                self.print_error("Field cannot be empty.")
+                continue
+
+            # Length Validation
+            if min_length != None and len(inp) < min_length:
+                self.print_error(f"input must be atleast {
+                    min_length} characters long.")
+                continue
+            if max_length != None and len(inp) > max_length:
+                self.print_error(f"input must be atmost {
+                    max_length} characters long.")
+                continue
+
+            if inp:
+                if constraint == "only_alpha" and not inp.isalpha():
+                    self.print_error("Only alphabets are allowed.")
                     continue
 
-                # Length Validation
-                if min_length != None and len(inp) < min_length:
-                    self.print_error(f"input must be atleast {
-                                     min_length} characters long.")
-                    continue
-                if max_length != None and len(inp) > max_length:
-                    self.print_error(f"input must be atmost {
-                                     max_length} characters long.")
+                elif constraint == "only_digits" and not inp.isdigit():
+                    self.print_error("Only digits are allowed.")
                     continue
 
-                if inp:
-                    if constraint == "only_alpha" and not inp.isalpha():
-                        self.print_error("Only alphabets are allowed.")
-                        continue
+                elif constraint == "only_alnum" and not inp.isalnum():
+                    self.print_error(
+                        "Only alphabets and digits are allowed.")
+                    continue
 
-                    elif constraint == "only_digits" and not inp.isdigit():
-                        self.print_error("Only digits are allowed.")
-                        continue
-
-                    elif constraint == "only_alnum" and not inp.isalnum():
-                        self.print_error(
-                            "Only alphabets and digits are allowed.")
-                        continue
-
-                return inp
-
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            return inp
 
     def input_question(self, prompt: str = '', prompt_color: Color = None,
                        prompt_attrs: Iterable[Attribute] = None,
@@ -623,26 +575,17 @@ class Pins:
 
         prompt = prompt if prompt else "Do you agree? (y/N): "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                u = self.inputc(prompt, prompt_fg=prompt_color,
-                                prompt_attrs=prompt_attrs,
-                                input_fg=input_color,
-                                input_attrs=input_attrs).lower()
-                if u == "y":
-                    return True
-                elif u == "n":
-                    return False
-                else:
-                    self.print_error("Only 'y' or 'n' is accepted.")
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+        while True:
+            u = self.inputc(prompt, prompt_fg=prompt_color,
+                            prompt_attrs=prompt_attrs,
+                            input_fg=input_color,
+                            input_attrs=input_attrs).lower()
+            if u == "y":
+                return True
+            elif u == "n":
+                return False
+            else:
+                self.print_error("Only 'y' or 'n' is accepted.")
 
     def input_email(self, prompt: str = '', prompt_color: Color = None,
                     prompt_attrs: Iterable[Attribute] = None,
@@ -677,30 +620,20 @@ class Pins:
 
         prompt = prompt if prompt else "Enter email: "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                e = self.inputc(prompt, prompt_fg=prompt_color,
-                                prompt_attrs=prompt_attrs,
-                                input_fg=input_color,
-                                input_attrs=input_attrs)
-                if not e:
-                    self.print_error("Email cannot be empty.")
-                    continue
+        while True:
+            e = self.inputc(prompt, prompt_fg=prompt_color,
+                            prompt_attrs=prompt_attrs,
+                            input_fg=input_color,
+                            input_attrs=input_attrs)
+            if not e:
+                self.print_error("Email cannot be empty.")
+                continue
 
-                # Match regex pattern
-                if Validator.is_valid_email(e):
-                    return e
+            # Match regex pattern
+            if Validator.is_valid_email(e):
+                return e
 
-                self.print_error(f"Invalid email: '{e}'")
-
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            self.print_error(f"Invalid email: '{e}'")
 
     @typecheck(only=['prompt', 'custom_regex', 'custom_regex_error'])
     def input_password(self, prompt: str = '',
@@ -747,36 +680,27 @@ class Pins:
         prompt = self.promptize(prompt, prompt_color, attrs=prompt_attrs)
         prompt_confirm = self.promptize("Confirm password: ", prompt_color,
                                         attrs=prompt_attrs)
-        try:
-            while True:
-                p = getpass(prompt)
-                if not p:
-                    self.print_error("Password cannot be empty.")
-                    continue
+        while True:
+            p = getpass(prompt)
+            if not p:
+                self.print_error("Password cannot be empty.")
+                continue
 
-                if require_strong and not Validator.is_strong_password(p):
-                    self.print_error(
-                        """Password must have length between 8-500 and must contain atleast one lowercase letter, one uppercase letter, one digit and one special character.""")
-                    continue
+            if require_strong and not Validator.is_strong_password(p):
+                self.print_error(
+                    """Password must have length between 8-500 and must contain atleast one lowercase letter, one uppercase letter, one digit and one special character.""")
+                continue
 
-                if custom_regex and not re.fullmatch(custom_regex, p):
-                    self.print_error(custom_regex_error)
-                    continue
+            if custom_regex and not re.fullmatch(custom_regex, p):
+                self.print_error(custom_regex_error)
+                continue
 
-                # Confirm
-                if confirm and (getpass(prompt_confirm) != p):
-                    self.print_error("Passwords did not match.")
-                    continue
+            # Confirm
+            if confirm and (getpass(prompt_confirm) != p):
+                self.print_error("Passwords did not match.")
+                continue
 
-                return p
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            return p
 
     @typecheck(only=['prompt', 'extension', 'max_length'])
     def input_file(self, prompt: str = '',
@@ -829,34 +753,24 @@ class Pins:
 
         prompt = prompt if prompt else "Enter a filepath: "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                filepath = self.inputc(prompt, prompt_fg=prompt_color,
-                                       prompt_attrs=prompt_attrs,
-                                       input_fg=input_color,
-                                       input_attrs=input_attrs)
+        while True:
+            filepath = self.inputc(prompt, prompt_fg=prompt_color,
+                                   prompt_attrs=prompt_attrs,
+                                   input_fg=input_color,
+                                   input_attrs=input_attrs)
 
-                is_valid = Validator.is_valid_filepath(filepath, extension,
-                                                       max_length)
-                if is_valid != True:
-                    self.print_error(is_valid)
-                    continue
+            is_valid = Validator.is_valid_filepath(filepath, extension,
+                                                   max_length)
+            if is_valid != True:
+                self.print_error(is_valid)
+                continue
 
-                # Exist or not?
-                if must_exist and not isfile(filepath):
-                    self.print_error(f"File does not exist: '{filepath}'")
-                    continue
+            # Exist or not?
+            if must_exist and not isfile(filepath):
+                self.print_error(f"File does not exist: '{filepath}'")
+                continue
 
-                return filepath
-
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            return filepath
 
     def input_dir(self, prompt: str = '', max_length: int = 250, must_exist: bool = True,
                   prompt_color: Color = None, prompt_attrs: Iterable[Attribute] = None,
@@ -888,35 +802,25 @@ class Pins:
 
         prompt = prompt if prompt else "Enter path to a directory: "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                directory = self.inputc(prompt, prompt_fg=prompt_color,
-                                        prompt_attrs=prompt_attrs,
-                                        input_fg=input_color,
-                                        input_attrs=input_attrs)
+        while True:
+            directory = self.inputc(prompt, prompt_fg=prompt_color,
+                                    prompt_attrs=prompt_attrs,
+                                    input_fg=input_color,
+                                    input_attrs=input_attrs)
 
-                is_valid = Validator.is_valid_dirpath(directory, max_length)
-                if is_valid != True:
-                    self.print_error(is_valid)
-                    continue
+            is_valid = Validator.is_valid_dirpath(directory, max_length)
+            if is_valid != True:
+                self.print_error(is_valid)
+                continue
 
-                # # Directory MUST exist (if required).
-                if must_exist and not isdir(directory):
-                    self.print_error(
-                        f"Directory '{directory}' does not exist.")
-                    continue
+            # # Directory MUST exist (if required).
+            if must_exist and not isdir(directory):
+                self.print_error(
+                    f"Directory '{directory}' does not exist.")
+                continue
 
-                # Safe to return the directory
-                return normpath(directory)
-
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            # Safe to return the directory
+            return normpath(directory)
 
     def input_ip(self, prompt: str = '', version: int = 4,
                  prompt_color: Color = None,
@@ -957,29 +861,19 @@ class Pins:
 
         prompt = prompt if prompt else f"Enter IPv{version} Address: "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                ip = self.inputc(prompt, prompt_fg=prompt_color,
-                                 prompt_attrs=prompt_attrs,
-                                 input_fg=input_color,
-                                 input_attrs=input_attrs)
-                if not ip:
-                    self.print_error("IP Address cannot be empty.")
-                    continue
+        while True:
+            ip = self.inputc(prompt, prompt_fg=prompt_color,
+                             prompt_attrs=prompt_attrs,
+                             input_fg=input_color,
+                             input_attrs=input_attrs)
+            if not ip:
+                self.print_error("IP Address cannot be empty.")
+                continue
 
-                if Validator.is_valid_ip(ip, version):
-                    return ip
+            if Validator.is_valid_ip(ip, version):
+                return ip
 
-                self.print_error(f"Invalid IPv{version} Address: '{ip}'")
-
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            self.print_error(f"Invalid IPv{version} Address: '{ip}'")
 
     def input_url(self, prompt: str = '',
                   prompt_color: Color = None,
@@ -1009,29 +903,19 @@ class Pins:
 
         prompt = prompt if prompt else "Enter URL: "
         prompt = self.promptize(prompt)
-        try:
-            while True:
-                url = self.inputc(prompt, prompt_fg=prompt_color,
-                                  prompt_attrs=prompt_attrs,
-                                  input_fg=input_color,
-                                  input_attrs=input_attrs)
-                if not url:
-                    self.print_error("URL cannot be empty.")
-                    continue
+        while True:
+            url = self.inputc(prompt, prompt_fg=prompt_color,
+                              prompt_attrs=prompt_attrs,
+                              input_fg=input_color,
+                              input_attrs=input_attrs)
+            if not url:
+                self.print_error("URL cannot be empty.")
+                continue
 
-                if Validator.is_valid_url(url):
-                    return url
+            if Validator.is_valid_url(url):
+                return url
 
-                self.print_error(f"Invalid URL: '{url}'")
-
-        except (KeyboardInterrupt, EOFError):
-            if self.handle_errors == "callback":
-                self.error_callback()
-            elif self.handle_errors == "raise":
-                raise
-
-            # Exit for `quit`
-            sys.exit(1)
+            self.print_error(f"Invalid URL: '{url}'")
 
     def input_menu(self, options: list,
                    bullet: Bullet = ">",
