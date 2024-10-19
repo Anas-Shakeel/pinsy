@@ -1224,57 +1224,79 @@ class Pins:
                 utils.clear_line()
 
     def print_pages(self, text: str, lines_per_page: int = 10,
-                    prompt: str = "",
-                    prompt_fg: Color = None,
-                    prompt_bg: Color = None,
-                    prompt_attrs: Iterable[Attribute] = None):
+                    show_statusbar: bool = True,
+                    statusbar_fg: Color = None,
+                    statusbar_bg: Color = None,
+                    statusbar_attrs: Iterable[Attribute] = None,
+                    text_fg: Color = None,
+                    text_bg: Color = None,
+                    text_attrs: Iterable[Attribute] = None,
+                    ):
         """
         ### Print Pages
         Prints paginated `text`. It prints a page, asks for keypress `enter` and
-        then prints another page after removing the previous page. (`ctrl+c` to stop)
+        then prints another page after removing the previous page.
 
-        This method uses `Batched` under the hood.
+        This method uses `pinsy.Batched` class under the hood.
 
         #### ARGS:
         - `text`: text to paginate
         - `lines_per_page`: lines to show per page
-        - `prompt`: prompt message (passed to `input()`)
-        - `prompt_fg`: foreground color of prompt
-        - `prompt_bg`: background color of prompt
-        - `prompt_attrs`: attributes of prompt
+        - `show_statusbar`: show/hide the statusbar
+        - `statusbar_fg`: foreground color of statusbar
+        - `statusbar_bg`: background color of statusbar
+        - `statusbar_attrs`: attributes of statusbar
+        - `text_fg`: foreground color of text
+        - `text_bg`: background color of text
+        - `text_attrs`: attributes of text
 
         ```
         >> text = "line 1\\nline 2\\nline 3\\nline 4\\nline 5"
-        >> p.print_pages(text, 2, "Enter to see next page...")
+        >> p.print_pages(text, 2)
         line 1 
         line 2
-        Enter to see next page...
+        
+        [CTRL+C] : Stop    [ENTER] : Next Page    (Page: 1 / 3)
         ```
 
         Raises `AssertionError` if:
         - `text` is not a string
-        - `prompt` is not a string
         - `lines_per_page` is lesser than 1
 
         Raises all exceptions that `ansy` would raises for invalid inputs.
         """
         assert type(text) == str, "text must be a string"
         assert lines_per_page > 0, "lines_per_page cannot be lesser than 1"
-        assert type(prompt) == str, "prompt must be a string"
 
-        prompt = self.colorize(f"{prompt}", prompt_fg, 
-                               prompt_bg, prompt_attrs)
-        newlines = max(prompt.count('\n')+1, 1)
+        # Create text format string
+        text_fmt = self.create_ansi_fmt(text_fg, text_bg, text_attrs)
+
+        # Number of lines that are printed (excluding text/page lines)
+        other_lines: int = 2
+        
+        # Create statusbar, if requested
+        if show_statusbar:
+            other_lines += 1
+            statusbar_fmt = self.colorize("[CTRL+C] : Stop    [ENTER] : Next Page    (Page: %d / %d)",
+                                      statusbar_fg, statusbar_bg, statusbar_attrs)
 
         batches = Batched(text.splitlines(), lines_per_page)
         with HiddenCursor():
             for batch in batches.iterate():
-                print("\n".join(batch), flush=True)
-                print(f"\nPage ({batches.batch_no}/{batches.total_batches})")
+                # Print Page
+                print(text_fmt % "\n".join(batch), flush=True, end="\n\n")
+
+                # Print Statusbar, if asked to.
+                if show_statusbar:
+                    print(statusbar_fmt % (batches.batch_no, batches.total_batches))
+                
+                # Wait for keypress
                 if batches.has_next_batch:
                     try:
-                        self.inputc(prompt, input_attrs=['concealed'])
-                        utils.clear_lines_above(len(batch)+newlines+2)
+                        self.inputc(input_attrs=['concealed'])
+                        utils.clear_lines_above(len(batch)+other_lines)
+                    except EOFError:
+                        utils.clear_lines_above(len(batch)+other_lines)
                     except KeyboardInterrupt:
                         break
         utils.clear_line()
