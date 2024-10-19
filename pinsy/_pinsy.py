@@ -1258,27 +1258,23 @@ class Pins:
 
         Raises all exceptions that `ansy` would raises for invalid inputs.
         """
-        assert type(text) == str, \
-            "text must be a string"
+        assert type(text) == str, "text must be a string"
+        assert lines_per_page > 0, "lines_per_page cannot be lesser than 1"
+        assert type(prompt) == str, "prompt must be a string"
 
-        assert lines_per_page > 0, \
-            "lines_per_page cannot be lesser than 1"
-        assert type(prompt) == str, \
-            "prompt must be a string"
-
-        prompt = self.colorize(
-            f"\n{prompt}", prompt_fg, prompt_bg, prompt_attrs)
+        prompt = self.colorize(f"{prompt}", prompt_fg, 
+                               prompt_bg, prompt_attrs)
         newlines = max(prompt.count('\n')+1, 1)
 
         batches = Batched(text.splitlines(), lines_per_page)
         with HiddenCursor():
             for batch in batches.iterate():
                 print("\n".join(batch), flush=True)
-
+                print(f"\nPage ({batches.batch_no}/{batches.total_batches})")
                 if batches.has_next_batch:
                     try:
                         self.inputc(prompt, input_attrs=['concealed'])
-                        utils.clear_lines_above(len(batch)+newlines)
+                        utils.clear_lines_above(len(batch)+newlines+2)
                     except KeyboardInterrupt:
                         break
         utils.clear_line()
