@@ -1391,7 +1391,7 @@ if __name__ == "__main__":
         except AssertionError:
             failed.append(name)
 
-    printc(f"Total Tests: {len(all_functions):<3}", "blue", end="\n\n")
+    printc(f"Total Tests: {len(all_functions):<3}", "light_blue", end="\n\n")
 
     if passed:
         printc(f"Tests Passed: {len(passed):<3}", "green", end=" ")
