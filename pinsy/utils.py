@@ -281,19 +281,19 @@ def type_match(value:Any, expected_type:Any) -> bool:
 
     # Handle Dict
     if origin_type is dict:
-        if not isinstance(value, dict):
-            return False
-        key_type, value_type = type_args
-        key_check = all(type_match(k, key_type) for k in value.keys())
-        value_check = all(type_match(v, value_type)
-                          for v in value.values())
-        return isinstance(value, dict) and key_check and value_check
+        if type_args and isinstance(value, dict):
+            key_type, value_type = type_args
+            key_check = all(type_match(k, key_type) for k in value.keys())
+            value_check = all(type_match(v,
+                                         value_type) for v in value.values())
+            return key_check and value_check
+        return isinstance(value, dict)
 
     # Handle Set
     if origin_type is set:
-        items_check = all(type_match(
-            item, type_args[0]) for item in value)
-        return isinstance(value, set) and items_check
+        if type_args and isinstance(value, set):
+            return all(type_match(item, type_args[0]) for item in value)
+        return isinstance(value, set)
 
     # Handle Union
     if origin_type is Union:
