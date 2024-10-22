@@ -1373,9 +1373,7 @@ if __name__ == "__main__":
     ]
 
     # Skip these tests
-    to_skip = [
-        # "test_format_date"
-    ]
+    to_skip = []
 
     failed = []
     passed = []
