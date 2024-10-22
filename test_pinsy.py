@@ -1152,7 +1152,7 @@ def test_is_valid_email():
 
 # UTILS.type_check Test
 def test_type_match():
-    from typing import (List, Set, Dict, Tuple, Union, Any, Iterable, Optional)
+    from typing import List, Set, Dict, Tuple, Union, Any, Iterable, Optional
 
     # Simple Types
     assert type_match(5, int)
@@ -1206,22 +1206,30 @@ def test_type_match():
     assert not type_match(True, set)
 
     # Complex Types
+    assert type_match([1,], List)
+    assert type_match([1, 2, 3], List)
     assert type_match([1, 2, 3], List[int])
+    assert type_match([1,], List[int])
     assert not type_match([1, "2", 3], List[int])
     assert not type_match("123", List[int])
     assert not type_match(None, List[int])
     assert not type_match(True, List[int])
 
     # One hint 'int' assumes each item to be int
+    assert type_match((1,), Tuple)
+    assert type_match((1, 2, 3), Tuple)
     assert type_match((1, 2, 3), Tuple[int])
+    assert type_match(("str", ), Tuple[str])
     # Two hints 'int' and 'str' assumes first item to be int and second to be str
     assert type_match((1, "2"), Tuple[int, str])
+    assert not type_match((1, "2", 3), Tuple[int, str])
     assert not type_match(("1", 2), Tuple[int, str])
     assert not type_match(123, Tuple[int, str])
     assert not type_match(None, Tuple[int, str])
     assert not type_match(True, Tuple[int, str])
 
     assert type_match({"a": 1, "b": 2}, Dict[str, int])
+    assert type_match({"a": 1}, Dict[str, int])
     assert not type_match(123, Dict[str, int])
     assert not type_match({1: 1, "b": 2}, Dict[str, int])
     assert not type_match({"1": "1", "b": 2}, Dict[str, str])
@@ -1229,6 +1237,7 @@ def test_type_match():
     assert not type_match(True, Dict[str, str])
 
     assert type_match({"a", "b", "c"}, Set[str])
+    assert type_match({"a",}, Set[str])
     assert not type_match({"a", "b", 123}, Set[int])
     assert not type_match("123", Set[str])
     assert not type_match(None, Set[str])
@@ -1237,6 +1246,10 @@ def test_type_match():
     assert type_match("any value", Any)
     assert type_match(123, Any)
     assert type_match(12.3, Any)
+    assert type_match([12, 34], Any)
+    assert type_match((12, 34), Any)
+    assert type_match({"key2":"value","key1":"value"}, Any)
+    assert type_match({"string",1123}, Any)
     assert type_match(None, Any)
     assert type_match(True, Any)
 
