@@ -1,4 +1,5 @@
 # Copyright 2024 Anas Shakeel
+from __future__ import annotations
 
 import sys
 import json
@@ -127,7 +128,7 @@ class Pins:
         - `charset` is invalid
         """
         assert charset in CHARSETS, f"Invalid charset: '{charset}'"
-        self.CHARSET: dict = CHARSETS[charset]
+        self.CHARSET: Dict = CHARSETS[charset]
         self.charset_name: str = charset
 
     def colorize(self, text: str, fgcolor: Color = None, bgcolor: Color = None,
@@ -916,7 +917,7 @@ class Pins:
 
             self.print_error(f"Invalid URL: '{url}'")
 
-    def input_menu(self, options: list,
+    def input_menu(self, options: List,
                    bullet: Bullet = ">",
                    bullet_fg: Color = None,
                    bullet_bg: Color = None,
@@ -1084,7 +1085,7 @@ class Pins:
                     author_email: str = None,
                     source_url: str = None,
                     license: str = None,
-                    platforms: list[str] | str = None,
+                    platforms: Union[List[str], str, None] = None,
                     *,
                     border_color: Color = None,
                     heading_fg: Color = None,
@@ -1255,7 +1256,7 @@ class Pins:
         >> p.print_pages(text, 2)
         line 1 
         line 2
-        
+
         [CTRL+C] : Stop    [ENTER] : Next Page    (Page: 1 / 3)
         ```
 
@@ -1273,12 +1274,12 @@ class Pins:
 
         # Number of lines that are printed (excluding text/page lines)
         other_lines: int = 2
-        
+
         # Create statusbar, if requested
         if show_statusbar:
             other_lines += 1
             statusbar_fmt = self.colorize("[CTRL+C] : Stop    [ENTER] : Next Page    (Page: %d / %d)",
-                                      statusbar_fg, statusbar_bg, statusbar_attrs)
+                                          statusbar_fg, statusbar_bg, statusbar_attrs)
 
         batches = Batched(text.splitlines(), lines_per_page)
         with HiddenCursor():
@@ -1288,8 +1289,9 @@ class Pins:
 
                 # Print Statusbar, if asked to.
                 if show_statusbar:
-                    print(statusbar_fmt % (batches.batch_no, batches.total_batches))
-                
+                    print(statusbar_fmt %
+                          (batches.batch_no, batches.total_batches))
+
                 # Wait for keypress
                 if batches.has_next_batch:
                     try:
@@ -1557,7 +1559,7 @@ class Pins:
         max_width = get_terminal_size()[0] - len(status_text)
         text = fill(text, max_width, replace_whitespace=False)
 
-        lines: list = text.splitlines()
+        lines: List = text.splitlines()
         formatted_lines = ""
         for line in lines[1:]:
             formatted_lines += colored_ansy(f"@bar[{bar}] {indent}@line[{line}]\n",
@@ -1617,7 +1619,7 @@ class Pins:
 
         return box.create(wrap=wrap, replace_whitespace=replace_whitespace)
 
-    def print_list_ordered(self, items: list | Tuple,
+    def print_list_ordered(self, items: Union[List, Tuple],
                            indent: int = 0,
                            list_indent: int = 4,
                            line_height: int = 0,
@@ -1640,7 +1642,7 @@ class Pins:
                                        item_color=item_color,
                                        item_attrs=item_attrs))
 
-    def print_list_unordered(self, items: list | Tuple,
+    def print_list_unordered(self, items: Union[List, Tuple],
                              bullet: Bullet = '+',
                              bullet_map: Iterable[Bullet] = None,
                              indent: int = 0,
@@ -1668,7 +1670,7 @@ class Pins:
                                          item_attrs=item_attrs))
 
     @typecheck(only=['items', 'indent', 'list_indent', 'line_height'])
-    def create_list_ordered(self, items: Union[list, tuple],
+    def create_list_ordered(self, items: Union[List, Tuple],
                             indent: int = 0,
                             list_indent: int = 4,
                             line_height: int = 0,
@@ -1725,7 +1727,7 @@ class Pins:
                                   newline=newlines)
 
     @typecheck(only=['items', 'indent', 'bullet', 'list_indent', 'line_height'])
-    def create_list_unordered(self, items: Union[list, tuple],
+    def create_list_unordered(self, items: Union[List, Tuple],
                               bullet: Union[Bullet, str] = '+',
                               bullet_map: Iterable[Bullet] = None,
                               indent: int = 0,
@@ -1794,7 +1796,7 @@ class Pins:
                                   newline=newlines)
 
     @typecheck(only=['dictionary', 'heading', 'indent_values', 'line_height'])
-    def create_table(self, dictionary: dict,
+    def create_table(self, dictionary: Dict,
                      heading: Optional[str] = None,
                      indent_values: int = 4,
                      line_height: int = 0,
@@ -1866,8 +1868,11 @@ class Pins:
             return "\n".join([self.colorize(heading, heading_fg, heading_bg, heading_attrs), " ", table])
         return table
 
-    def promptize(self, prompt: str, fgcolor: Color = None, bgcolor: Color = None,
-                  attrs: Iterable[Attribute] = None, prompt_char: str = None) -> str:
+    def promptize(self, prompt: str,
+                  fgcolor: Color = None,
+                  bgcolor: Color = None,
+                  attrs: Iterable[Attribute] = None,
+                  prompt_char: str = None) -> str:
         """ 
         ### Promptize
         Returns a formatted version of `prompt`, which you can use to create
@@ -2019,7 +2024,7 @@ class Pins:
         pad = " "*indent
         return '\n'.join([pad+line for line in text.splitlines()])
 
-    def for_each(self, items: Iterable[Any], func: Callable[[Any], Any]) -> list:
+    def for_each(self, items: Iterable[Any], func: Callable[[Any], Any]) -> List:
         """ 
         ### For Each
         As name implies, this method runs `func` for each item in `items`, 
@@ -2029,6 +2034,7 @@ class Pins:
         - `items`: any iterable (e.g. `list`, `tuple`, `str` etc.)
         - `func`: function to call for each item (this function must accept an item)
 
+        #### Example:
         ```
         >> strings = ('paul', 'leto', 'jessica')
         >> pins.for_each(strings, str.title)
@@ -2143,7 +2149,7 @@ class Pins:
         # Convert to Path object
         p: Path = Path(p)
 
-        parts: list = list(p.parts)
+        parts: List = list(p.parts)
         if len(parts) <= 2:
             return str(p)
 
@@ -2338,7 +2344,8 @@ class Pins:
 
         return calendar_month(year, month)
 
-    def print_calendar(self, year: int = None, month: int = None,
+    def print_calendar(self, year: int = None,
+                       month: int = None,
                        month_color: Color = None,
                        date_color: Color = None):
         """ 
@@ -2377,8 +2384,10 @@ class Pins:
 
         print('\n'.join([month_year, daynames, dates]))
 
-    def create_ansi_fmt(self, fgcolor: Color = None, bgcolor: Color = None,
-                        attrs: Iterable[Attribute] = None, color_mode: int = None) -> str:
+    def create_ansi_fmt(self, fgcolor: Color = None,
+                        bgcolor: Color = None,
+                        attrs: Iterable[Attribute] = None,
+                        color_mode: int = None) -> str:
         """
         ### Create Ansi Format
         Returns an ansi format string with a string placeholder and reset code.
@@ -2411,7 +2420,7 @@ class Pins:
         ansi_seq = self._make_ansi(fgcolor, bgcolor, attrs, color_mode)
         return f"{ansi_seq}%s{ANSI_CODES['reset']}" if ansi_seq else '%s'
 
-    def _recurse_list(self, items: list,
+    def _recurse_list(self, items: List,
                       level: int = 0,
                       list_indent: int = 4,
                       pad: str = "",
@@ -2474,8 +2483,11 @@ class Pins:
         # Join the nest, create a string
         return newline.join(nest)
 
-    def _render_menu(self, menu: list, selected_index: int, bullet: str = ">",
-                     selected_ansi: str = None, normal_ansi: str = None):
+    def _render_menu(self, menu: List,
+                     selected_index: int,
+                     bullet: str = ">",
+                     selected_ansi: str = None,
+                     normal_ansi: str = None):
         """
         Renders menu with ansi formatting
         #### ARGS:
@@ -2505,8 +2517,10 @@ class Pins:
         for m in re.finditer(pattern, text):
             yield m.group(1)
 
-    def _make_ansi(self, fgcolor: Color = None, bgcolor: Color = None,
-                   attrs: Iterable[Attribute] = None, color_mode: int = None) -> str:
+    def _make_ansi(self, fgcolor: Color = None,
+                   bgcolor: Color = None,
+                   attrs: Iterable[Attribute] = None,
+                   color_mode: int = None) -> str:
         """ 
         Interface between `ansy.make_ansi()` and `Pins`. It's just for `Pins`,
         you can safely use `ansy.make_ansi()` for you purposes.
@@ -2519,7 +2533,7 @@ class Pins:
 
         return make_ansi(fgcolor, bgcolor, attrs, color_mode)
 
-    def _assign_colors(self) -> dict:
+    def _assign_colors(self) -> Dict:
         """ 
         Assign colors based on `COLOR_MODE`. Returns a dictionary.
         #### Keys in dictionary:
@@ -2549,7 +2563,7 @@ class Pins:
             case _:
                 raise ValueError("Invalid COLORMODE:", self.COLORMODE)
 
-    def _validate_types(self, v: list[Tuple]):
+    def _validate_types(self, v: List[Tuple]):
         """ 
         ### Validate Types
         Validate the types of variable. Returns `True` if all vars are valid,
@@ -2610,7 +2624,7 @@ class Pins:
 
         return True
 
-    def _validate_colors(self, colors: list[Tuple]):
+    def _validate_colors(self, colors: List[Tuple]):
         """ 
         ### Validate Colors
         Validate the colors based on `COLORMODE`. Returns `True` if all colors are valid.
@@ -2640,7 +2654,7 @@ class Pins:
 
         return True
 
-    def _validate_attrs(self, attributes: list[Tuple]):
+    def _validate_attrs(self, attributes: List[Tuple]):
         """ 
         ### Validate Attrs
         Validate the attrs in `attributes`. Returns `True` if all attrs are valid.
@@ -2690,7 +2704,7 @@ class Batched:
     """ 
     ### Batched
     Batch items of length `items_per_batch`. The last batch may be
-    shorter than `items_per_batch`. Accepts any iterable that supports slicing `[:]`
+    shorter than `items_per_batch`. Accepts any iterable that supports slicing
     like `str`, `list`, `tuple` etc.
 
     Works similar to `batched()` from `itertools`, but also provides more
@@ -3028,10 +3042,10 @@ class Box:
         self.color_mode = color_mode
 
         try:
-            self.charset: dict = CHARSETS[charset]
+            self.charset: Dict = CHARSETS[charset]
         except KeyError:
             # Fallback: ascii
-            self.charset: dict = CHARSETS['ascii']
+            self.charset: Dict = CHARSETS['ascii']
 
         self.border_color = border_color
         self.text_color = text_color
@@ -3069,7 +3083,7 @@ class Box:
         if self.padding_x % 2 != 0:
             self.padding_x -= 1
 
-    def _create_top_bottom_lines(self, fmt) -> tuple:
+    def _create_top_bottom_lines(self, fmt):
         """ Create top and bottom lines of the box """
         top_line = fmt % f"{self.charset['TOP_LEFT']}{
             self.charset['TOP_ST']*(self.width-2)}{self.charset['TOP_RIGHT']}"
@@ -3320,7 +3334,8 @@ class Validator:
         return True
 
     @classmethod
-    def is_valid_filepath(cls, filepath: str, extension="*", max_length: int = 250) -> Literal[True] | str:
+    def is_valid_filepath(cls, filepath: str, extension="*",
+                          max_length: int = 250) -> Union[bool, str]:
         """ 
         ### Is Valid Filepath
         Validates filepath. Returns `True` if valid, Returns `str` if invalid.
