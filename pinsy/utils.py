@@ -271,15 +271,13 @@ def type_match(value:Any, expected_type:Any) -> bool:
 
     # Handle Tuple
     if origin_type is tuple:
-        if not isinstance(value, tuple):
+        if type_args and isinstance(value, tuple):
+            if len(type_args) == len(value):
+                return all(type_match(item, type_arg) for item, type_arg in zip(value, type_args))
+            elif len(type_args) == 1:
+                return all(type_match(item, type_args[0]) for item in value)
             return False
-        if value == None:
-            return False
-        if len(type_args) == len(value):
-            return all(type_match(item, type_arg) for item, type_arg in zip(value, type_args))
-        elif len(type_args) == 1:
-            return all(type_match(item, type_args[0]) for item in value)
-        return False
+        return isinstance(value, tuple)
 
     # Handle Dict
     if origin_type is dict:
