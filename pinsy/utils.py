@@ -34,7 +34,7 @@ else:  # Unix (mac/linux)
 
 from inspect import signature
 from functools import wraps
-from typing import (get_origin, get_args, List, Tuple,
+from typing import (get_origin, get_args, get_type_hints, List, Tuple,
                     Dict, Set, Union, Optional, Literal, Any, AnyStr)
 from collections.abc import Iterable
 
@@ -398,7 +398,7 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str]=None
         def wrapper(*args, **kwargs):
             # Get the function signature and annotations (type hints)
             sig = signature(func)
-            hints = func.__annotations__
+            hints = get_type_hints(func)
 
             # bind the arguments to their names (mapping argument values to parameter names)
             bound_args = sig.bind(*args, **kwargs)
