@@ -1185,27 +1185,32 @@ def test_type_match():
     assert not type_match(True, None)
     assert not type_match(False, None)
 
+    assert type_match(tuple(), tuple)
     assert type_match((1, 2, 3), tuple)
     assert not type_match([1, 2, 3], tuple)
     assert not type_match(None, tuple)
     assert not type_match(True, tuple)
 
+    assert type_match(list(), list)
     assert type_match([1, 2, 3], list)
     assert not type_match((1, 2, 3), list)
     assert not type_match(None, list)
     assert not type_match(True, list)
 
+    assert type_match(dict(), dict)
     assert type_match({"a": 1, "b": 2}, dict)
     assert not type_match({"a", "b", "c"}, dict)
     assert not type_match(None, dict)
     assert not type_match(True, dict)
 
+    assert type_match(set(), set)
     assert type_match({"a", "b", "c"}, set)
     assert not type_match({"a": 1, "b": 2}, set)
     assert not type_match(None, set)
     assert not type_match(True, set)
 
     # Complex Types
+    assert type_match(list(), List)
     assert type_match([1,], List)
     assert type_match([1, 2, 3], List)
     assert type_match([1, 2, 3], List[int])
@@ -1216,6 +1221,7 @@ def test_type_match():
     assert not type_match(True, List[int])
 
     # One hint 'int' assumes each item to be int
+    assert type_match(tuple(), Tuple)
     assert type_match((1,), Tuple)
     assert type_match((1, 2, 3), Tuple)
     assert type_match((1, 2, 3), Tuple[int])
@@ -1228,6 +1234,8 @@ def test_type_match():
     assert not type_match(None, Tuple[int, str])
     assert not type_match(True, Tuple[int, str])
 
+    assert type_match(dict(), Dict)
+    assert type_match({"a": 1, "b": 2}, Dict)
     assert type_match({"a": 1, "b": 2}, Dict[str, int])
     assert type_match({"a": 1}, Dict[str, int])
     assert not type_match(123, Dict[str, int])
@@ -1236,6 +1244,8 @@ def test_type_match():
     assert not type_match(None, Dict[str, str])
     assert not type_match(True, Dict[str, str])
 
+    assert type_match(set(), Set)
+    assert type_match({"a", "b", "c"}, Set)
     assert type_match({"a", "b", "c"}, Set[str])
     assert type_match({"a",}, Set[str])
     assert not type_match({"a", "b", 123}, Set[int])
