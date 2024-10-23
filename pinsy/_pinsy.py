@@ -57,8 +57,9 @@ class Pins:
                  prompt_char: PromptChar = '>>',
                  color_mode: int = 4) -> None:
 
-        self.OS: str = platform.system()  # Windows | Linux | Darwin
+        self.OS: str = platform.system()
         if self.OS == "Windows":
+            # If on Windows, fix console
             Pins.fix_windows_console()
 
         self.USE_COLORS: bool = use_colors
@@ -68,8 +69,7 @@ class Pins:
 
         # Set self.CHARSET & self.charset_name
         self.set_charset(charset)
-
-        # Char used in make_status
+        
         self.STATUS_CHAR = "█"
         self.PROMPT_CHAR = prompt_char if prompt_char else ">>"
 
@@ -281,7 +281,7 @@ class Pins:
 
         Raises all exceptions raised by `ansy` and `Pins.olorize`
         """
-        # Create ANSI to format user-input
+        # ANSI sequence to style user-input
         input_ansi = self._make_ansi(input_fg, input_bg, input_attrs,
                                      self.COLORMODE)
 
@@ -496,13 +496,12 @@ class Pins:
         Raises `ValueError` if:
         - `min_length` is greater than max_length
         """
-        # Constraint validations
+        # Validations
         if constraint:
             assert isinstance(constraint, str), "constraint must be a string."
             assert constraint in CONSTRAINTS, f"Invalid constraint: '{
                 constraint}'"
 
-        # Minlength, MaxLength validation
         if (min_length != None and max_length != None) and min_length > max_length:
             raise ValueError("min_length cannot be greater than max_length")
 
@@ -511,12 +510,9 @@ class Pins:
         prompt = prompt if prompt else "Enter a string: "
         prompt = self.promptize(prompt)
         while True:
-            inp = self.inputc(prompt, prompt_fg=prompt_color,
-                              prompt_attrs=prompt_attrs,
-                              input_fg=input_color,
-                              input_attrs=input_attrs)
+            inp = self.inputc(prompt, prompt_fg=prompt_color, prompt_attrs=prompt_attrs,
+                              input_fg=input_color, input_attrs=input_attrs)
             if not empty_allowed and not inp:
-                # If empty not allowed and input is empty
                 self.print_error("Field cannot be empty.")
                 continue
 
@@ -629,7 +625,6 @@ class Pins:
                 self.print_error("Email cannot be empty.")
                 continue
 
-            # Match regex pattern
             if Validator.is_valid_email(e):
                 return e
 
@@ -765,7 +760,7 @@ class Pins:
                 self.print_error(is_valid)
                 continue
 
-            # Exist or not?
+            # File Exist?
             if must_exist and not isfile(filepath):
                 self.print_error(f"File does not exist: '{filepath}'")
                 continue
@@ -813,13 +808,12 @@ class Pins:
                 self.print_error(is_valid)
                 continue
 
-            # # Directory MUST exist (if required).
+            # Directory Exist?
             if must_exist and not isdir(directory):
                 self.print_error(
                     f"Directory '{directory}' does not exist.")
                 continue
 
-            # Safe to return the directory
             return normpath(directory)
 
     def input_ip(self, prompt: str = '', version: int = 4,
@@ -970,7 +964,7 @@ class Pins:
         assert type(options) == list, "options is expected to be a list"
         assert type(bullet) == str, "bullet is expected to be a str"
 
-        # Ansi formatting
+        # Ansi sequences
         bullet = self.colorize(bullet, bullet_fg, bullet_bg, bullet_attrs)
         selected_ansi = self._make_ansi(selected_fg, selected_bg, selected_attrs,
                                         color_mode=self.COLORMODE)
@@ -1159,7 +1153,6 @@ class Pins:
                                 pad_x=6, pad_y=1,
                                 y_align="center",
                                 border_color=border_color)
-        # Print the damn thing!
         print(new_table)
 
     def print_more(self, text: str, n: int = 1,
@@ -1209,12 +1202,12 @@ class Pins:
         prompt = self.textalign_x(prompt, w, prompt_align)
         prompt = self.colorize(prompt, prompt_fg, prompt_bg, prompt_attrs)
 
-        # Print first section
+        # Print first section (first page)
         lines = text.splitlines()
         stop_ = min(h-2, len(lines))
         print("\n".join(lines[:stop_]))
 
-        # Print remaining lines
+        # Print remaining lines (line by line)
         with HiddenCursor():
             try:
                 for batch in batched(lines[stop_:], n):
@@ -1269,18 +1262,16 @@ class Pins:
         assert type(text) == str, "text must be a string"
         assert lines_per_page > 0, "lines_per_page cannot be lesser than 1"
 
-        # Create text format string
-        text_fmt = self.create_ansi_fmt(text_fg, text_bg, text_attrs)
-
-        # Number of lines that are printed (excluding text/page lines)
+        # Lines printed (excluding lines in text)
         other_lines: int = 2
 
-        # Create statusbar, if requested
+        # Create statusbar
         if show_statusbar:
-            other_lines += 1
             statusbar_fmt = self.colorize("[CTRL+C] : Stop    [ENTER] : Next Page    (Page: %d / %d)",
                                           statusbar_fg, statusbar_bg, statusbar_attrs)
+            other_lines += 1
 
+        text_fmt = self.create_ansi_fmt(text_fg, text_bg, text_attrs)
         batches = Batched(text.splitlines(), lines_per_page)
         with HiddenCursor():
             for batch in batches.iterate():
@@ -1488,7 +1479,6 @@ class Pins:
         else:
             hr = hr.ljust(terminal_width)
 
-        # Colorize the line
         return self.colorize(hr.rstrip(), color)
 
     def create_status(self, label: str, text: str,
@@ -1531,14 +1521,13 @@ class Pins:
         - `label_attr` contains an invalid attribute
         - `text_attr` contains an invalid attribute
         """
-        # Type validation
+        # Validation
         assert isinstance(label, str), "label must be a string."
         assert isinstance(text, str), "text must be a string."
 
         if not text or not label:
             return ""
 
-        # Color validation
         if not self.USE_COLORS:
             label_fg, label_bg, text_fg, text_bg = None, None, None, None
 
@@ -1559,19 +1548,18 @@ class Pins:
         max_width = get_terminal_size()[0] - len(status_text)
         text = fill(text, max_width, replace_whitespace=False)
 
-        lines: List = text.splitlines()
-        formatted_lines = ""
+        # Create Status
+        lines = text.splitlines()
+        first_line = colored_ansy(f"@bar[{status_text}]@line[{lines[0]}]", style)
+        other_lines = ""
         for line in lines[1:]:
-            formatted_lines += colored_ansy(f"@bar[{bar}] {indent}@line[{line}]\n",
+            other_lines += colored_ansy(f"@bar[{bar}] {indent}@line[{line}]\n",
                                             style)
-        first_line = colored_ansy(f"@bar[{status_text}]@line[{lines[0]}]",
-                                  style)
 
-        if formatted_lines:
+        if other_lines:
             first_line += "\n"
 
-        # RETURN after Adding the status_text at the beginning
-        return first_line + formatted_lines.rstrip("\n")
+        return first_line + other_lines.rstrip("\n")
 
     def boxify(self, text: str,
                width: int = None,
@@ -1709,7 +1697,7 @@ class Pins:
         if not items:
             return None
 
-        # Create ansi format string
+        # Create ansi format strings
         num_fmt = self.create_ansi_fmt(num_color, None, num_attrs)
         item_fmt = self.create_ansi_fmt(item_color, None, item_attrs)
 
@@ -1850,7 +1838,7 @@ class Pins:
         key_ansi = self.create_ansi_fmt(keys_fg, keys_bg, keys_attrs)
         value_ansi = self.create_ansi_fmt(values_fg, values_bg, values_attrs)
 
-        # Find the length of longest string in l1
+        # Space inbetween keys and values in table
         space: int = len(self._longest_string(dictionary.keys()))
         pad = " "*indent_values
         newlines: str = "\n"*(line_height+1)
@@ -1863,9 +1851,10 @@ class Pins:
                          pad}{value_ansi % value}")
         table = newlines.join(table)
 
-        # Add the heading if provided
+        # Add heading
         if heading:
-            return "\n".join([self.colorize(heading, heading_fg, heading_bg, heading_attrs), " ", table])
+            return "\n".join([self.colorize(heading, heading_fg,
+                                            heading_bg, heading_attrs), " ", table])
         return table
 
     def promptize(self, prompt: str,
@@ -1928,7 +1917,6 @@ class Pins:
         if text == "":
             return text
 
-        # Set the width to the terminal width, if None
         width = width if width else get_terminal_size()[0]
 
         newtext = []
@@ -1978,7 +1966,7 @@ class Pins:
 
         height = height if height != None else (get_terminal_size()[1] // 2)
         pad = "\n".join([fill_char for _ in range(height)])
-        padding_fmt = "%s\n%s\n%s"  # Format string
+        padding_fmt = "%s\n%s\n%s"
 
         if align == "top":
             return padding_fmt % (text, pad, pad)
@@ -2020,7 +2008,7 @@ class Pins:
         if wrap and max_width < (len(text)+indent):
             text = fill(text, max_width - indent)
 
-        # Indent and Return
+        # Indent
         pad = " "*indent
         return '\n'.join([pad+line for line in text.splitlines()])
 
@@ -2069,7 +2057,6 @@ class Pins:
         ```
 
         """
-        # Terminal width if width None.
         width = width if width else get_terminal_size()[0]
         return fill(text=text,
                     width=width,
@@ -2104,13 +2091,12 @@ class Pins:
         'in+se+rt+ t+he+ c+ha+ra+ct+er+s'
         ```
         """
-        steps = max(steps, 1)  # Ensure steps is positive
+        steps = max(steps, 1)
 
         if steps > len(text):
             return text
 
-        # Is chars empty?
-        if chars == '':
+        if not chars:
             return text
 
         return chars.join([text[i:i+steps] for i in range(0, len(text), steps)])
@@ -2146,7 +2132,6 @@ class Pins:
         if n == 0 or n < -1:
             return p
 
-        # Convert to Path object
         p: Path = Path(p)
 
         parts: List = list(p.parts)
@@ -2244,7 +2229,7 @@ class Pins:
         now = datetime.now()
 
         # Handle time-only strings by assuming today's date
-        if '%H' in format_ or '%I' in format_:  # Hour in format?
+        if '%H' in format_ or '%I' in format_:
             if '%Y' not in format_ and '%d' not in format_:  # Year and Day not in format?
                 # Add past_date's time in today's date
                 past_date = now.replace(hour=past_date.hour,
@@ -2258,7 +2243,6 @@ class Pins:
         seconds = diff.seconds
         minutes = int(seconds // 60)
         hours = int(minutes // 60)
-
         days = diff.days
         weeks = int(days // 7)
         months = int(days // 30)
@@ -2266,7 +2250,6 @@ class Pins:
         decades = int(years // 10)
         centuries = int(decades // 10)
 
-        # Format and return
         if centuries > 0:
             return f"{centuries} centur{'ies' if centuries > 1 else 'y'} ago"
         if decades > 0:
@@ -2328,10 +2311,9 @@ class Pins:
         Raises `AssertionError` if:
         - `month` is not in range `1-12`
         - one of `month` and `year` is None
-
         """
-        # Get the current month (if not provided by user)
         if month == None and year == None:
+            # Get current month, year
             today = datetime.today()
             month, year = today.month, today.year
 
@@ -2373,6 +2355,7 @@ class Pins:
         dates = '\n'.join(calendar[2:])
 
         day, dayname, year_, month_ = self.now("%d %a %Y %B").split()
+
         # Colorize the parts
         month_year_chunks = month_year.split()
         if month_year_chunks[0] == month_ and month_year_chunks[1] == year_:
@@ -2452,7 +2435,7 @@ class Pins:
         Raises `TypeError` if:
         - `items` include anything except `str` and `list`
         """
-        # Indentation in each level
+        # Indentation of each level
         indent = (" "*list_indent)*level
 
         count = 1  # For numbered (ordered) list
@@ -2467,20 +2450,20 @@ class Pins:
                 prefix = prefix_fmt % bullet
 
             if isinstance(item, list):
-                # IF list, recurse
+                # For list, recurse
                 nest[i] = self._recurse_list(item, level+1, list_indent, pad,
                                              bullet, bullet_map, prefix_fmt,
                                              item_fmt, list_type, newline,
                                              f"{num_prefix}{i}.")
             elif isinstance(item, str):
-                # IF str, add to nest
+                # For str, add to nest
                 nest[i] = f"{pad}{indent}{prefix} {item_fmt % item}"
                 count += 1
             else:
-                # IF other, Error
+                # For others
                 raise TypeError(f"Unexpected type: {type(item)}")
 
-        # Join the nest, create a string
+        # Join nest
         return newline.join(nest)
 
     def _render_menu(self, menu: List,
@@ -2602,7 +2585,7 @@ class Pins:
         ```
         """
         for var in v:
-            # If to check multiple types
+            # For multiple types
             if isinstance(var[2], tuple):
                 # Normalize var[2] for Nonetype
                 expected_types = [type(t) if t == None else t for t in var[2]]
@@ -2616,7 +2599,7 @@ class Pins:
                 raise TypeError(err)
 
             else:
-                # Check for single type
+                # For single type
                 expected_type = var[2] if var[2] != None else type(var[2])
                 if type(var[1]) != expected_type:
                     err = f"{var[0]} must be {var[2]}: not {type(var[1])}"
@@ -3059,22 +3042,23 @@ class Box:
         self.terminal_width = get_terminal_size()[0]
         self.width = max(width, 4) if width else self.terminal_width
 
-        if not wrap:  # if wrap false, and width less than text
+        if not wrap:
+            # Width less than text width?
             self.width = max(self.width, len(text)+4)
 
-        # Is width more than terminal width?
+        # Width more than terminal width?
         self.width = min(self.width, self.terminal_width)
 
-        # Is width odd?
+        # Width odd?
         if self.width % 2 == 1:
-            self.width -= 1  # reduce to make even
-        self.width = max(self.width, 4)  # Clip width to 4 minimum
+            self.width -= 1  # Make even
+        # Width less than 4?
+        self.width = max(self.width, 4)
 
-        # Paddings X, Y around text within box
-        self.padding_x = max(pad_x, 0)  # Ensure pad_x is non-negative
+        # Paddings around text in box
+        self.padding_x = max(pad_x, 0)
         self.padding_y = max(pad_y, 0)
 
-        # Is padding_x times 2 > half of width?
         half_width = (self.width / 2)
         if self.padding_x*2 >= half_width:
             self.padding_x = floor(half_width/2)
@@ -3102,9 +3086,9 @@ class Box:
             empty_space = max((width - (self.padding_x * 2)) - lenline - 2, 0)
             rem_chars = max(width - (lenline + empty_space + 2), 0)
 
-            # Is padding more than remaining chars?
+            # Padding more than remaining chars?
             if self.padding_x >= rem_chars:
-                self.padding_x = rem_chars // 2  # Set to half of rem_chars
+                self.padding_x = rem_chars // 2
 
             pad = " "*self.padding_x
 
@@ -3185,7 +3169,7 @@ class Box:
         self._calculate_width_padding(text, width,
                                       pad_x, pad_y, wrap)
 
-        # Wrap the text (if wrap true)
+        # Wrap the text
         if wrap and len(text) > self.width:
             text = fill(text, (self.width-2) - self.padding_x,
                         replace_whitespace=replace_whitespace)
@@ -3204,7 +3188,7 @@ class Box:
         mid_lines = self._ypad_midlines(mid_lines, self.padding_y, self.width,
                                         self.charset, self.border_fmt, self.y_align)
 
-        # Join the lines and return
+        # Join everything
         return "\n".join([top_line, mid_lines.rstrip(), bottom_line])
 
 
@@ -3374,7 +3358,7 @@ class Validator:
         if not filepath:
             return "Path cannot be empty."
 
-        # # Split filepath into root and extension
+        # Split filepath into root and extension
         root, ext_ = splitext(filepath)
 
         # # Root must not be empty
