@@ -1072,13 +1072,15 @@ class Pins:
                                  label_fg=self.DEFAULT_COLORS['success'],
                                  label_attrs=['bold'], text_attrs=['italic']))
 
-    def print_about(self, name: str = None,
-                    version: str = None,
-                    description: str = None,
-                    author: str = None,
-                    author_email: str = None,
-                    source_url: str = None,
-                    license: str = None,
+    @typecheck(skip=["border_color","heading_fg","heading_bg","heading_attrs","keys_color","values_color"])
+    def print_about(self, 
+                    name: Optional[str] = None,
+                    version: Optional[str] = None,
+                    description: Optional[str] = None,
+                    author: Optional[str] = None,
+                    author_email: Optional[str] = None,
+                    source_url: Optional[str] = None,
+                    license: Optional[str] = None,
                     platforms: Union[List[str], str, None] = None,
                     *,
                     border_color: Color = None,
@@ -1108,16 +1110,6 @@ class Pins:
         - `values_color`: color of values
 
         """
-        self._validate_types([
-            ("name", name, (str, None)),
-            ("version", version, (str, None)),
-            ("description", description, (str, None)),
-            ("author", author, (str, None)),
-            ("author_email", author_email, (str, None)),
-            ("source_url", source_url, (str, None)),
-            ("license", license, (str, None)),
-        ])
-
         if platforms:
             platforms = ", ".join(platforms) if isinstance(
                 platforms, list) else platforms
