@@ -36,13 +36,11 @@ class Pins:
 
     #### ARGS:
     - `use_colors`: as name implies, Use colors (default `True`)
-    - `handle_errors`: how should Pins handle errors (`raise`, `quit`, `callback`)
-    - `error_callback`: function to call on errors, when handle_errors is set to `callback`
     - `charset`: the character set to use (`ascii`, `blocks`, `box`, `box_double`, `box_heavy`, `box_round`)
     - `prompt_char`: prompt character(s) to use in input functions.
     - `color_mode`: color mode to use (`4`, `8`, `24`)
 
-    #### Example Usage:
+    #### Example:
     ```
     >> from pinsy import Pins
     >>
@@ -69,7 +67,7 @@ class Pins:
 
         # Set self.CHARSET & self.charset_name
         self.set_charset(charset)
-        
+
         self.STATUS_CHAR = "█"
         self.PROMPT_CHAR = prompt_char if prompt_char else ">>"
 
@@ -131,41 +129,37 @@ class Pins:
         self.CHARSET: Dict = CHARSETS[charset]
         self.charset_name: str = charset
 
-    def colorize(self, text: str, fgcolor: Color = None, bgcolor: Color = None,
-                 attrs: Iterable[Attribute] = None, color_mode: int = None,
+    def colorize(self, text: str,
+                 fgcolor: Color = None,
+                 bgcolor: Color = None,
+                 attrs: Iterable[Attribute] = None,
+                 color_mode: int = None,
                  *,
                  no_color: Optional[bool] = None,
                  force_color: Optional[bool] = None) -> str:
         """ 
         ### Colorize
-        Colorize the `text` using the color mode specified by `color_mode`.
-        Uses module level `COLORMODE` if `color_mode` is `None`.
+        Colorize the `text`. This method sets `fgcolor` and `bgcolor`
+        to `None` if the module-level `USE_COLORS` is set to False.
 
-        This method uses `ansy.colored()`.
+        This method uses `ansy.colored()` under the hood.
 
         #### ARGS:
         - `text`: the text to colorize
         - `fgcolor`: foreground color
         - `bgcolor`: background color
         - `attrs`: attributes list
-        - `color_mode`: color mode
+        - `color_mode`: color mode (module-level COLORMODE is used, if `None`)
+        - `no_color`: don't use colors at all
+        - `force_color`: force colors even if terminal doesn't support
 
-        This method sets `fgcolor` and `bgcolor` to `None` if the
-        module-level `USE_COLORS` is set to False.
-
+        #### Example:
         ```
-        # Example
         >> from pinsy import Pins
-        >> pins = Pins()
         >>
+        >> pins = Pins()
         >> text = 'Hello, World!'
         >> pins.colorize(text, 'red', 'black', ['bold', 'blink'])
-        >>
-        >> pins.colorize(text, 'plum', color_mode=8)  # 8-bit color: name
-        >> pins.colorize(text, 215, color_mode=8) # 8-bit color: code
-        >>
-        >> pins.colorize(text, '#B00B1E', color_mode=24) # 24-bit color: Hex
-        >> pins.colorize(text, (255,100,100), color_mode=24) # 24-bit color: RGB
         ```
 
         Raises `ColorModeError` if:
@@ -186,7 +180,7 @@ class Pins:
 
         if attrs:
             assert isinstance(attrs, (tuple, list)), \
-                "attrs must be a list or tuple"
+                "attrs must be a list or tuple."
 
         color_mode = color_mode if color_mode else self.COLORMODE
         no_color = no_color if no_color else not self.USE_COLORS
@@ -205,16 +199,15 @@ class Pins:
 
         #### ARGS:
         - `text`: the text to find the substring in
-        - `pattern`: the regex pattern to match for (accepts compiled patterns as well)
+        - `pattern`: the regex pattern to match for (also accepts compiled patterns)
         - `fgcolor`: the foreground color of matches
         - `bgcolor`: the background color of matches
         - `attrs`: the attributes list
 
+        #### Example:
         ```
-        # Example
-        >> pattern = "8008135"
-        >> pins.colorize_regex("8008135 is a number", pattern, fgcolor="red")
-        '8008135 is a number' # 8008135 is colored red
+        >> pins.colorize_regex("8008135 is a number", pattern="8008", fgcolor="red")
+        '8008135 is a number' # 8008 is colored red
         ..
         >> import re
         >> pattern = re.compile(r"[0-9]+")
@@ -233,7 +226,7 @@ class Pins:
         - `fgcolor` is unrecognized
         - `bgcolor` is unrecognized
         """
-        assert isinstance(text, str), "text is not a str"
+        assert isinstance(text, str), "text must be a string."
         if not text:
             return text
 
@@ -247,7 +240,7 @@ class Pins:
 
         return re.sub(pattern, colorize_match_, text)
 
-    def inputc(self, prompt: object = "",
+    def inputc(self, prompt: Any = "",
                prompt_fg: Color = None,
                prompt_bg: Color = None,
                prompt_attrs: Iterable[Attribute] = None,
@@ -258,27 +251,21 @@ class Pins:
         ### Colored Input
         Python's `input()` with color support. All three color modes are supported.
 
-        ##### NOTE:
-        This method is not a replacement for the built-in `input()`.
-        Although, It's not drastically slow, It should only be used
-        when you need color support.
-
         #### ARGS:
         - `prompt`: prompt message
-        - `prompt_fg`: foreground color of prompt message (default is `None`)
-        - `prompt_bg`: background color of prompt message (default is `None`)
-        - `prompt_attrs`: attributes of prompt message (default is `None`)
-        - `input_fg`: foreground color of input that user types (default is `None`)
-        - `input_bg`: background color of input that user types (default is `None`)
-        - `input_attrs`: attributes of input that user types (default is `None`)
+        - `prompt_fg`: foreground color of prompt (default is `None`)
+        - `prompt_bg`: background color of prompt (default is `None`)
+        - `prompt_attrs`: attributes of prompt (default is `None`)
+        - `input_fg`: foreground color of input (default is `None`)
+        - `input_bg`: background color of input (default is `None`)
+        - `input_attrs`: attributes of input (default is `None`)
 
+        #### Example:
         ```
-        # Example
         >> pins.inputc('Type something: ', input_fg='light_red')
         .. Type something: hello, there!
         'hello, there!'
         ```
-
         Raises all exceptions raised by `ansy` and `Pins.olorize`
         """
         # ANSI sequence to style user-input
@@ -299,7 +286,8 @@ class Pins:
             std.write(ANSI_CODES['reset'])
             std.flush()
 
-    def input_multiline(self, prompt: str = '', stop_word: str = '',
+    def input_multiline(self, prompt: str = '',
+                        stop_word: str = '',
                         ignore_newlines: bool = False,
                         prompt_fg: Color = None,
                         prompt_bg: Color = None,
@@ -315,19 +303,19 @@ class Pins:
         - `prompt`: prompt message
         - `stop_word`: stop taking inputs when encountered just these chars on a line.
         - `ignore_newlines`: whether to include newlines in return string or ignore.
-        - `prompt_fg`: foreground color of prompt message (default is `None`)
-        - `prompt_bg`: background color of prompt message (default is `None`)
-        - `prompt_attrs`: attributes of prompt message (default is `None`)
-        - `input_fg`: foreground color of input that user types (default is `None`)
-        - `input_bg`: background color of input that user types (default is `None`)
-        - `input_attrs`: attributes of input that user types (default is `None`)
+        - `prompt_fg`: foreground color of prompt (default is `None`)
+        - `prompt_bg`: background color of prompt (default is `None`)
+        - `prompt_attrs`: attributes of prompt (default is `None`)
+        - `input_fg`: foreground color of input (default is `None`)
+        - `input_bg`: background color of input (default is `None`)
+        - `input_attrs`: attributes of input (default is `None`)
 
         ```
         # Example
-        >> pins.input_multiline("Enter a paragraph: ", stop_word='done')
-        .. >> Enter a paragraph: Lorem ipsum dolor sit amet consectetur, adipisicing elit.
-        At ab quidem itaque mollitia dolorum expedita.
-        'Lorem ipsum dolor sit amet consectetur, adipisicing elit.\\nAt ab quidem itaque mollitia dolorum expedita.'
+        >> pins.input_multiline("Enter text: ", stop_word='done')
+        .. >> Enter text: Lorem ipsum dolor sit
+        amet consectetur, adipisicing elit.
+        'Lorem ipsum dolor sit\\namet consectetur, adipisicing elit.'
         ```
         """
         stop_word = stop_word.lower()
@@ -343,28 +331,28 @@ class Pins:
             userinput += tmp + newline
 
     def input_int(self, prompt: str = '',
-                  min_: int = None, max_: int = None,
+                  min_: int = None,
+                  max_: int = None,
                   prompt_color: Color = None,
                   prompt_attrs: Iterable[Attribute] = None,
                   input_color: Color = None,
                   input_attrs: Iterable[Attribute] = None) -> int:
         """ 
         ### Input Int
-        Asks user for input, accepts integers only within the constaints.
-        Returns an `int`. asks agains upon invalid inputs and keeps asking until a
-        valid integer entered or `KeyboardInterrupt`.
+        Take `int` input from user. Keeps asking until a valid
+        integer entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
         - `min_`: minimum accepted integer (`None` removes minimum constraint)
         - `max_`: maximum accepted integer (`None` removes maximum constraint)
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt 
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
+        #### Example:
         ```
-        # Example
         >> pins.input_int()
         .. >> Enter an integer: 25
         25
@@ -374,8 +362,6 @@ class Pins:
         """
         if (min_ != None and max_ != None) and min_ > max_:
             raise ValueError("min_ cannot be greater than max_")
-
-        self._validate_colors([("prompt_color", prompt_color)])
 
         prompt = prompt if prompt else "Enter an integer: "
         prompt = self.promptize(prompt)
@@ -399,38 +385,38 @@ class Pins:
 
             return i
 
-    def input_float(self, prompt: str = '', min_: float = None, max_: float = None,
-                    prompt_color: Color = None, prompt_attrs: Iterable[Attribute] = None,
-                    input_color: Color = None, input_attrs: Iterable[Attribute] = None) -> float:
+    def input_float(self, prompt: str = '',
+                    min_: float = None,
+                    max_: float = None,
+                    prompt_color: Color = None,
+                    prompt_attrs: Iterable[Attribute] = None,
+                    input_color: Color = None,
+                    input_attrs: Iterable[Attribute] = None) -> float:
         """ 
         ### Input Float
-        Asks user for input, accepts Floats (and integers) within the constaints.
-        Returns an `float`. asks agains upon invalid inputs and keeps asking until a
-        valid float entered or `KeyboardInterrupt`.
+        Take `float` input from user. Keeps asking until a valid
+        float entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
         - `min_`: minimum accepted float (`None` removes minimum constraint)
         - `max_`: maximum accepted float (`None` removes maximum constraint)
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
+        #### Example:
         ```
-        # Example
         >> pins.input_float()
         .. >> Enter an float: 2.5
         2.5
         ```
-
         Raises `ValueError` if:
         - `min_` is greater than `max_`
         """
         if (min_ != None and max_ != None) and min_ > max_:
             raise ValueError("'min_' cannot be greater than 'max_'")
-
-        self._validate_colors([("prompt_color", prompt_color)])
 
         prompt = prompt if prompt else "Enter a float: "
         prompt = self.promptize(prompt)
@@ -454,36 +440,37 @@ class Pins:
 
             return i
 
-    def input_str(self, prompt: str = '', empty_allowed: bool = False,
+    def input_str(self, prompt: str = '',
+                  empty_allowed: bool = False,
                   constraint: Union[StrConstraint, str, None] = None,
-                  min_length: int = None, max_length: int = None,
+                  min_length: int = None,
+                  max_length: int = None,
                   prompt_color: Color = None,
                   prompt_attrs: Iterable[Attribute] = None,
                   input_color: Color = None,
                   input_attrs: Iterable[Attribute] = None) -> str:
         """ 
         ### Input Str
-        Asks user for input, accepts strings within the constaints.
-        Returns an `str`. asks agains upon invalid inputs and keeps asking until a
-        valid `str` entered or `KeyboardInterrupt`.
+        Take `str` input from user. Keeps asking until a valid
+        string entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
         - `empty_allowed`: whether to allow empty inputs (`True` allows empty inputs)
         - `constraint`: set a constraint to accept only a specific set of characters.
-            - `only_alpha`: only alphabets allowed
-            - `only_digits`: only digits allowed
-            - `only_alnum`: only alphanumerics allowed
-            - `None`: all characters allowed
-        - `min_length`: minimum length of input (`None` removes minimum constraint)
-        - `max_length`: maximum length of input (`None` removes maximum constraint)
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+            - `only_alpha`: accept alphabets only
+            - `only_digits`: accept digits only
+            - `only_alnum`: accept alphanumerics only
+            - `None`: accept all characters
+        - `min_length`: minimum accepted length of input (`None` removes minimum constraint)
+        - `max_length`: maximum accepted length of input (`None` removes maximum constraint)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
+        #### Example:
         ```
-        # Example
         >> pins.input_str()
         .. >> Enter an string: this is a string
         'this is a string'
@@ -504,8 +491,6 @@ class Pins:
 
         if (min_length != None and max_length != None) and min_length > max_length:
             raise ValueError("min_length cannot be greater than max_length")
-
-        self._validate_colors([("prompt_color", prompt_color)])
 
         prompt = prompt if prompt else "Enter a string: "
         prompt = self.promptize(prompt)
@@ -542,78 +527,68 @@ class Pins:
 
             return inp
 
-    def input_question(self, prompt: str = '', prompt_color: Color = None,
+    def input_question(self, prompt: str = '',
+                       prompt_color: Color = None,
                        prompt_attrs: Iterable[Attribute] = None,
                        input_color: Color = None,
                        input_attrs: Iterable[Attribute] = None) -> bool:
         """ 
         ### Input Question
-        Asks user a question, accepts `y` or `n` only. Returns `True`
-        for `y` and `False` for `n`. Asks agains upon invalid inputs 
-        and keeps asking until a valid answer entered or `KeyboardInterrupt`.
+        Ask user a question, accepts `y` or `n` only. Keeps asking until a
+        valid answer entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
+        #### Example:
         ```
-        # Example
         >> pins.input_question()
         .. >> Do you agree? (y/N): y
         True 
         ```
-
         """
-        self._validate_colors([("prompt_color", prompt_color)])
-
         prompt = prompt if prompt else "Do you agree? (y/N): "
         prompt = self.promptize(prompt)
         while True:
-            u = self.inputc(prompt, prompt_fg=prompt_color,
-                            prompt_attrs=prompt_attrs,
-                            input_fg=input_color,
-                            input_attrs=input_attrs).lower()
-            if u == "y":
+            answer = self.inputc(prompt, prompt_fg=prompt_color,
+                                 prompt_attrs=prompt_attrs,
+                                 input_fg=input_color,
+                                 input_attrs=input_attrs).lower()
+            if answer == "y":
                 return True
-            elif u == "n":
+            elif answer == "n":
                 return False
             else:
                 self.print_error("Only 'y' or 'n' is accepted.")
 
-    def input_email(self, prompt: str = '', prompt_color: Color = None,
+    def input_email(self, prompt: str = '',
+                    prompt_color: Color = None,
                     prompt_attrs: Iterable[Attribute] = None,
                     input_color: Color = None,
                     input_attrs: Iterable[Attribute] = None) -> str:
         """ 
         ### Input Email
-        Asks user for input, accepts emails only.
-        Returns a `str`. Asks agains upon invalid inputs 
-        and keeps asking until a valid email entered or `KeyboardInterrupt`.
-
-        Email is matched with a simplified version of a regex (regular expression)
-        pattern that most browsers nowadays use to validate email addresses
-        in the web forms.
+        Take `email` input from user. Keeps asking until a valid
+        email entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
+        #### Example:
         ```
-        # Example
         >> pins.input_email()
         .. >> Enter email: pins@python.com
         'pins@python.com'
         ```
-
         """
-        self._validate_colors([("prompt_color", prompt_color)])
-
         prompt = prompt if prompt else "Enter email: "
         prompt = self.promptize(prompt)
         while True:
@@ -640,14 +615,13 @@ class Pins:
                        prompt_attrs: Iterable[Attribute] = None) -> str:
         """ 
         ### Input password
-        Asks user for input, accepts password `str`.
-        Returns a `str`. Asks agains upon invalid inputs 
-        and keeps asking until a valid password entered or `KeyboardInterrupt`.
+        Take `password` input from user. Keeps asking until a valid
+        password entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
         - `confirm`: confirm password by asking again.
-        - `require_strong`: accepts only strong passwords
+        - `require_strong`: accepts only strong passwords.
             A password is strong if:
             - contains atleast one lowercase letter.
             - contains atleast one uppercase letter.
@@ -656,20 +630,16 @@ class Pins:
             - its length is atleast 8.
         - `custom_regex`: accept passwords only if they match this pattern. (set `require_strong` to `False` to avoid collisions)
         - `custom_regex_error`: the message to print when custom regex doesn't match
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
 
-        (by default, `constraint` is set to `''` meaning every character is allowed.)
-
+        #### Example:
         ```
-        # Example
         >> pins.input_password()
         .. >> Enter password (hidden on purpose): 
         'root'
         ```
         """
-        self._validate_colors([("prompt_color", prompt_color)])
-
         prompt = prompt if prompt else "Enter password (hidden on purpose): "
         custom_regex_error = custom_regex_error if custom_regex_error else "Invalid password, try again!"
         prompt = self.promptize(prompt, prompt_color, attrs=prompt_attrs)
@@ -708,9 +678,8 @@ class Pins:
                    input_attrs: Iterable[Attribute] = None) -> str:
         """ 
         ### Input File
-        Asks user for input, accepts filepaths only within the constraints.
-        Returns a `str`. Asks agains upon invalid inputs 
-        and keeps asking until a valid filepath entered or `KeyboardInterrupt`.
+        Take `file` input from user. Keeps asking until a valid
+        filepath entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
@@ -719,15 +688,13 @@ class Pins:
             - `None`: accept files with/without any extension
         - `max_length`: maximum length of the filepath (exluding slashes, extension and drive)
         - `must_exist`: file must exist (default to `True`)
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
-        `extension` must be provided with `.` (e.g `.py` or `.txt` etc)
-
+        #### Example:
         ```
-        # Example
         >> pins.input_file()
         .. >> Enter a filepath: somefolder/somefile.txt
         'somefolder/somefile.txt'
@@ -743,8 +710,6 @@ class Pins:
 
         if extension != None and (extension != "*" and not extension.startswith(".")):
             raise ValueError("extension must start with a period ('.').")
-
-        self._validate_colors([("prompt_color", prompt_color)])
 
         prompt = prompt if prompt else "Enter a filepath: "
         prompt = self.promptize(prompt)
@@ -767,34 +732,34 @@ class Pins:
 
             return filepath
 
-    def input_dir(self, prompt: str = '', max_length: int = 250, must_exist: bool = True,
-                  prompt_color: Color = None, prompt_attrs: Iterable[Attribute] = None,
-                  input_color: Color = None, input_attrs: Iterable[Attribute] = None) -> str:
+    def input_dir(self, prompt: str = '',
+                  max_length: int = 250,
+                  must_exist: bool = True,
+                  prompt_color: Color = None,
+                  prompt_attrs: Iterable[Attribute] = None,
+                  input_color: Color = None,
+                  input_attrs: Iterable[Attribute] = None) -> str:
         """ 
         ### Input Directory
-        Asks user for input, accepts directory paths only.
-        Returns a `str`. Asks agains upon invalid inputs 
-        and keeps asking until a valid filepath entered or `KeyboardInterrupt`.
+        Take `directory` input from user. Keeps asking until a valid
+        directory path entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
         - `max_length`: maximum length of the filepath (exluding slashes and drive)
         - `must_exist`: directory must exist (default to `True`)
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
+        #### Example:
         ```
-        # Example
         >> pins.input_dir()
         .. >> Enter path to a directory: somefolder/anotherfolder
         'somefolder/anotherfolder'
         ```
-
         """
-        self._validate_colors([("prompt_color", prompt_color)])
-
         prompt = prompt if prompt else "Enter path to a directory: "
         prompt = self.promptize(prompt)
         while True:
@@ -816,42 +781,36 @@ class Pins:
 
             return normpath(directory)
 
-    def input_ip(self, prompt: str = '', version: int = 4,
+    def input_ip(self, prompt: str = '',
+                 version: int = 4,
                  prompt_color: Color = None,
                  prompt_attrs: Iterable[Attribute] = None,
                  input_color: Color = None,
                  input_attrs: Iterable[Attribute] = None) -> str:
         """ 
         ### Input IP Address
-        Asks user for IP Address and keeps asking until a valid
-        ip address is entered or `KeyboardInterrupt`.
+        Take `ipaddress` input from user. Keeps asking until a valid
+        ip address entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
         - `version`: version of ip address (version `4` or `6`)
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
+        #### Example:
         ```
-        # Example
         >> pins.input_ip()
         .. >> Enter IPv4 Address: 192.168.0.1
         '192.168.0.1'
-        ..
-        >> pins.input_ip(version=6)
-        .. >> Enter IPv6 Address: 2001:db8:85a3::8a2e:370:7334
-        '2001:db8:85a3::8a2e:370:7334'
         ```
 
         Raises `AssertionError` if:
         - `version` is not 4 or 6
-
         """
         assert version in {4, 6}, "version must be 4 or 6."
-
-        self._validate_colors([("prompt_color", prompt_color)])
 
         prompt = prompt if prompt else f"Enter IPv{version} Address: "
         prompt = self.promptize(prompt)
@@ -876,25 +835,23 @@ class Pins:
                   input_attrs: Iterable[Attribute] = None) -> str:
         """ 
         ### Input URL
-        Asks user for a URL and keeps asking until a valid
+        Asks user for a URL. Keeps asking until a valid
         url is entered or `KeyboardInterrupt`.
 
         #### ARGS:
         - `prompt`: prompt message
-        - `prompt_color`: foreground color of prompt message (`None` uses the default color)
-        - `prompt_attrs`: attributes for prompt message (default is `None`)
-        - `input_color`: foreground color of input that user types (`None` uses the default terminal color)
-        - `input_attrs`: attributes for input that user types (default is `None`)
+        - `prompt_color`: foreground color of prompt
+        - `prompt_attrs`: attributes for prompt
+        - `input_color`: foreground color of input
+        - `input_attrs`: attributes for input
 
+        #### Example:
         ```
-        # Example
         >> pins.input_url()
         .. >> Enter URL: https://github.com/Anas-Shakeel
         'https://github.com/Anas-Shakeel'
         ```
         """
-        self._validate_colors([("prompt_color", prompt_color)])
-
         prompt = prompt if prompt else "Enter URL: "
         prompt = self.promptize(prompt)
         while True:
@@ -911,7 +868,7 @@ class Pins:
 
             self.print_error(f"Invalid URL: '{url}'")
 
-    def input_menu(self, options: List,
+    def input_menu(self, options: List[str],
                    bullet: Bullet = ">",
                    bullet_fg: Color = None,
                    bullet_bg: Color = None,
@@ -928,7 +885,7 @@ class Pins:
         and returns the selection as number (`index + 1`).
 
         #### NOTE:
-        CTRL+C (`KeyboardInterrupt`) cannot be read with this method,
+        `CTRL+C` does not raise `KeyboardInterrupt` here,
         so `Enter` key is the only way to proceed.
 
         #### ARGS:
@@ -944,8 +901,8 @@ class Pins:
         - `normal_bg`: background color of normal options
         - `normal_attrs`: attributes for normal options
 
+        #### Example:
         ```
-        # Example
         >> menu = ['Python', 'C', 'Rust']
         >> pins.input(menu)
         ..   Python
@@ -996,19 +953,18 @@ class Pins:
     def print_error(self, error: str, quit_too: bool = False):
         """ 
         ### Print error
-        Prints a formatted version of `error`. Closes the application
-        with an exit status `1` if `quit_too` is set to `True`.
+        Print a formatted `error`. Closes the application with an exit
+        status `1` if `quit_too` is set to `True`.
 
         #### ARGS:
         - `error`: the error message to print
-        - `quit_too`: quit the application after printing the error (Defualt to `False`)
+        - `quit_too`: quit the application after print (default is `False`)
 
+        #### Example:
         ```
-        # Example
         >> pins.print_error("This is error")
         █ Error: This is error
         ```
-
         """
         print(self.create_status("Error", str(error),
                                  label_fg=self.DEFAULT_COLORS['error'],
@@ -1020,17 +976,16 @@ class Pins:
     def print_info(self, info: str):
         """ 
         ### Print info
-        Prints a formatted version of `info`.
+        Prints a formatted `info`.
 
         #### ARGS:
         - `info`: the info message to print
 
+        #### Example:
         ```
-        # Example
         >> pins.print_info("This is info")
         █ Info: This is info
         ```
-
         """
         print(self.create_status("Info", str(info),
                                  label_fg=self.DEFAULT_COLORS['info'],
@@ -1039,13 +994,13 @@ class Pins:
     def print_warning(self, warning: str):
         """ 
         ### Print Warning
-        Prints a formatted version of `warning`.
+        Prints a formatted `warning`.
 
         #### ARGS:
         - `warning`: the warning message to print
 
+        #### Example:
         ```
-        # Example
         >> pins.print_warning("This is warning")
         █ Warning: This is warning
         ```
@@ -1057,13 +1012,13 @@ class Pins:
     def print_success(self, success: str):
         """ 
         ### Print Warning
-        Prints a formatted version of `success`.
+        Prints a formatted `success`.
 
         #### ARGS:
         - `success`: the success message to print
 
+        #### Example:
         ```
-        # Example
         >> pins.print_success("This is success")
         █ Success: This is success
         ```
@@ -1072,9 +1027,8 @@ class Pins:
                                  label_fg=self.DEFAULT_COLORS['success'],
                                  label_attrs=['bold'], text_attrs=['italic']))
 
-    @typecheck(skip=["border_color","heading_fg","heading_bg","heading_attrs","keys_color","values_color"])
-    def print_about(self, 
-                    name: Optional[str] = None,
+    @typecheck(skip=["border_color", "heading_fg", "heading_bg", "heading_attrs", "keys_color", "values_color"])
+    def print_about(self, name: Optional[str] = None,
                     version: Optional[str] = None,
                     description: Optional[str] = None,
                     author: Optional[str] = None,
@@ -1091,7 +1045,7 @@ class Pins:
                     values_color: Color = None):
         """  
         ### Print About
-        Print details of your program.
+        Print information about your program.
 
         #### ARGS:
         - `name`: name of the program
@@ -1108,11 +1062,10 @@ class Pins:
         - `heading_attrs`: attributes for heading
         - `keys_color`: color of keys
         - `values_color`: color of values
-
         """
         if platforms:
-            platforms = ", ".join(platforms) if isinstance(
-                platforms, list) else platforms
+            platforms = ", ".join(platforms) if isinstance(platforms,
+                                                           list) else platforms
 
         table = {
             "Name": name,
@@ -1147,7 +1100,8 @@ class Pins:
                                 border_color=border_color)
         print(new_table)
 
-    def print_more(self, text: str, n: int = 1,
+    def print_more(self, text: str,
+                   n: int = 1,
                    prompt: str = "",
                    prompt_align: XAlign = "left",
                    prompt_fg: Color = None,
@@ -1156,8 +1110,8 @@ class Pins:
         """ 
         ### Print More
         Prints `text` in the terminal. when number of lines in `text` are more than
-        number of visible lines in terminal (`terminal's height`), it adds a `MORE`
-        prompt and shows next line upon `enter` keypress. `CTRL+C` to stop.
+        terminal's height, it adds a `MORE` line and waits for enter keypress
+        shows next line upon `enter` keypress. `CTRL+C` to stop.
 
         #### ARGS:
         - `text`: text to print
@@ -1168,13 +1122,12 @@ class Pins:
         - `prompt_bg`: background color of prompt
         - `prompt_attrs`: attributes of prompt
 
+        #### Example:
         ```
         >> pins.print_more(colors)
         #ffebee
-        #ffcdd2
         #ef9a9a
         --snip--
-        #e57373
         #ef5350
         ---- MORE ---- # Pressing enter would print next n lines
         ```
@@ -1209,7 +1162,8 @@ class Pins:
             except KeyboardInterrupt:
                 utils.clear_line()
 
-    def print_pages(self, text: str, lines_per_page: int = 10,
+    def print_pages(self, text: str,
+                    lines_per_page: int = 10,
                     show_statusbar: bool = True,
                     statusbar_fg: Color = None,
                     statusbar_bg: Color = None,
@@ -1236,6 +1190,7 @@ class Pins:
         - `text_bg`: background color of text
         - `text_attrs`: attributes of text
 
+        #### Example:
         ```
         >> text = "line 1\\nline 2\\nline 3\\nline 4\\nline 5"
         >> p.print_pages(text, 2)
@@ -1289,7 +1244,7 @@ class Pins:
     def paginate(self, text: str, lines_per_page: int = 10):
         """ 
         ### Paginate
-        Paginates a multiline lengthy text. Returns a generator object which,
+        Paginates a lengthy multiline text. Returns a generator object which,
         yields a page on each iteration.
         A page is just a string of `lines_per_page` lines (or less).
 
@@ -1323,7 +1278,8 @@ class Pins:
             for page in pages.iterate():
                 yield "\n".join(page)
 
-    def print_json(self, filepath: str, indent: int = 4,
+    def print_json(self, filepath: str,
+                   indent: int = 4,
                    quotes: bool = False,
                    str_color: Color = None,
                    number_color: Color = None,
@@ -1344,8 +1300,8 @@ class Pins:
         - `key_color`: color of object keys (`object` in json is `dict` in python)
         - `symbol_color`: color of symbols (`[,]{:}`)
 
+        #### Example:
         ```
-        # Example
         >> pins.print_json("person.json")
         {
             "name": "anas",
@@ -1386,6 +1342,7 @@ class Pins:
         - `interval`: interval between each character print.
         - `hide_cursor`: hide or show cursor
 
+        #### Example:
         ```
         >> pins.typewrite("write this.")
         write this.
@@ -1398,19 +1355,21 @@ class Pins:
         else:
             w.write(text)
 
-    def print_hr(self, width: int = None, pad_x: int = 0,
-                 align: XAlign = "left", charset: Charset = None,
-                 fill_char: FillChar = None, color: Color = None):
+    def print_hr(self, width: int = None,
+                 pad_x: int = 0,
+                 align: XAlign = "left",
+                 charset: Charset = None,
+                 fill_char: FillChar = None,
+                 color: Color = None):
         """
-        ### Print HR
+        ### Print HR (Horizontal Rule)
         Prints the string returned from  `Pins.create_hr(args)` 
 
+        #### Example:
         ```
-        # Example
         >> pins.print_hr(10, fill_char='-')
         ----------
         ```
-        Raises all exceptions raised by `Pins.create_hr()`
         """
         print(self.create_hr(width, pad_x, align, charset, fill_char, color))
 
@@ -1423,8 +1382,8 @@ class Pins:
                   color: Color = None):
         """ 
         ### Create Horizontal Rule (line)
-        Creates a horizontal line in the terminal. Uses characters from `charset` if 
-        set, otherwise uses the module level `charset`. `fill_char` takes
+        Creates a horizontal line. Uses characters from `charset` if provided,
+        otherwise uses the module level `charset`. `fill_char` takes
         precedence always.
 
         #### ARGS:
@@ -1434,11 +1393,11 @@ class Pins:
             (alignments: `left`, `center`, `right`)
         - `charset`: character set to use in creating the line (default is `None` which uses the `charset` set as module level arg)
             - `ascii` `box` `box_rounded` `box_double` `box_heavy` `blocks`
-        - `fill_char`: character to use to fill the line, overrides `charset` (default is `None` which uses the `charset`)
-        - `color`: color of the line (default is `None`)
+        - `fill_char`: character used to create line, overrides `charset` (default is `None` which uses the `charset`)
+        - `color`: color of the line
 
+        #### Example:
         ```
-        >> # Example
         >> pins.create_hr(10, fill_char='+')
         '++++++++++'
         ```
@@ -1473,7 +1432,8 @@ class Pins:
 
         return self.colorize(hr.rstrip(), color)
 
-    def create_status(self, label: str, text: str,
+    def create_status(self, label: str,
+                      text: str,
                       label_fg: Color = None,
                       label_bg: Color = None,
                       label_attrs: Iterable[Attribute] = None,
@@ -1488,15 +1448,15 @@ class Pins:
         #### ARGS:
         - `label`: the status label e.g `error, info, warning, success etc.`
         - `text`: the status text (after the status label)
-        - `label_fg`: foreground color for the label (default is `None`)
-        - `label_bg`: background color for the label (default is `None`)
-        - `label_attrs`: attributes for the label (default is `None`)
-        - `text_fg`: foreground color for the text (default is `None`)
-        - `text_bg`: background color for the text (default is `None`)
-        - `text_attrs`: attributes for the text (default is `None`)
+        - `label_fg`: foreground color for the label
+        - `label_bg`: background color for the label
+        - `label_attrs`: attributes for the label
+        - `text_fg`: foreground color for the text
+        - `text_bg`: background color for the text
+        - `text_attrs`: attributes for the text
 
+        #### Example:
         ```
-        # Example
         >> pins.create_status("Hint", "this is a hint.")
         '█ Hint: this is a hint.'
         ```
@@ -1542,11 +1502,12 @@ class Pins:
 
         # Create Status
         lines = text.splitlines()
-        first_line = colored_ansy(f"@bar[{status_text}]@line[{lines[0]}]", style)
+        first_line = colored_ansy(
+            f"@bar[{status_text}]@line[{lines[0]}]", style)
         other_lines = ""
         for line in lines[1:]:
             other_lines += colored_ansy(f"@bar[{bar}] {indent}@line[{line}]\n",
-                                            style)
+                                        style)
 
         if other_lines:
             first_line += "\n"
@@ -1557,7 +1518,8 @@ class Pins:
                width: int = None,
                wrap: bool = False,
                replace_whitespace: bool = False,
-               pad_x: int = 0, pad_y: int = 0,
+               pad_x: int = 0,
+               pad_y: int = 0,
                x_align: XAlign = "left",
                y_align: YAlign = "top",
                charset: Charset = None,
@@ -1581,8 +1543,8 @@ class Pins:
         - `border_color`: color of the border
         - `text_color`: color of the text
 
+        #### Example:
         ```
-        # Example
         >> pins.boxify("A Box", 20, x_align="center", charset="box_round")
         ╭──────────────────╮
         │      A Box       │
@@ -1610,8 +1572,6 @@ class Pins:
         """
         ### Print List Ordered
         Prints the string returned from `create_list_ordered(args)`
-
-        Raises all exceptions raised by `Pins.create_list_ordered()`
         """
         print(self.create_list_ordered(items=items,
                                        indent=indent,
@@ -1635,8 +1595,6 @@ class Pins:
         """
         ### Print List Unordered
         Prints the string returned from `create_list_unordered(*args, **kwargs)`
-
-        Raises all exceptions raised by `Pins.create_list_unordered()`
         """
         print(self.create_list_unordered(items=items,
                                          bullet=bullet,
@@ -1672,8 +1630,8 @@ class Pins:
         - `item_color`: item's foreground color
         - `item_attrs`: item's attrs list
 
+        #### Example:
         ```
-        # Example
         >> items = ['item 1', 'item 2', 'and so on.']
         >> pins.create_list_ordered(items)
         1. item 1
@@ -1733,13 +1691,12 @@ class Pins:
         - `item_color`: item's foreground color
         - `item_attrs`: item's attrs list
 
+        #### Example:
         ```
-        # Example
-        >> items = ['item 1', ['item 1.1', 'item 1.2'], 'item 2', 'and so on.']
+        >> items = ['item 1', ['item 1.1'], 'item 2', 'and so on.']
         >> pins.create_list_unordered(items)
         + item 1
             + item 1.1
-            + item 1.2
         + item 2
         + and so on.
         >> pins.create_list_unordered(items, bullet_map="+-")
@@ -1811,13 +1768,10 @@ class Pins:
         - `values_bg`: background color of all the values
         - `values_attrs`: attributes for all the values
 
+        #### Example:
         ```
-        # Example
-        >> items = {
-        ..          'Name': 'Pins',
-        ..          'Version': '1.0.0',
-        ..          'Source': 'github.com/Anas-Shakeel/pinsy',
-        .. }
+        >> items = {'Name': 'Pins', 'Version': '1.0.0',
+        ..          'Source': 'github.com/Anas-Shakeel/pinsy'}
         >> create_table(items)
         Name        Pins
         Version     1.0.0
@@ -1861,16 +1815,14 @@ class Pins:
 
         #### ARGS:
         - `prompt`: the prompt message
-        - `fgcolor`: the foreground color of prompt (default is `None` which uses no colors)
-        - `bgcolor`: the background color of prompt (default is `None` which uses no colors)
-        - `prompt_char`: the character(s) starting the prompt. (default is `None` which uses the default '>>')
+        - `fgcolor`: the foreground color of prompt
+        - `bgcolor`: the background color of prompt
+        - `prompt_char`: the character(s) starting the prompt. (`None` uses module-level `PROMPT_CHAR`)
 
+        #### Example:
         ```
-        # Example
         >> pins.promptize('this is prompt')
         '>> this is prompt'
-        >> pins.promptize('this is prompt', 'plum', prompt_char='$')
-        '$ this is prompt'
         ```
         """
         prompt_char = prompt_char if prompt_char else self.PROMPT_CHAR
@@ -1878,8 +1830,10 @@ class Pins:
         return self.colorize(s, fgcolor, bgcolor, attrs=attrs)
 
     @typecheck()
-    def textalign_x(self, text: str, width: Optional[int] = None,
-                    align: Union[XAlign, str] = "center", fill_char: str = " "):
+    def textalign_x(self, text: str,
+                    width: Optional[int] = None,
+                    align: Union[XAlign, str] = "center",
+                    fill_char: str = " "):
         """
         ### Text Align X
         Align `text` on the x axis.
@@ -1891,8 +1845,8 @@ class Pins:
             (alignments: `center`, `left`, `right`)
         - `fill_char`: the character used for padding (default is `' '`)
 
+        #### Example:
         ```
-        # Example
         >> pins.textalign_x("Align this", width=30)
         '          Align this          '
         >>
@@ -1924,8 +1878,10 @@ class Pins:
         return "\n".join(newtext)
 
     @typecheck()
-    def textalign_y(self, text: str, height: Optional[int] = None,
-                    align: Union[YAlign, str] = "center", fill_char: str = " "):
+    def textalign_y(self, text: str,
+                    height: Optional[int] = None,
+                    align: Union[YAlign, str] = "center",
+                    fill_char: str = " "):
         """
         ### Text Align Y
         Align `text` on the y axis.
@@ -1936,8 +1892,8 @@ class Pins:
         - `align`: the alignment position (`top`, `center`, `bottom`)
         - `fill_char`: the character used for padding (default is `' '`)
 
+        #### Example:
         ```
-        # Example
         >> pins.textalign_y("Align this.", height=1, align="center", fill_char=".")
         .
         Align this.
@@ -1947,8 +1903,8 @@ class Pins:
         Raises `AssertionError` if:
         - `align` is not top, center or bottom.
         """
-        assert align in ("center", "top", "bottom"), f"Invalid align: '{
-            align}'"
+        assert align in ("center", "top", "bottom"), \
+            f"Invalid align: '{align}'"
 
         if not text:
             return text
@@ -1978,13 +1934,10 @@ class Pins:
         - `indent`: number of characters to indent
         - `wrap`: wrap the text if exceeds terminal width
 
+        #### Example:
         ```
-        # Example
-        >> pins.indent_text("Indent this text to two spaces.", indent=2)
-        '  Indent this text to two spaces.'
-        >> 
-        >> multiline_text = "This is a\\nmultiline text. it contains\\nnewline characters."
-        >> pins.indent_text(multiline_text, indent=2)
+        >> text = "This is a\\nmultiline text. it contains\\nnewline characters."
+        >> pins.indent_text(text, indent=2)
           This is a
           multiline text. it contains
           newline characters.
@@ -2004,7 +1957,7 @@ class Pins:
         pad = " "*indent
         return '\n'.join([pad+line for line in text.splitlines()])
 
-    def for_each(self, items: Iterable[Any], func: Callable[[Any], Any]) -> List:
+    def for_each(self, items: Iterable[Any], func: Callable[[Any], Any]) -> List[Any]:
         """ 
         ### For Each
         As name implies, this method runs `func` for each item in `items`, 
@@ -2023,7 +1976,8 @@ class Pins:
         """
         return [func(item) for item in items]
 
-    def wrap_text(self, text: str, width: int = None,
+    def wrap_text(self, text: str,
+                  width: int = None,
                   initial_indent: str = "",
                   subsequent_indent: str = "",
                   expand_tabs: bool = True,
@@ -2040,6 +1994,10 @@ class Pins:
         Wrap the text. This method is merely a thin wrapper around the `fill()`
         function from `textwrap` library.
 
+        #### ARGS:
+        See `textwrap` module in python's official documentation.
+
+        #### Example:
         ```
         >> text = "Wrap this text if it exceeds 15 characters."
         >> pins.wrap_text(text, 15)
@@ -2047,7 +2005,6 @@ class Pins:
         if it exceeds
         15 characters.
         ```
-
         """
         width = width if width else get_terminal_size()[0]
         return fill(text=text,
@@ -2075,12 +2032,10 @@ class Pins:
         - `chars`: the characters to insert
         - `steps`: number of characters to jump before inserting
 
+        #### Example:
         ```
-        # Example
         >> pins.splice_text("insert the characters")
         'i_n_s_e_r_t_ _t_h_e_ _c_h_a_r_a_c_t_e_r_s'
-        >> pins.splice_text("insert the characters", "+", 2)
-        'in+se+rt+ t+he+ c+ha+ra+ct+er+s'
         ```
         """
         steps = max(steps, 1)
@@ -2112,6 +2067,7 @@ class Pins:
         - `n`: number of parts to truncate (`-1` to truncate maximum parts)
         - `replacement`: string placed in place of truncated parts
 
+        #### Example:
         ```
         >> path = "C:\\users\\username\\downloads"
         >> pins.shorten_path(path, 2)
@@ -2142,8 +2098,7 @@ class Pins:
         This method is equivalent to `datetime.now().strftime(format_)`
 
         #### ARGS:
-        - `format_`: the format of output datetime string 
-            (default format returns as `25 September 2024 01:30 PM`)
+        - `format_`: the format of output datetime string
 
         #### Format Codes:
         - `%d` day of the month as decimal (e.g. `01, 02, ... 31`)
@@ -2167,14 +2122,12 @@ class Pins:
 
         To learn more about format codes, see  `datetime` module in Python Docs.
 
+        #### Example:
         ```
-        # Example
         >> pins.now(format_="%I:%M %p")
         '01:40 PM'
         >> pins.now(format_="%d %B %Y")
         '25 September 2024'
-        >> pins.now(format_="%d %B %Y %I:%M %p")
-        '25 September 2024 01:40 PM'
         ```
         """
         return datetime.now().strftime(format_)
@@ -2193,20 +2146,12 @@ class Pins:
         #### Format Codes:
         See Function Docstring of `Pins.now()`
 
+        #### Example:
         ```
-        # Example
-        >> date_string = "25-09-2024"
-        >> pins.time_ago(date_string, format_="%d-%m-%Y")
+        >> pins.time_ago("25-09-2024", format_="%d-%m-%Y")
         '14 hours ago'
-        >>
-        >> datetime_string = "25-09-2024 14:02:00"
-        >> pins.time_ago(datetime_string, format_="%d-%m-%Y %H:%M:%S")
+        >> pins.time_ago("25-09-2024 14:02:00", format_="%d-%m-%Y %H:%M:%S")
         '22 minutes ago'
-        >>
-        >> time_string = pins.now("%H:%M:%S")
-        >> time.sleep(3)
-        >> pins.time_ago(time_string, format_="%H:%M:%S")
-        '3 seconds ago'
         ```
 
         Raises `ValueError` if:
@@ -2224,10 +2169,8 @@ class Pins:
         if '%H' in format_ or '%I' in format_:
             if '%Y' not in format_ and '%d' not in format_:  # Year and Day not in format?
                 # Add past_date's time in today's date
-                past_date = now.replace(hour=past_date.hour,
-                                        minute=past_date.minute,
-                                        second=past_date.second,
-                                        microsecond=0)
+                past_date = now.replace(hour=past_date.hour, minute=past_date.minute,
+                                        second=past_date.second, microsecond=0)
 
         diff = now - past_date
 
@@ -2273,8 +2216,8 @@ class Pins:
         - `year`: the year of the calendar
         - `month`: the month of the year
 
+        #### Example:
         ```
-        # Example
         >> pins.get_calendar()
            September 2024
         Mo Tu We Th Fr Sa Su
@@ -2284,20 +2227,6 @@ class Pins:
         16 17 18 19 20 21 22
         23 24 25 26 27 28 29
         30
-
-        >> pins.get_calendar(2024, 9)
-           September 2024
-        Mo Tu We Th Fr Sa Su
-                           1
-         2  3  4  5  6  7  8
-         9 10 11 12 13 14 15
-        16 17 18 19 20 21 22
-        23 24 25 26 27 28 29
-        30
-
-        >> pins.get_calendar(2024, None)
-        --snip--
-        ValueError: Either both year and month should be provided or none.
         ```
 
         Raises `AssertionError` if:
@@ -2331,11 +2260,7 @@ class Pins:
         - `month`: the month of the year
         - `month_color`: color of the first line (e.g `September 2024`)
         - `date_color`: color of the current date and day name (e.g `We` and `25`)
-
-        Raises all exceptions raised by `Pins.get_calendar()`, `Pins.colorize()`
-        and `Pins.colorize_regex()` methods upon invalid inputs.
         """
-
         calendar = self.get_calendar(year, month)
         if month_color == None and date_color == None:
             print(calendar)
@@ -2376,20 +2301,13 @@ class Pins:
         This method sets `fgcolor` and `bgcolor` to `None` if the
         module-level `USE_COLORS` is set to False.
 
-        #### Returns:
-        `ANSI%sRESET` or `%s`
-
+        #### Example:
         ```
-        # Example
         >> pins.create_ansi_fmt(fgcolor="light_red", color_mode=4)
         '\x1b[91m%s\x1b[0m'
-        >>
         >> pins.create_ansi_fmt(fgcolor=None, color_mode=4)
         '%s'
         ```
-
-        Raises all exceptions that `ansy.make_ansi()` would raise for invalid inputs.
-
         """
         color_mode = color_mode if color_mode else self.COLORMODE
         ansi_seq = self._make_ansi(fgcolor, bgcolor, attrs, color_mode)
@@ -2407,8 +2325,8 @@ class Pins:
                       newline: str = "\n",
                       num_prefix: str = '') -> str:
         """ 
-        Recursively traverse through items and create a list (the "str" list not the "list" list).
-        Each list inside `items` will be indented.
+        Recursively traverse through items and create a list (the `str` list
+        not the `list` list). Each list inside `items` will be indented.
 
         #### ARGS:
         - `items`: the items list
@@ -2422,7 +2340,6 @@ class Pins:
         - `newline`: the newline character(s)
         - `level`: level of list (Not to be touched by humans!)
         - `num_prefix`: prefix for numbered list (Not to be touched by humans!)
-
 
         Raises `TypeError` if:
         - `items` include anything except `str` and `list`
@@ -2464,14 +2381,14 @@ class Pins:
                      selected_ansi: str = None,
                      normal_ansi: str = None):
         """
-        Renders menu with ansi formatting
+        Renders menu with ansi formatting.
+
         #### ARGS:
         - `menu`: the menu list (a list of strings)
         - `selected_index`: the selected menu item
         - `bullet`: the bullet character(s)
         - `selected_ansi`: the ansi sequence for selected text
         - `normal_ansi`: the ansi sequence for normal text
-
         """
         normal_pad = len(de_ansi(bullet))
         for i, option in enumerate(menu):
@@ -2479,7 +2396,6 @@ class Pins:
                 # Selected
                 print(f"{bullet} {selected_ansi}{option}\033[0m", flush=True)
             else:
-                # Normal
                 print(f"{' '*normal_pad} {normal_ansi}{option}\033[0m",
                       flush=True)
 
@@ -2549,8 +2465,8 @@ class Pins:
         - `[(str, var),(...),...,(...)]`
         - `('name of var', value of var)`
 
+        #### Example:
         ```
-        >> # Example
         >> # Colormode is 24
         >> fg = 'orchid'
         >> bg = (255,15,16)
@@ -2584,10 +2500,6 @@ class Pins:
         True
         >> pins.validate_attrs([('attrs', attrs=None)])
         True
-        >> pins.validate_attrs([('attrs', attrs=['bolf'])])
-        AttributeError: Invalid attribute in attrs: 'bolf'
-        >> pins.validate_attrs([('attrs', attrs=123)])
-        AssertionError: attrs must be a list or tuple
         ```
         """
         for name, attrs in attributes:
@@ -2608,8 +2520,7 @@ class Pins:
         Traverses the Iterable (except strings) of strings and 
         returns the longest string in it.
         """
-        assert isinstance(strings, Iterable), \
-            "strings must be an iterable."
+        assert isinstance(strings, Iterable), "strings must be an iterable."
 
         return max(strings, key=len)
 
@@ -2617,14 +2528,13 @@ class Pins:
 class Batched:
     """ 
     ### Batched
-    Batch items of length `items_per_batch`. The last batch may be
-    shorter than `items_per_batch`. Accepts any iterable that supports slicing
-    like `str`, `list`, `tuple` etc.
+    Batch items of length `items_per_batch`. Accepts any iterable that
+    supports slicing like `str`, `list`, `tuple` etc.
 
     Works similar to `batched()` from `itertools`, but also provides more
     information about the process like `total_batches`, `remaining_batches`, 
-    `batch_no`, and `has_next_batch`. It also supports `with` statement.
-    But unlike `batched()` which returns tuples, it returns the same type as input `items`.    
+    `batch_no`, and `has_next_batch`. But unlike `batched()` which returns tuples,
+    it returns the same type as input `items`.
 
     #### ARGS:
     - `items`: an iterable that supports slicing (e.g `str`, `list`, `tuple`)
@@ -2639,20 +2549,12 @@ class Batched:
     ABC
     DEF
     G
-
     >> my_list = ['item 1', 'item 2', 'item 3', 'item 4', 'item 5']
     >> with Batched(my_list, 3) as batches:
     >>     for batch in batches.iterate():
     ..         print(batch)
     ['item 1', 'item 2', 'item 3']
     ['item 4', 'item 5']
-
-    >> my_tuple = ('item 1', 'item 2', 'item 3', 'item 4', 'item 5')
-    >> with Batched(my_list, 3) as batches:
-    >>     for batch in batches.iterate():
-    ..         print(f"Batch no: {batches.batch_no}", batch)
-    ('item 1', 'item 2', 'item 3')
-    ('item 4', 'item 5')
     ```
     """
 
@@ -2661,7 +2563,6 @@ class Batched:
         self.items = items
         self.items_per_batch = items_per_batch
         self._total_items = len(self.items)
-
         self._calculate()
 
     def _calculate(self):
@@ -2707,10 +2608,9 @@ class JsonHighlight:
     - `key_color`: color of object keys (`object` in json is `dict` in python)
     - `symbol_color`: color of symbols (`[,]{:}`)
 
-    #### Example Usage:
+    #### Example:
     ```
     >> jsh = JsonHighlight()
-    >> 
     >> with open('temp.json') as file:
     >>     new_json = jsh.highlight(json.load(file))
     >> print(new_json)
@@ -2799,20 +2699,6 @@ class JsonHighlight:
         #### ARGS:
         - `data`: json data as python object
         - `indent`: number of spaces to indent each level
-
-        ```
-        >> jsh = JsonHighlight()
-        >> 
-        >> with open('temp.json') as file:
-        >>     new_json = jsh.highlight(json.load(file))
-        >> print(new_json)
-        {
-            "name": "John",
-            "age": 30,
-            "details": {
-                "is_admin": true
-            }
-        }
         ```
         """
         self.indent = indent if indent else self.indent
@@ -2851,13 +2737,10 @@ class Typewriter:
         - `interval`: interval between each character print (overrides module-level `interval`)
         - `end`: character to print after printing whole `value`.
 
+        #### Example:
         ```
         >> writer = Typewriter(0.01)
         >> writer.write("Write this text.")
-        Write this text.
-
-        >> with Typewriter(0.01) as writer:
-        >>     writer.write("Write this text.")
         Write this text.
         ```
 
@@ -2915,6 +2798,7 @@ class Box:
     |   Another Box    |
     +------------------+
     ```
+
     Raises `ValueError` if:
     - `x_align` is invalid 
     - `y_align` is invalid 
@@ -3132,15 +3016,6 @@ class Validator:
     It is not a full-fledged validtor, for more advanced (proper) validations use 
     the `validators` (or similar) module.
 
-    #### Validation methods:
-    - `is_strong_password` Validation for strong passwords
-    - `is_valid_extension` Validation for file extensions
-    - `is_valid_filepath` Validation for filepaths
-    - `is_valid_dirpath` Validation for directory paths
-    - `is_valid_email` Validation for emails
-    - `is_valid_url` Validation for urls
-    - `is_valid_ip` Validation for ipaddresses (v4/v6)
-
     #### Example:
     ```
     >> Validator.is_email("someone@somewhere.com")
@@ -3167,9 +3042,8 @@ class Validator:
         - it contains no whitespaces.
         - its length is atleast 8.
 
-        #### Example
+        #### Example:
         ```
-        # Contains an upper/lowercase letter, digit, special char, length >= 8
         >> is_strong_password("Passw0rd!")
         True
         # No uppercase letter, no special char
@@ -3208,8 +3082,6 @@ class Validator:
         ```
         >> pins.is_valid_extension(".txt")
         True
-        >> pins.is_valid_extension(".py-c")
-        True
         >> pins.is_valid_extension(".")
         False
         >> pins.is_valid_extension("txt")
@@ -3219,8 +3091,7 @@ class Validator:
         Raises `AssertionError` if:
         - `extension` is not a string
         """
-        assert isinstance(extension, str), \
-            "extension must be a string."
+        assert isinstance(extension, str), "extension must be a string."
 
         if not extension:
             return False
@@ -3277,8 +3148,7 @@ class Validator:
         - `extension` is not a string or None
         - `extension` does not contain `*` or an extension (e.g `.py`)
         """
-        assert isinstance(filepath, str), \
-            "filepath must be a string."
+        assert isinstance(filepath, str), "filepath must be a string."
         if extension != None:
             assert isinstance(extension, str), \
                 "extension must be None or a string."
@@ -3370,6 +3240,9 @@ class Validator:
         ### Is Valid Email
         Returns `True` if email is valid, `False` otherwise.
 
+        #### ARGS:
+        - `email`: the email to validate
+
         #### Example:
         ```
         >> is_valid_email("simple@example.com")
@@ -3391,6 +3264,9 @@ class Validator:
         """ 
         ### Is Valid URL
         Returns `True` if url is valid, `False` otherwise.
+
+        #### ARGS:
+        - `url`: the url to validate
 
         #### Example:
         ```
@@ -3422,8 +3298,6 @@ class Validator:
         ```
         >> is_valid_ip("192.168.0.1", version=4)
         True
-        >> is_valid_ip("2001:db8:85a3::8a2e:370:7334", version=6)
-        True
         >> is_valid_ip("192.168.0.1", version=6)
         False
         ```
@@ -3433,8 +3307,8 @@ class Validator:
         - `version` is not 4 or 6
         """
         assert type(addr) == str, "addr must be a string."
-        assert version in (4, 6), f"Invalid version: {
-            version}, must be 4 or 6."
+        assert version in (4, 6), \
+            f"Invalid version: {version}, must be 4 or 6."
         try:
             address = ipaddress.ip_address(addr)
         except ValueError:
