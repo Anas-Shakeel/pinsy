@@ -691,27 +691,6 @@ def test_create_ansi_fmt():
         pins.create_ansi_fmt("red", color_mode="4")
 
 
-def test__validate_types():
-    valid_data = [
-        ("None", None, None),
-        ("int", 25, int),
-        ("float", 2.5, float),
-        ("str", "25", str),
-        ("bool", False, bool),
-        ("list", [25, 2.5, 2, 5], list),
-        ("tuple", (25, 2.5, 2, 5), tuple),
-        ("dict", {"name": "pinsy", "version": 1.0}, dict),
-    ]
-    assert pins._validate_types(valid_data)
-
-    with raises(TypeError):
-        pins._validate_types([("int", 2.5, int)])
-    with raises(TypeError):
-        pins._validate_types([("float", 25, float)])
-    with raises(TypeError):
-        pins._validate_types([("str", True, str)])
-
-
 def test__validate_colors():
     default_colormode = pins.COLORMODE
 
@@ -1381,7 +1360,6 @@ if __name__ == "__main__":
         (test_format_date, "test_format_date"),
         (test_get_calendar, "test_get_calendar"),
         (test_create_ansi_fmt, "test_create_ansi_fmt"),
-        (test__validate_types, "test__validate_types"),
         (test__validate_colors, "test__validate_colors"),
         (test__validate_attrs, "test__validate_attrs"),
         (test__longest_string, "test__longest_string"),

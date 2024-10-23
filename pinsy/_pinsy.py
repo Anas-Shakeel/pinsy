@@ -2538,67 +2538,6 @@ class Pins:
             case _:
                 raise ValueError("Invalid COLORMODE:", self.COLORMODE)
 
-    def _validate_types(self, v: List[Tuple]):
-        """ 
-        ### Validate Types
-        Validate the types of variable. Returns `True` if all vars are valid,
-        Raises `TypeError` if any var not matched. It iterates through the `v` list
-        and validates each tuple.
-
-        #### Types supported:
-        - `str`: check strings
-        - `int`: check integers
-        - `float`: check floating point numbers
-        - `list`: check lists
-        - `tuple`: check tuples
-        - `set`: check sets
-        - `dict`: check dictionaries
-        - `bool`: check booleans
-        - `None`: check nonetypes
-        - `type`: check classes
-
-
-        #### Syntax for v:
-        - `[(str, var, type),(...),...,(...)]`
-        - `('name of var', value of var, type(s) to match to)`
-
-        ```
-        >> # Example
-        >> name = 'Anas'
-        >> age = '22'
-        >> pins.validate_type([('name', name, str),('age', age, int)])
-        TypeError: 'age' must be int: not <class str>
-        >>
-        >> # Checking a var for multiple types
-        >> number: str | None = 1
-        >> pins.validate_type([('name', name, (str, None))])
-        TypeError: 'age' must be str or None: not <class int>
-        >>
-        ```
-        """
-        for var in v:
-            # For multiple types
-            if isinstance(var[2], tuple):
-                # Normalize var[2] for Nonetype
-                expected_types = [type(t) if t == None else t for t in var[2]]
-
-                if type(var[1]) in expected_types:
-                    continue
-
-                # If not matched with any type
-                err = f"{var[0]} must be {' or '.join([str(t) for t in var[2]])}: not {
-                    type(var[1])}"
-                raise TypeError(err)
-
-            else:
-                # For single type
-                expected_type = var[2] if var[2] != None else type(var[2])
-                if type(var[1]) != expected_type:
-                    err = f"{var[0]} must be {var[2]}: not {type(var[1])}"
-                    raise TypeError(err)
-
-        return True
-
     def _validate_colors(self, colors: List[Tuple]):
         """ 
         ### Validate Colors
