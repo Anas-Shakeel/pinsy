@@ -69,6 +69,18 @@ class Pins:
 
         self.STATUS_CHAR = "█"
         self.PROMPT_CHAR = prompt_char if prompt_char else ">>"
+        self.PROMPTS = {
+            "int": "Enter an integer: ",
+            "float": "Enter a float: ",
+            "str": "Enter a string: ",
+            "question": "Do you agree? (y/N): ",
+            "email": "Enter email: ",
+            "password": "Enter password (hidden on purpose): ",
+            "ip": "Enter IPv%d Address: ",
+            "url": "Enter URL: ",
+            "file": "Enter a filepath: ",
+            "dir": "Enter path to a directory: ",
+        }
 
     @classmethod
     def fix_windows_console(cls):
@@ -363,7 +375,7 @@ class Pins:
         if (min_ != None and max_ != None) and min_ > max_:
             raise ValueError("min_ cannot be greater than max_")
 
-        prompt = prompt if prompt else "Enter an integer: "
+        prompt = prompt if prompt else self.PROMPTS['int']
         prompt = self.promptize(prompt)
         while True:
             try:
@@ -419,7 +431,7 @@ class Pins:
         if (min_ != None and max_ != None) and min_ > max_:
             raise ValueError("'min_' cannot be greater than 'max_'")
 
-        prompt = prompt if prompt else "Enter a float: "
+        prompt = prompt if prompt else self.PROMPTS['float']
         prompt = self.promptize(prompt)
         while True:
             try:
@@ -491,7 +503,7 @@ class Pins:
         if (min_length != None and max_length != None) and min_length > max_length:
             raise ValueError("min_length cannot be greater than max_length")
 
-        prompt = prompt if prompt else "Enter a string: "
+        prompt = prompt if prompt else self.PROMPTS['str']
         prompt = self.promptize(prompt)
         while True:
             inp = self.inputc(prompt, prompt_fg=prompt_color, prompt_attrs=prompt_attrs,
@@ -551,7 +563,7 @@ class Pins:
         True 
         ```
         """
-        prompt = prompt if prompt else "Do you agree? (y/N): "
+        prompt = prompt if prompt else self.PROMPTS['question']
         prompt = self.promptize(prompt)
         while True:
             answer = self.inputc(prompt, prompt_fg=prompt_color,
@@ -590,7 +602,7 @@ class Pins:
         'pins@python.com'
         ```
         """
-        prompt = prompt if prompt else "Enter email: "
+        prompt = prompt if prompt else self.PROMPTS['email']
         prompt = self.promptize(prompt)
         while True:
             e = self.inputc(prompt, prompt_fg=prompt_color,
@@ -641,7 +653,7 @@ class Pins:
         'root'
         ```
         """
-        prompt = prompt if prompt else "Enter password (hidden on purpose): "
+        prompt = prompt if prompt else self.PROMPTS['password']
         custom_regex_error = custom_regex_error if custom_regex_error else "Invalid password, try again!"
         prompt = self.promptize(prompt, prompt_color, attrs=prompt_attrs)
         prompt_confirm = self.promptize("Confirm password: ", prompt_color,
@@ -712,7 +724,7 @@ class Pins:
         if extension != None and (extension != "*" and not extension.startswith(".")):
             raise ValueError("extension must start with a period ('.').")
 
-        prompt = prompt if prompt else "Enter a filepath: "
+        prompt = prompt if prompt else self.PROMPTS['file']
         prompt = self.promptize(prompt)
         while True:
             filepath = self.inputc(prompt, prompt_fg=prompt_color,
@@ -762,7 +774,7 @@ class Pins:
         'somefolder/anotherfolder'
         ```
         """
-        prompt = prompt if prompt else "Enter path to a directory: "
+        prompt = prompt if prompt else self.PROMPTS['dir']
         prompt = self.promptize(prompt)
         while True:
             directory = self.inputc(prompt, prompt_fg=prompt_color,
@@ -815,7 +827,7 @@ class Pins:
         """
         assert version in {4, 6}, "version must be 4 or 6."
 
-        prompt = prompt if prompt else f"Enter IPv{version} Address: "
+        prompt = prompt if prompt else self.PROMPTS['ip'] % version
         prompt = self.promptize(prompt)
         while True:
             ip = self.inputc(prompt, prompt_fg=prompt_color,
@@ -856,7 +868,7 @@ class Pins:
         'https://github.com/Anas-Shakeel'
         ```
         """
-        prompt = prompt if prompt else "Enter URL: "
+        prompt = prompt if prompt else self.PROMPTS['url']
         prompt = self.promptize(prompt)
         while True:
             url = self.inputc(prompt, prompt_fg=prompt_color,
