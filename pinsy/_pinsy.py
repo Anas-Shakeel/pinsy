@@ -330,9 +330,10 @@ class Pins:
                 return userinput
             userinput += tmp + newline
 
+    @typecheck(only=['prompt', 'min_', 'max_'])
     def input_int(self, prompt: str = '',
-                  min_: int = None,
-                  max_: int = None,
+                  min_: Optional[int] = None,
+                  max_: Optional[int] = None,
                   prompt_color: Color = None,
                   prompt_attrs: Iterable[Attribute] = None,
                   input_color: Color = None,
@@ -385,9 +386,10 @@ class Pins:
 
             return i
 
+    @typecheck(only=['prompt', 'min_', 'max_'])
     def input_float(self, prompt: str = '',
-                    min_: float = None,
-                    max_: float = None,
+                    min_: Optional[float] = None,
+                    max_: Optional[float] = None,
                     prompt_color: Color = None,
                     prompt_attrs: Iterable[Attribute] = None,
                     input_color: Color = None,
@@ -440,11 +442,12 @@ class Pins:
 
             return i
 
+    @typecheck(only=['prompt', 'constraint', 'min_length', 'max_length'])
     def input_str(self, prompt: str = '',
                   empty_allowed: bool = False,
                   constraint: Union[StrConstraint, str, None] = None,
-                  min_length: int = None,
-                  max_length: int = None,
+                  min_length: Optional[int] = None,
+                  max_length: Optional[int] = None,
                   prompt_color: Color = None,
                   prompt_attrs: Iterable[Attribute] = None,
                   input_color: Color = None,
@@ -477,17 +480,14 @@ class Pins:
         ```
 
         Raises a `AssertionError` if:
-        - `constraint` is not a `str`
         - `constraint` is invalid
 
         Raises `ValueError` if:
         - `min_length` is greater than max_length
         """
-        # Validations
         if constraint:
-            assert isinstance(constraint, str), "constraint must be a string."
-            assert constraint in CONSTRAINTS, f"Invalid constraint: '{
-                constraint}'"
+            assert constraint in CONSTRAINTS, \
+                f"Invalid constraint: '{constraint}'"
 
         if (min_length != None and max_length != None) and min_length > max_length:
             raise ValueError("min_length cannot be greater than max_length")
@@ -527,6 +527,7 @@ class Pins:
 
             return inp
 
+    @typecheck(only=['prompt'])
     def input_question(self, prompt: str = '',
                        prompt_color: Color = None,
                        prompt_attrs: Iterable[Attribute] = None,
@@ -565,6 +566,7 @@ class Pins:
             else:
                 self.print_error("Only 'y' or 'n' is accepted.")
 
+    @typecheck(only=['prompt'])
     def input_email(self, prompt: str = '',
                     prompt_color: Color = None,
                     prompt_attrs: Iterable[Attribute] = None,
@@ -732,6 +734,7 @@ class Pins:
 
             return filepath
 
+    @typecheck(only=['prompt', 'max_length'])
     def input_dir(self, prompt: str = '',
                   max_length: int = 250,
                   must_exist: bool = True,
@@ -781,6 +784,7 @@ class Pins:
 
             return normpath(directory)
 
+    @typecheck(only=['prompt', 'version'])
     def input_ip(self, prompt: str = '',
                  version: int = 4,
                  prompt_color: Color = None,
@@ -828,6 +832,7 @@ class Pins:
 
             self.print_error(f"Invalid IPv{version} Address: '{ip}'")
 
+    @typecheck(only=['prompt'])
     def input_url(self, prompt: str = '',
                   prompt_color: Color = None,
                   prompt_attrs: Iterable[Attribute] = None,
@@ -868,8 +873,9 @@ class Pins:
 
             self.print_error(f"Invalid URL: '{url}'")
 
+    @typecheck(only=['options', 'bullet'])
     def input_menu(self, options: List[str],
-                   bullet: Bullet = ">",
+                   bullet: Union[Bullet, str] = ">",
                    bullet_fg: Color = None,
                    bullet_bg: Color = None,
                    bullet_attrs: Iterable[Attribute] = None,
@@ -910,17 +916,10 @@ class Pins:
         ..   Rust
         2
         ```
-
-        Raises `AssertionError` if
-        - `options` is not a list
-        - `bullet` is not a string
-
+        
         Raises all exceptions that `ansy` would raise for 
         invalid colors and attributes.
         """
-        assert type(options) == list, "options is expected to be a list"
-        assert type(bullet) == str, "bullet is expected to be a str"
-
         # Ansi sequences
         bullet = self.colorize(bullet, bullet_fg, bullet_bg, bullet_attrs)
         selected_ansi = self._make_ansi(selected_fg, selected_bg, selected_attrs,
