@@ -249,6 +249,10 @@ def type_match(value:Any, expected_type:Any) -> bool:
 
     # Handle Basic types (int, float etc.)
     if origin_type is None:
+        # Ints are valid floats
+        if expected_type is float and type(value) is int:
+            return True
+
         return type(value) == expected_type
 
     if type(value) == bool:  # Cannot be bool below this point

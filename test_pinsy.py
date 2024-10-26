@@ -1141,7 +1141,7 @@ def test_type_match():
     assert not type_match(True, int)
 
     assert type_match(1.5, float)
-    assert not type_match(1, float)
+    assert type_match(1, float)
     assert not type_match(None, float)
     assert not type_match(True, float)
 
@@ -1268,10 +1268,9 @@ def test_type_check():
     def add(a: float, b: int) -> str:
         return f"{a + b}"
 
-    assert add(1.0, 2) == f"{1.0 + 2}"
-
-    with raises(TypeError):
-        add(1, 2)
+    assert add(1.0, 2) == "3.0"
+    assert add(1, 2) == "3"
+    
     with raises(TypeError):
         add("1", "2")
 
