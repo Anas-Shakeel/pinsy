@@ -939,7 +939,10 @@ class Pins:
                                   selected_ansi, normal_ansi)
 
                 # Wait for a keypress
-                key = utils.read_key()
+                try:
+                    key = utils.read_key()
+                except UnicodeDecodeError:
+                    continue
 
                 if key == utils.UP and selected_index > 0:  # UP
                     selected_index -= 1
