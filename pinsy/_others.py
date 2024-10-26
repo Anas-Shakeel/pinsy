@@ -3,12 +3,6 @@ from __future__ import annotations
 from typing import Literal, Callable
 import re
 
-# Data
-ERROR_HANDLING: list = [
-    "callback",
-    "quit",
-    "raise",
-]
 
 CONSTRAINTS: list = [
     "only_alpha",
@@ -110,14 +104,6 @@ CHARSETS = {
 
 
 # TYPE HINTS START FROM HERE....
-Callback = Callable[[str], None]
-
-ErrorHandling = Literal[
-    "callback",
-    "quit",
-    "raise",
-]
-
 StrConstraint = Literal[
     "only_alpha",
     "only_digits",

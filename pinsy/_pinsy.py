@@ -24,9 +24,8 @@ from .cursor import HiddenCursor
 from . import utils
 from .utils import get_terminal_size, typecheck
 from ._others import (PromptChar, FillChar, Charset, YAlign, XAlign, Bullet,
-                      StrConstraint, Callback, ErrorHandling,
-                      ERROR_HANDLING, CONSTRAINTS, CHARSETS, REGEX_PATTERNS)
-from typing import List, Tuple, Dict, Iterable, Callable, Literal, Optional, Union, Any
+                      StrConstraint, CONSTRAINTS, CHARSETS, REGEX_PATTERNS)
+from typing import List, Tuple, Dict, Iterable, Callable, Optional, Union, Any
 
 
 class Pins:
@@ -916,7 +915,7 @@ class Pins:
         ..   Rust
         2
         ```
-        
+
         Raises all exceptions that `ansy` would raise for 
         invalid colors and attributes.
         """
