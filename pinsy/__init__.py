@@ -33,4 +33,4 @@ Written By : `Anas Shakeel`
 Source Code: `https://www.github.com/Anas-Shakeel/pinsy`
 """
 
-from ._pinsy import Pins, Batched, JsonHighlight, Typewriter, Box, Validator
+from ._pinsy import Pins, Batched, JsonHighlight, Typewriter, Box, Validator, RevealText

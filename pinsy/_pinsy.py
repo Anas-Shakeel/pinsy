@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import sys
 import json
+import random
+from time import time
 import platform
 import ipaddress
 import re
@@ -2772,6 +2774,132 @@ class Typewriter:
         except (KeyboardInterrupt, EOFError):
             pass
         sys.stdout.write(end)
+        sys.stdout.flush()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
+
+class RevealText:
+    """ 
+    ### Reveal Text
+    A class to animate text by shuffling and progressively revealing each letter.
+
+    #### ARGS:
+    - `interval`: interval between each reveal (default `0.05`)
+    - `max_seconds`: the maximum seconds to run this animation for (default `1`)
+    - `final_color`: foreground color of matched letters (final text)
+    - `initial_color`: foreground color of unmatched letters (initial text)
+    - `color_mode`: the color mode
+
+    #### Example:
+    ```
+    >> with RevealText(initial_color="black") as revealer:
+    >>     revealer.reveal("Reveal this text after shuffling it.")
+    Reveal this text after shuffling it. # Final string
+    ```
+
+    Raises `AssertionError` if:
+    - `interval` is less than 0
+    - `max_seconds` is less than 1
+    - `color_mode` is not `4`, `8`, or `24`
+
+    Raises `InvalidColorError` if:
+    - `final_color` is invalid
+    - `initial_color` is invalid
+    """
+
+    @typecheck(skip=['initial_color', 'final_color'])
+    def __init__(self, interval: float = 0.05,
+                 max_seconds: int = 1,
+                 initial_color: Color = None,
+                 final_color: Color = None,
+                 color_mode: int = 4):
+        assert interval >= 0, "interval must not be negative."
+        assert max_seconds > 0, "max_seconds must be greater than zero."
+        assert color_mode in (4, 8, 24), f"Invalid color_mode: {color_mode}."
+
+        err = f"Invalid {color_mode}-bit color: %s."
+        if final_color and not is_valid_color(final_color, color_mode):
+            raise InvalidColorError(err % final_color)
+        if initial_color and not is_valid_color(initial_color, color_mode):
+            raise InvalidColorError(err % initial_color)
+
+        self.interval = interval
+        self.max_seconds = max_seconds
+        self.color_mode = color_mode
+        self.initial_fmt = make_ansi(initial_color,
+                                     color_mode=color_mode) + "%s" + ANSI_CODES['reset']
+        self.final_fmt = make_ansi(final_color,
+                                   color_mode=color_mode) + "%s" + ANSI_CODES['reset']
+
+    @typecheck()
+    def reveal(self, text: Any, interval: Optional[float] = None):
+        """ 
+        ### Reveal
+        Animates the process of gradually revealing each letter 
+        in shuffled `text` (after shuffling it, ofcourse).
+
+        #### ARGS:
+        - `text`: text to reveal. accepts any value (implicitly converts to `str`)
+        - `interval`: interval between each character print (overrides module-level `interval`)
+
+        #### Example:
+        ```
+        >> revealer = RevealText()
+        >> revealer.reveal("Reveal this text.")
+        Reveal this text.
+        ```
+
+        Raises `AssertionError` if:
+        - `interval` is negative.
+        """
+        if interval:
+            assert interval >= 0, "interval must not be negative"
+
+        text = str(text)
+        if not text:
+            return
+
+        text_lines = ceil(len(text) / get_terminal_size()[0])
+        interval = interval if interval else self.interval
+        new_text = "".join(random.sample(text, len(text)))  # Shuffle
+        start_time = time()
+
+        with HiddenCursor():
+            try:
+                while new_text != text:
+                    # If animation time exceeded max_seconds
+                    if self.max_seconds < (time() - start_time):
+                        break
+
+                    # Create new string
+                    temp = ""
+                    for char1, char2 in zip(text, new_text):
+                        if char1 != char2:
+                            temp += self.initial_fmt % str(random.choice(text))
+                        else:
+                            temp += self.final_fmt % char1
+
+                    # Print the string
+                    sys.stdout.write(temp+"\n")
+                    sys.stdout.flush()
+
+                    # Store the string
+                    new_text = de_ansi(temp)
+
+                    # Wait and repeat
+                    sleep(interval)
+                    utils.clear_lines_above(text_lines)
+
+                # Print text finally after animation
+                sys.stdout.write(self.final_fmt % text+"\n")
+            except (KeyboardInterrupt, EOFError):
+                pass
+
         sys.stdout.flush()
 
     def __enter__(self):
