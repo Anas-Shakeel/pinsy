@@ -2742,13 +2742,13 @@ class Typewriter:
         self.interval = interval
 
     @typecheck()
-    def write(self, value: Any, interval: Optional[float] = None, end: str = "\n"):
+    def write(self, text: Any, interval: Optional[float] = None, end: str = "\n"):
         """ 
         ### Write
-        Write the `value` character by character to `stdout`.
+        Write the `text` character by character to `stdout`.
 
         #### ARGS:
-        - `value`: value to print. accepts any value (implicitly converts to `str`)
+        - `text`: text to print. accepts any value (implicitly converts to `str`)
         - `interval`: interval between each character print (overrides module-level `interval`)
         - `end`: character to print after printing whole `value`.
 
@@ -2767,7 +2767,7 @@ class Typewriter:
 
         interval = interval if interval else self.interval
         try:
-            for char in list(str(value)):
+            for char in list(str(text)):
                 sys.stdout.write(char)
                 sys.stdout.flush()
                 sleep(interval)
