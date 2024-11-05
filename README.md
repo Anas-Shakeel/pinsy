@@ -29,25 +29,20 @@
 
 ## Features
 
-- Ability to create a**box** around text
+- Ability to create a **box** around text
 - Ability to print colorful calendars
-- Ability**align**,**indent** and**wrap** text
-- Ability to create nested**ordered** and**unordered** lists
-- Ability to create dynamic**HRs** (*Horizontal Rules*)
-- Ability to create paginated text
-- Ability to shorten*file or directory* paths
-- Syntax Highlight for**Json**
-- Text effects like*typewriter* and*reveal text* effect.
+- Ability **align**, **indent** and **wrap** text
+- Ability to create nested **ordered** and **unordered** lists
+- Ability to create dynamic **HRs** (*Horizontal Rules*)
+- Syntax Highlight for **Json**
+- Text effects like *typewriter* and *reveal text* effect.
 - Text coloring and styling
-- Supports 3 color modes (`4-bit`,`8-bit`,`24-bit`)
+- Supports 3 color modes (`4-bit`, `8-bit`, `24-bit`)
 - Prompting and validation
-- Easy color toggle
-- Basic cursor manipulation functions using`ansi sequences`
-- Strict Typechecker
+- Basic cursor manipulation functions using `ansi sequences`
 - Highly optimized
-- Easy to use API
 - And much more!
-- And pretty lightweight* too (under`160kb`)
+- And pretty lightweight* too (under `160kb`)
 
 ## Dependencies
 
