@@ -1368,6 +1368,39 @@ class Pins:
         else:
             w.write(text)
 
+    def reveal_text(self, text: str, interval: float = 0.01,
+                    max_seconds: int = 1,
+                    initial_color: Color = None,
+                    final_color: Color = None,
+                    color_mode: int = 4):
+        """ 
+        ### Reveal Text
+        Print `text` in the terminal with a reveal-text effect.
+
+        This method uses `Pins.RevealText` under the hood.
+
+        #### ARGS:
+        - `text`: the text to print
+        - `interval`: interval between each reveal (default `0.05`)
+        - `max_seconds`: the maximum seconds to run this animation for (default `1`)
+        - `initial_color`: foreground color of unmatched letters (initial text)
+        - `final_color`: foreground color of matched letters (final text)
+        - `color_mode`: the color mode
+
+        #### Example:
+        ```
+        >> text = "Print this text with reveal effect"
+        >> pins.reveal_text(text, interval=0.1)
+        "Print this text with reveal effect"
+        ```
+        """
+        revealer = RevealText(interval=interval,
+                              max_seconds=max_seconds,
+                              initial_color=initial_color, 
+                              final_color=final_color,
+                              color_mode=color_mode)
+        revealer.reveal(text)
+
     def print_hr(self, width: int = None,
                  pad_x: int = 0,
                  align: XAlign = "left",
@@ -2789,8 +2822,8 @@ class RevealText:
     #### ARGS:
     - `interval`: interval between each reveal (default `0.05`)
     - `max_seconds`: the maximum seconds to run this animation for (default `1`)
-    - `final_color`: foreground color of matched letters (final text)
     - `initial_color`: foreground color of unmatched letters (initial text)
+    - `final_color`: foreground color of matched letters (final text)
     - `color_mode`: the color mode
 
     #### Example:
