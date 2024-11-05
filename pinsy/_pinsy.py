@@ -21,7 +21,7 @@ from ansy import (colored, colored_ansy, make_ansi, de_ansi,
                   create_style, is_valid_color, ANSI_REGEX,
                   ANSI_CODES, ATTRIBUTES, Attribute, Color, ColorMode)
 from ansy.exceptions import InvalidColorError
-from .cursor import HiddenCursor
+from cursor import HiddenCursor
 from . import utils
 from .utils import get_terminal_size, typecheck
 from ._others import (PromptChar, FillChar, Charset, YAlign, XAlign, Bullet,
