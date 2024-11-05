@@ -1293,7 +1293,7 @@ class Pins:
             for page in pages.iterate():
                 yield "\n".join(page)
 
-    def print_json(self, filepath: str,
+    def print_json(self, data: Any,
                    indent: int = 4,
                    quotes: bool = False,
                    str_color: Color = None,
@@ -1306,7 +1306,7 @@ class Pins:
         Pretty-print json with syntax highlighting. This method uses `Pins.JsonHighlight`
 
         #### ARGS:
-        - `filepath`: the json filepath
+        - `data`: the json data as python object
         - `indent`: number of spaces to indent
         - `quotes`: remove the quotations (`""`)
         - `str_color`: color of string values
@@ -1317,32 +1317,30 @@ class Pins:
 
         #### Example:
         ```
-        >> pins.print_json("person.json")
+        >> with open("person.json") as jfile:
+        ..     data = json.load(jfile)
+        ..
+        >> pins.print_json(data)
         {
-            "name": "anas",
-            "age": "22",
-            "hobbies": "coding, programming, writing code etc."
+            name: anas,
+            age: 22,
+            hobbies: coding, programming, writing code etc.
         }
         ```
 
         Raises `AssertionError` if:
-        - `filepath` does not exist
         - `indent` is not an integer
         """
-        assert isfile(filepath), "filepath does not exist."
         assert type(indent) == int, "indent must be an integer."
 
         if not self.USE_COLORS:
             str_color, number_color, symbol_color = None, None, None
             key_color, keyword_color = None, None
 
-        with open(filepath, encoding="utf-8") as jfile:
-            jdata = json.load(jfile)
-
         jsh = JsonHighlight(indent, quotes, self.COLORMODE,
                             str_color, number_color, keyword_color,
                             key_color, symbol_color)
-        print(jsh.highlight(jdata))
+        print(jsh.highlight(data))
 
     def typewrite(self, text: str, interval: float = 0.01, hide_cursor: bool = True):
         """ 
