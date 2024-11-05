@@ -1,12 +1,10 @@
 ![](assets/20241106_012559_output.jpg)
 
-# Pinsy
-
 `pinsy` (pronounced __pin-si__) *formerly `pins`*, is a powerful lightweight python package that helps speed up the workflow of creating visually apealing command-line applications.
 
 ## Table of contents
 
-- [Feature](#features)
+- [Features](#features)
 - [Dependencies](#dependencies)
 - [Installation](#installation)
 - [Basic Usage](#basic-usage)
@@ -27,6 +25,7 @@
   - [how to print info about your program](#how-to-print-info-about-your-program)
   - [how to print text with typewriter effect](#how-to-print-text-with-typewriter-effect)
   - [how to print text with reveal effect](#how-to-print-text-with-reveal-effect)
+- [Pinsy CLI](#pinsy-cli)
 
 ## Features
 
@@ -77,7 +76,7 @@ from pinsy import Pins
 pins = Pins()
 ```
 
-#### How to color text
+### How to color text
 
 Use `pins.colorize()` method to color text using any of the three color modes.
 
@@ -94,7 +93,7 @@ print(blue_text)
 
 ![](assets/20241105_172244_colored_text.png)
 
-#### How to color a regex match
+### How to color a regex match
 
 You can color only specific parts of text that match a regular expression, using `pins.colorize_regex()`.
 
@@ -113,7 +112,7 @@ pattern = re.compile(r"\d")
 pins.colorize_regex(text, pattern=pattern, fgcolor="red")
 ```
 
-#### How to print status messages
+### How to print status messages
 
 Status messages include **info**, **warning**, **success**, and **error** messages. There are four built-in methods for printing these messages.
 
@@ -136,7 +135,7 @@ print(hint)
 
 ![](assets/20241105_172159_hint.png)
 
-#### How to align text
+### How to align text
 
 You can easily align text in the terminal using `pins.textalign_x()` (*for horizontal alignment*) or `pins.textalign_y` (*for vertical alignment*).
 
@@ -150,7 +149,7 @@ print(pins.textalign_x(text, align="right"))
 
 ![](assets/20241105_172028_align_x.png)
 
-#### How to indent text
+### How to indent text
 
 Use `pins.indent_text()` to indent text, **Duh!**
 
@@ -161,7 +160,7 @@ print("|", pins.indent_text(text, indent=4))
 
 ![](assets/20241105_172019_indent.png)
 
-#### How to wrap text
+### How to wrap text
 
 You can wrap text using `pins.wrap_text()`. This method is merely a wrapper around the `fill()` method from `textwrap` module.
 
@@ -172,7 +171,7 @@ print(pins.wrap_text(text, 15))
 
 ![](assets/20241105_172013_wrap.png)
 
-#### How to create lists
+### How to create lists
 
 There are two types of lists that you can create, **ordered** and **unordered**, using `pins.create_list_ordered()` and `pins.create_list_unordered()` respectively.
 
@@ -196,7 +195,7 @@ print(unordered_list)
 
 You can further tweak these lists using other arguments of both of these methods.
 
-#### How to take inputs of various types
+### How to take inputs of various types
 
 There are 13 input methods that can be used take all sorts of inputs from users. almost all of them support colors.
 
@@ -260,7 +259,7 @@ print("\nYou chose option %d" % choice)
 
 It returns the index of choice that was selected. *(starting from 1)*
 
-#### How to create HRs *(horizontal rules)*
+### How to create HRs *(horizontal rules)*
 
 Use `pins.create_hr()` to create a horizontal line, or `pins.print_hr()` to create and then print the line.
 
@@ -282,7 +281,7 @@ pins.print_hr(width=50, color="green", fill_char="▲")
 
 ![](assets/20241105_165522_lines.png)
 
-#### How to create box around text
+### How to create box around text
 
 You can easily create a box around text using `pins.boxify().`
 
@@ -309,7 +308,7 @@ print(box.create("Create a box\naround this\nmultiline text."))
 
 ![](assets/20241105_171935_box.png)
 
-#### How to create a calendar
+### How to create a calendar
 
 Use `pins.get_calendar()` to get a calendar of any month of any year.
 
@@ -329,7 +328,7 @@ pins.print_calendar(month_color="red", date_color="blue")
 
 It's November 05, 2024 today.
 
-#### How to pretty-print json
+### How to pretty-print json
 
 You can use `pins.print_json()` to pretty-print json.
 
@@ -366,7 +365,7 @@ print(jsh.highlight(data))
 
 ![](assets/20241105_180420_json_colored.png)
 
-#### How to print lengthy text for user to read easily
+### How to print lengthy text for user to read easily
 
 You can use `pins.print_more()` to print a lengthy multiline text in the terminal.
 
@@ -381,7 +380,7 @@ pins.print_more(text, prompt_fg="magenta")
 
 It let's user read the text easily.
 
-#### How to print multiline text as pages
+### How to print multiline text as pages
 
 Use `pins.print_pages()` to print a length multiline text as pages. somewhat similar to paginations in websites.
 
@@ -394,7 +393,7 @@ pins.print_pages(text, lines_per_page=16, statusbar_fg="yellow")
 
 ![](assets/20241105_191925_pages.gif)
 
-#### How to print info about your program
+### How to print info about your program
 
 Similar to softwares and webapps, you can print info about your program/application using `pins.print_about()`.
 
@@ -417,7 +416,7 @@ pins.print_about(name="pinsy",
 
 A bit verbose i know.
 
-#### How to print text with typewriter effect
+### How to print text with typewriter effect
 
 You can use the typewriter effect in two ways: using `pins.typewrite()` or using `Typewrite` class (which `pins.typewrite`() uses under the hood).
 
@@ -437,7 +436,7 @@ writer.write(text)
 
 Output is exactly the same.
 
-#### How to print text with reveal effect
+### How to print text with reveal effect
 
 You can use the `pins.reveal_text()` or `RevealText` class to print text with reveal effect.
 
@@ -471,4 +470,4 @@ And there's much more that you can do...
 
 ## Pinsy CLI
 
-##### Coming soon!
+#### Coming soon!
