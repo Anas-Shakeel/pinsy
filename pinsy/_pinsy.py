@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import sys
-import json
 import random
 from time import time
 import platform
@@ -1396,7 +1395,7 @@ class Pins:
         """
         revealer = RevealText(interval=interval,
                               max_seconds=max_seconds,
-                              initial_color=initial_color, 
+                              initial_color=initial_color,
                               final_color=final_color,
                               color_mode=color_mode)
         revealer.reveal(text)
