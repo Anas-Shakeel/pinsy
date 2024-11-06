@@ -1051,6 +1051,7 @@ class Pins:
                     license: Optional[str] = None,
                     platforms: Union[List[str], str, None] = None,
                     *,
+                    show_heading: bool = True,
                     border_color: Color = None,
                     heading_fg: Color = None,
                     heading_bg: Color = None,
@@ -1070,6 +1071,7 @@ class Pins:
         - `source_url`: project's source code url (e.g. `github.com/author/project`)
         - `license`: license of the project (e.g. `MIT` or `GNU`)
         - `platforms`: platforms supported by this program (e.g. `Windows` or `Unix`)
+        - `show_heading`: show heading, duh! (using `name`)
         - `border_color`: color of border
         - `heading_fg`: foreground color of heading
         - `heading_bg`: background color of heading
@@ -1095,8 +1097,8 @@ class Pins:
         if not any(table.values()):
             return
 
+        heading = f"  About {name.title()}  " if name and show_heading else None
         # Create table
-        heading = f"  About {name.title()}  " if name else None
         new_table = self.create_table(dictionary=table,
                                       heading=heading,
                                       heading_fg=heading_fg,
