@@ -1077,9 +1077,8 @@ class Pins:
         - `keys_color`: color of keys
         - `values_color`: color of values
         """
-        if platforms:
-            platforms = ", ".join(platforms) if isinstance(platforms,
-                                                           list) else platforms
+        if platforms and isinstance(platforms, list):
+            platforms = ", ".join(platforms)
 
         table = {
             "Name": name,
