@@ -2136,6 +2136,35 @@ class Pins:
 
         return path_join(prefix, replacement, path_sep.join(parts[n:]))
 
+    @typecheck()
+    def ellipsis(self, text: str, max_chars: int = 4) -> str:
+        """ 
+        ### Ellipsis
+        Truncate from end, part of string that exceeds `max_chars`.
+
+        #### ARGS:
+        - `text`: the text to add ellipsis to...
+        - `max_chars`: maximum length of output, with `...` (truncate afterwards)
+
+        #### Example:
+        ```
+        >> text = "Truncate this text"
+        >> pins.ellipsis(text, 10)
+        'Truncat...' # total 10 max chars including '...'
+        ```
+        
+        Raises `AssertionError` if:
+        - `max_chars` is less than 4
+        """
+        assert max_chars >= 4, "max_chars must be at least 4."
+
+        if not text:
+            return ""
+
+        if (len(text) + 3) > max_chars:
+            return text[:max_chars-3] + "..."
+        return text
+
     def now(self, format_: str = "%d %B %Y %I:%M %p") -> str:
         """  
         ### Now
