@@ -28,6 +28,7 @@ These are all the tests for pinsy module.
 - `test_now`
 - `test_promptize`
 - `test_shorten_path`
+- `test_ellipsis`
 - `test_splice_text`
 - `test_textalign_x`
 - `test_textalign_y`
@@ -63,7 +64,7 @@ CURRENT_OS = Validator.OS
 
 pins = Pins()
 
-# DONT CHANGE THESE DUMMIES PLEASE!!! Used by tests.
+# DONT ALTER THESE DUMMIES PLEASE!!! Used by tests.
 dummy = "This is a dummy string."
 dummy_lg = "pine ordinary factor control bear use nation after blind loss deep serve stiff give railroad cry whale gone save sing wire bank ear swamThis is a dummy string."
 dummy_items = ['item 1', 'item 2', 'item 3', 'item 4', 'item 5']
@@ -277,7 +278,8 @@ def test_create_status():
         label, dummy) == "█ test: This is a dummy string."
     assert pins.create_status(label, dummy, "light_blue", "dark_grey", ['bold'],
                               "light_green", "dark_grey", ['italic']) == "\x1b[1m\x1b[100m\x1b[94m█ test: \x1b[0m\x1b[3m\x1b[100m\x1b[92mThis is a dummy string.\x1b[0m"
-    assert pins.create_status(label, dummy_lg, "light_blue").startswith('\x1b[94m█ test: \x1b[0mpine ordinary factor control')
+    assert pins.create_status(label, dummy_lg, "light_blue").startswith(
+        '\x1b[94m█ test: \x1b[0mpine ordinary factor control')
 
     # Label and text
     with raises(AssertionError):
@@ -572,6 +574,27 @@ def test_shorten_path():
         pins.shorten_path("somefile.txt", replacement=123)
 
 
+def test_ellipsis():
+    assert pins.ellipsis("") == ""
+    assert pins.ellipsis("ab") == "a..."
+    assert len(pins.ellipsis(dummy, 10)) == len(dummy[:7] + "...")
+    assert pins.ellipsis(dummy, 20) == dummy[:17] + "..."
+    assert pins.ellipsis(dummy) == dummy[0] + "..."
+    assert pins.ellipsis(dummy, len(dummy) + 50) == dummy
+
+    with raises(AssertionError):
+        pins.ellipsis(dummy, 2)
+
+    with raises(TypeError):
+        pins.ellipsis(dummy, "4")
+
+    with raises(TypeError):
+        pins.ellipsis(None, 4)
+
+    with raises(TypeError):
+        pins.ellipsis(dummy, None)
+
+
 def test_now():
     dt_format = "%d %B %Y %I:%M %p"
     dt_datetime = datetime.now().strftime(dt_format)
@@ -619,12 +642,12 @@ def test_format_date():
     # Years test
     dt = datetime(year=2022, month=1, day=1)
     assert pins.time_ago(dt.strftime(d_fmt),
-                            d_fmt) == f"{today.year - 2022} years ago"
-    
+                         d_fmt) == f"{today.year - 2022} years ago"
+
     # Decades test
     dt = datetime(year=int(today.year - 20), month=1, day=1)
     assert pins.time_ago(dt.strftime(d_fmt), d_fmt) == f"2 decades ago"
-    
+
     # Century test
     dt = datetime(year=1500, month=1, day=1)
     d_fmt = "%d-%m-%Y %H:%M:%S"
@@ -1227,7 +1250,7 @@ def test_type_match():
     assert type_match(set(), Set)
     assert type_match({"a", "b", "c"}, Set)
     assert type_match({"a", "b", "c"}, Set[str])
-    assert type_match({"a",}, Set[str])
+    assert type_match({"a", }, Set[str])
     assert not type_match({"a", "b", 123}, Set[int])
     assert not type_match("123", Set[str])
     assert not type_match(None, Set[str])
@@ -1238,8 +1261,8 @@ def test_type_match():
     assert type_match(12.3, Any)
     assert type_match([12, 34], Any)
     assert type_match((12, 34), Any)
-    assert type_match({"key2":"value","key1":"value"}, Any)
-    assert type_match({"string",1123}, Any)
+    assert type_match({"key2": "value", "key1": "value"}, Any)
+    assert type_match({"string", 1123}, Any)
     assert type_match(None, Any)
     assert type_match(True, Any)
 
@@ -1270,7 +1293,7 @@ def test_type_check():
 
     assert add(1.0, 2) == "3.0"
     assert add(1, 2) == "3"
-    
+
     with raises(TypeError):
         add("1", "2")
 
@@ -1354,6 +1377,7 @@ if __name__ == "__main__":
         (test_splice_text, "test_splice_text"),
         (test_contains_ansi, "test_contains_ansi"),
         (test_shorten_path, "test_shorten_path"),
+        (test_ellipsis, "test_ellipsis"),
         (test_now, "test_now"),
         (test_for_each, "test_for_each"),
         (test_format_date, "test_format_date"),
