@@ -1,4 +1,6 @@
-![](assets/20241106_012559_output.jpg)
+<p align="center">
+  <img src="assets/20241106_012559_output.jpg" />
+</p>
 
 `pinsy` (pronounced __pin-si__) *formerly `pins`*, is a powerful lightweight python package that helps speed up the workflow of creating visually apealing command-line applications.
 
