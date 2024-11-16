@@ -10,7 +10,7 @@ def readme():
 
 setup(
     name='pinsy',
-    version='0.1.1',
+    version='0.1.2',
     description='A Python package to help speed up the workflow of creating beautiful CLI apps.',
     long_description=readme(),
     long_description_content_type='text/markdown',
