@@ -89,7 +89,7 @@ print(blue_text)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172244_colored_text.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172244_colored_text.png" />
 </p>
 
 ### How to color a regex match
@@ -103,7 +103,7 @@ print(highlights)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172238_highlights.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172238_highlights.png" />
 </p>
 
 `pattern` can also be a `re` compiled pattern.
@@ -125,7 +125,7 @@ pins.print_error("This is an error message.")
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172215_status_messages.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172215_status_messages.png" />
 </p>
 
 Colors are set by default for these built-in messages. But you can also create custom status messages for more control, using `pins.create_status()`.
@@ -137,7 +137,7 @@ print(hint)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172159_hint.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172159_hint.png" />
 </p>
 
 ### How to align text
@@ -153,7 +153,7 @@ print(pins.textalign_x(text, align="right"))
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172028_align_x.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172028_align_x.png" />
 </p>
 
 ### How to indent text
@@ -166,7 +166,7 @@ print("|", pins.indent_text(text, indent=4))
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172019_indent.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172019_indent.png" />
 </p>
 
 ### How to wrap text
@@ -179,7 +179,7 @@ print(pins.wrap_text(text, 15))
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172013_wrap.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172013_wrap.png" />
 </p>
 
 ### How to create lists
@@ -194,7 +194,7 @@ print(ordered_list)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172003_ordered.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_172003_ordered.png" />
 </p>
 
 ```py
@@ -205,7 +205,7 @@ print(unordered_list)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_171953_unordered.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_171953_unordered.png" />
 </p>
 
 You can further tweak these lists using other arguments of both of these methods.
@@ -223,7 +223,7 @@ print(f"You entered {number}")
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_205758_input_int.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_205758_input_int.gif" />
 </p>
 
 ```python
@@ -236,7 +236,7 @@ else:
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_212352_input_question.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_212352_input_question.gif" />
 </p>
 
 There are other similar input functions for **floats**, **strings**, **ip addresses**, **emails**, **passwords**, **urls**, **filepaths**, and **directory paths**.
@@ -252,7 +252,7 @@ print("Your name in %s" % name)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_232755_inputc.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_232755_inputc.gif" />
 </p>
 
 You can also take multiline input using `pins.input_multiline()`.
@@ -263,7 +263,7 @@ print(text)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_234448_input_multiline.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_234448_input_multiline.gif" />
 </p>
 
 Pressing `enter` twice submits the input.
@@ -279,7 +279,7 @@ print("\nYou chose option %d" % choice)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241106_000000_menu.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241106_000000_menu.gif" />
 </p>
 
 It returns the index of choice that was selected. _(starting from 1)_
@@ -294,7 +294,7 @@ print(line)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_164513_line.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_164513_line.png" />
 </p>
 
 You can also use `pins.print_hr()` to just print the line, it takes the same arguments as `pins.create_hr()`.
@@ -307,7 +307,7 @@ pins.print_hr(width=50, color="green", fill_char="▲")
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_165522_lines.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_165522_lines.png" />
 </p>
 
 ### How to create box around text
@@ -322,7 +322,7 @@ print(pins.boxify(text, width=50, x_align="right", charset="box", border_color="
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_170508_boxes.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_170508_boxes.png" />
 </p>
 
 This method use the `Box` class under the hood. You can use it too.
@@ -338,7 +338,7 @@ print(box.create("Create a box\naround this\nmultiline text."))
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_171935_box.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_171935_box.png" />
 </p>
 
 ### How to create a calendar
@@ -350,7 +350,7 @@ print(pins.get_calendar())
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_173318_calendar.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_173318_calendar.png" />
 </p>
 
 You can also use `pins.print_calendar()` to print the calendar.
@@ -360,7 +360,7 @@ pins.print_calendar(month_color="red", date_color="blue")
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_173737_calendar_colored.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_173737_calendar_colored.png" />
 </p>
 
 It's November 05, 2024 today.
@@ -379,7 +379,7 @@ pins.print_json(data)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_175903_json.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_175903_json.png" />
 </p>
 
 This method uses `JsonHighlight` class under the hood. and so can you!
@@ -403,7 +403,7 @@ print(jsh.highlight(data))
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_180420_json_colored.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_180420_json_colored.png" />
 </p>
 
 ### How to print lengthy text for user to read easily
@@ -418,7 +418,7 @@ pins.print_more(text, prompt_fg="magenta")
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_190612_more.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_190612_more.gif" />
 </p>
 
 It let's user read the text easily.
@@ -435,7 +435,7 @@ pins.print_pages(text, lines_per_page=16, statusbar_fg="yellow")
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_191925_pages.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_191925_pages.gif" />
 </p>
 
 ### How to print info about your program
@@ -458,7 +458,7 @@ pins.print_about(name="pinsy",
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_225940_about.png" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_225940_about.png" />
 </p>
 
 A bit verbose i know.
@@ -474,7 +474,7 @@ pins.typewrite(text, interval=0.04, hide_cursor=False)
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_194030_typewrite.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_194030_typewrite.gif" />
 </p>
 
 ```python
@@ -496,7 +496,7 @@ pins.reveal_text(text, initial_color="black", final_color="blue")
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_200951_reveal.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_200951_reveal.gif" />
 </p>
 
 ```python
@@ -514,7 +514,7 @@ pins.reveal_text(text, interval=0.1, max_seconds=3, initial_color="red", final_c
 ```
 
 <p align="center">
-    <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_202116_reveal_slowmo.gif" />
+  <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_202116_reveal_slowmo.gif" />
 </p>
 
 It scrambles the text and then solves each letter using bruteforce method. `max_seconds` is the number of maximum seconds to let this effect run, and prints the original text afterwards.
