@@ -1566,11 +1566,13 @@ class Pins:
                replace_whitespace: bool = False,
                pad_x: int = 0,
                pad_y: int = 0,
+               heading: Optional[str] = None,
                x_align: XAlign = "left",
                y_align: YAlign = "top",
                charset: Charset = None,
                border_color: Color = None,
-               text_color: Color = None) -> str:
+               text_color: Color = None,
+               heading_color: Color = None) -> str:
         """  
         ### Boxify
         Returns a formatted version of `text` in a box. This method uses
@@ -1583,11 +1585,13 @@ class Pins:
         - `replace_whitespace`: replace whitespaces with a single space.
         - `pad_x`: padding on X-axis
         - `pad_y`: padding on Y-axis
+        - `heading`: heading text
         - `x_align`: alignment of text on X-Axis (`left`, `center`, `right`)
         - `y_align`: alignment of text on Y-Axis (`top`, `center`, `bottom`)
         - `charset`: the charset to use (`None` uses module-level `CHARSET`)
         - `border_color`: color of the border
         - `text_color`: color of the text
+        - `heading_color`: color of the heading
 
         #### Example:
         ```
@@ -1602,8 +1606,18 @@ class Pins:
             text_color, border_color = None, None
 
         charset = charset if charset else self.charset_name
-        box = Box(text, width, pad_x, pad_y, x_align, y_align, charset,
-                  border_color, text_color, self.COLORMODE)
+        box = Box(text=text,
+                  width=width,
+                  pad_x=pad_x,
+                  pad_y=pad_y,
+                  heading=heading,
+                  x_align=x_align,
+                  y_align=y_align,
+                  charset=charset,
+                  border_color=border_color,
+                  text_color=text_color,
+                  heading_color=heading_color,
+                  color_mode=self.COLORMODE)
 
         return box.create(wrap=wrap, replace_whitespace=replace_whitespace)
 
@@ -2980,11 +2994,13 @@ class Box:
         (only even numbers work, this method forces width to be even if it's odd)
     - `pad_x`: padding on X-axis within the box (number of characters)
     - `pad_y`: padding on Y-axis within the box (number of lines)
+    - `heading`: heading text
     - `x_align`: alignment of text on X-Axis (`left`, `center`, `right`)
     - `y_align`: alignment of text on Y-Axis (`top`, `center`, `bottom`)
     - `charset`: the charset to use (`ascii`, `blocks`, `box`, `box_double`, `box_heavy`, `box_round`)
     - `border_color`: color of the border
     - `text_color`: color of the text
+    - `heading_color`: color of the heading
     - `color_mode`: color_mode to use (`4`, `8`, `16`)
 
     #### Example:
@@ -3009,26 +3025,32 @@ class Box:
     - `text_color` is invalid 
     """
 
-    @typecheck(skip=['border_color', 'text_color'])
+    @typecheck(skip=['border_color', 'text_color', 'heading_color'])
     def __init__(self, text: Optional[str] = None,
                  width: Optional[int] = None,
-                 pad_x: int = 0, pad_y: int = 0,
+                 pad_x: int = 0,
+                 pad_y: int = 0,
+                 heading: Optional[str] = None,
                  x_align: Union[XAlign, str] = "left",
                  y_align: Union[YAlign, str] = "top",
                  charset: Union[Charset, str, None] = None,
                  border_color: Color = None,
                  text_color: Color = None,
+                 heading_color: Color = None,
                  color_mode: int = 4) -> None:
 
-        assert x_align in ("center", "left", "right"), f"Invalid x_align: '{
-            x_align}'"
-        assert y_align in {"center", "top",
-                           "bottom"}, f"Invalid y_align: '{y_align}'"
+        assert x_align in ("center", "left", "right"),\
+            f"Invalid x_align: '{x_align}'"
+        assert y_align in {"center", "top", "bottom"},\
+            f"Invalid y_align: '{y_align}'"
 
         if border_color and not is_valid_color(border_color, color_mode):
             raise InvalidColorError(
                 f"Invalid {color_mode}-bit color: '{border_color}'")
         if text_color and not is_valid_color(text_color, color_mode):
+            raise InvalidColorError(
+                f"Invalid {color_mode}-bit color: '{text_color}'")
+        if heading_color and not is_valid_color(heading_color, color_mode):
             raise InvalidColorError(
                 f"Invalid {color_mode}-bit color: '{text_color}'")
 
@@ -3039,6 +3061,7 @@ class Box:
         self.padding_x = pad_x
         self.padding_y = pad_y
         self.color_mode = color_mode
+        self.heading = heading
 
         try:
             self.charset: Dict = CHARSETS[charset]
@@ -3046,12 +3069,11 @@ class Box:
             # Fallback: ascii
             self.charset: Dict = CHARSETS['ascii']
 
-        self.border_color = border_color
-        self.text_color = text_color
-
         self.border_fmt = make_ansi(border_color,
                                     color_mode=color_mode)+"%s"+ANSI_CODES['reset']
         self.text_fmt = make_ansi(text_color,
+                                  color_mode=color_mode)+"%s"+ANSI_CODES['reset']
+        self.heading_fmt = make_ansi(heading_color,
                                   color_mode=color_mode)+"%s"+ANSI_CODES['reset']
 
     def _calculate_width_padding(self, text, width, pad_x, pad_y, wrap):
@@ -3085,10 +3107,19 @@ class Box:
 
     def _create_top_bottom_lines(self, fmt):
         """ Create top and bottom lines of the box """
-        top_line = fmt % f"{self.charset['TOP_LEFT']}{
-            self.charset['TOP_ST']*(self.width-2)}{self.charset['TOP_RIGHT']}"
-        bottom_line = fmt % f"{self.charset['BOTTOM_LEFT']}{
-            self.charset['BOTTOM_ST']*(self.width-2)}{self.charset['BOTTOM_RIGHT']}"
+        top_st = self.charset['TOP_ST']
+        top_lt = self.charset['TOP_LEFT']
+        top_rt = self.charset['TOP_RIGHT']
+        width = self.width - 2
+
+        # Add heading if available
+        if self.heading:
+            rem_line = (top_st * ((width - 5) - len(self.heading))) + top_rt # Remaining line
+            top_line = f"{fmt % (top_lt + (top_st * 3))} {self.heading_fmt % self.heading} {fmt % rem_line}"
+        else:
+            top_line = fmt % f"{top_lt}{top_st * width}{top_rt}"
+        
+        bottom_line = fmt % f"{self.charset['BOTTOM_LEFT']}{self.charset['BOTTOM_ST']*width}{self.charset['BOTTOM_RIGHT']}"
 
         return top_line, bottom_line
 

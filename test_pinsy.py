@@ -313,8 +313,11 @@ def test_boxify():
     assert pins.boxify(dummy, 30, wrap=True, pad_x=2,
                        x_align="center") == "+----------------------------+\x1b[0m\n|\x1b[0m  This is a dummy string. \x1b[0m  |\x1b[0m\n+----------------------------+\x1b[0m"
 
+    assert pins.boxify(dummy, 20, heading="Heading", charset="box_round", heading_color="yellow") == "╭───\x1b[0m \x1b[33mHeading\x1b[0m ────────────╮\x1b[0m\n│\x1b[0mThis is a dummy string. \x1b[0m│\x1b[0m\n╰────────────────────────╯\x1b[0m"
+
     with raises(TypeError):
         pins.boxify(123456)
+        
     with raises(TypeError):
         pins.boxify(None)
 
@@ -335,6 +338,11 @@ def test_boxify():
         pins.boxify(dummy, text_color="cyanish")
     with raises(exceptions.InvalidColorError):
         pins.boxify(dummy, text_color=404)
+    
+    with raises(exceptions.InvalidColorError):
+        pins.boxify(dummy, heading_color="cyanish")
+    with raises(exceptions.InvalidColorError):
+        pins.boxify(dummy, heading_color=404)
 
 
 def test_create_list_ordered():
