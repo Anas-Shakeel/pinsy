@@ -7,9 +7,10 @@ def readme():
     with codecs.open(join(abspath(dirname(__file__)), "README.md"), encoding="utf-8") as f:
         return f.read()
 
+
 setup(
     name='pinsy',
-    version='0.1',
+    version='0.1.1',
     description='A Python package to help speed up the workflow of creating beautiful CLI apps.',
     long_description=readme(),
     long_description_content_type='text/markdown',
@@ -27,6 +28,14 @@ setup(
         "python",
         "cli",
         "command-line",
+        "terminal",
+        "text formatting",
+        "color output",
+        "CLI app development",
+        "CLI tools",
+        "terminal UI",
+        "beautiful CLI apps",
+        "text styling",
     ],
     entry_points={
         "console_scripts": [
