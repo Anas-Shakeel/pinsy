@@ -57,6 +57,7 @@ from pinsy.utils import typecheck, type_match
 from ansy import printc, colored, exceptions, ATTRIBUTES
 from pytest import raises
 import re
+import sys
 from datetime import datetime
 
 
@@ -1441,4 +1442,4 @@ if __name__ == "__main__":
         printc("All Tests Failed :(", "light_red")
 
     # Exit with a code same as failed tests...
-    exit(len(failed))
+    sys.exit(len(failed))
