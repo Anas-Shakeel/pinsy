@@ -23,6 +23,7 @@ from __future__ import annotations
 
 import sys
 import os
+from shutil import get_terminal_size
 import re
 if os.name == 'nt':  # Windows
     import msvcrt
@@ -188,19 +189,7 @@ def get_cursor_pos() -> tuple[int, int]:
     return (-1, -1)
 
 
-def get_terminal_size() -> tuple[int, int]:
-    """ 
-    ### Get Terminal Size
-    Returns a `tuple` containing `(width, height)` of the 
-    visible terminal screen.
-
-    This method is nothing more than just a wrapper around the `get_terminal_size`
-    method from the `os` module.
-    """
-    return tuple(os.get_terminal_size())
-
-
-def type_match(value:Any, expected_type:Any) -> bool:
+def type_match(value: Any, expected_type: Any) -> bool:
     """ 
     ### Type Match
     Checks if a value is an instance of the expected type, supporting complex 
@@ -302,7 +291,7 @@ def type_match(value:Any, expected_type:Any) -> bool:
     # Handle Union
     if origin_type is Union:
         return any(type_match(value, arg) for arg in type_args)
-    
+
     # Handle Optional (equivalent to Union[Any, None])
     if origin_type is Union and type(None) in type_args:
         actual_type = type_args[0] if type_args[1] is type(
@@ -325,7 +314,7 @@ def type_match(value:Any, expected_type:Any) -> bool:
     return False
 
 
-def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str]=None):
+def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = None):
     """ 
     ### Type Check
     A decorator that enforces type checking on function arguments and return values
@@ -376,7 +365,7 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str]=None
     >> add(1.5, 2.5)
     TypeError: Argument 'b' must be <class 'int'>, but got <class 'float'>
     ```
-    
+
     #### NOTE:
     This decorator does not preserve metadata of the function if used without arguments.
     ```
@@ -391,12 +380,12 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str]=None
     ..    return a + b
     .. 
     ```
-    
+
     Raises `TypeError` if argument types or return type do not match annotated type hints.
     """
     if skip or only:
         assert bool(skip) ^ bool(only), "skip and only are mutually exclusive."
-    
+
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
@@ -417,7 +406,7 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str]=None
                 # Skip the requested args
                 if skip and arg_name in skip:
                     continue
-                
+
                 # Typecheck Only the requested args
                 if only and arg_name not in only:
                     continue
@@ -426,7 +415,8 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str]=None
                     # TODO: Normalize Hint names
                     expected_type = hints[arg_name]
                     if not type_match(arg_value, expected_type):
-                        raise TypeError(f"Argument '{arg_name}' must be {expected_type}, but got {type(arg_value)}")
+                        raise TypeError(f"Argument '{arg_name}' must be {
+                                        expected_type}, but got {type(arg_value)}")
 
             # Execute the function and capture result
             result = func(*args, **kwargs)
@@ -451,12 +441,12 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str]=None
 def _normalize_hint(hint) -> str:
     """ 
     Normalize a hint name to a more readable format.
-    
+
     ```
     # Hint name
     >> type(123)
     <class 'int'>
-    
+
     # Normalized hint name
     >> _normalize_hint(type(123))
     'int'
@@ -482,6 +472,6 @@ def _normalize_hint(hint) -> str:
         return "set"
     if hint == type(None):
         return "None"
-    
+
     # IF Not from above, return back
     return hint
