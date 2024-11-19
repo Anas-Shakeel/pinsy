@@ -872,7 +872,7 @@ def test_shorten_path():
     relative_path_2 = "downloads\\files\\music\\song.mp3"
 
     assert pins.shorten_path(absolute_path, 0) == absolute_path
-    assert pins.shorten_path(absolute_path, -1) == "C:\\...\\song.mp3"
+    assert pins.shorten_path(absolute_path, -1) == absolute_path
     assert pins.shorten_path(absolute_path, 8000) == "C:\\...\\song.mp3"
     assert (
         pins.shorten_path(absolute_path, n=1)
@@ -880,12 +880,12 @@ def test_shorten_path():
     )
 
     assert pins.shorten_path(relative_path, n=0) == relative_path
-    assert pins.shorten_path(relative_path, n=-1) == "downloads\\...\\song.mp3"
+    assert pins.shorten_path(relative_path, n=-1) == relative_path
     assert pins.shorten_path(relative_path, n=800) == "downloads\\...\\song.mp3"
     assert pins.shorten_path(relative_path, n=1) == "downloads\\...\\music\\song.mp3"
 
     assert pins.shorten_path(relative_path_2, n=0) == relative_path_2
-    assert pins.shorten_path(relative_path_2, n=-1) == "downloads\\...\\song.mp3"
+    assert pins.shorten_path(relative_path_2, n=-1) == relative_path_2
     assert pins.shorten_path(relative_path_2, n=800) == "downloads\\...\\song.mp3"
     assert pins.shorten_path(relative_path_2, n=1) == "downloads\\...\\music\\song.mp3"
 

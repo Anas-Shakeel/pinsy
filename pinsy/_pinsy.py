@@ -2376,12 +2376,12 @@ class Pins:
     def shorten_path(self, p: str, n: int = 3, replacement: str = "...") -> str:
         """
         ### Shorten Path
-        Truncate first `n` parts (exluding prefix) from `p` path. This method also
+        Truncate first `n` parts (exluding prefix) from `p` path. This method 
         never truncates the suffix (last part).
 
         #### ARGS:
         - `p`: the path to shorten
-        - `n`: number of parts to truncate (`-1` to truncate maximum parts)
+        - `n`: number of parts to truncate
         - `replacement`: string placed in place of truncated parts
 
         #### Example:
@@ -2394,7 +2394,7 @@ class Pins:
         if not p:
             return ""
 
-        if n == 0 or n < -1:
+        if n <= 0:
             return p
 
         p: Path = Path(p)
