@@ -25,6 +25,7 @@ MANIFEST
 MANIFEST.in
 
 # Other
+myenv39/
 images/
 backups/
 TODO.md
