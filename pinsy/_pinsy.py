@@ -2376,7 +2376,7 @@ class Pins:
     def shorten_path(self, p: str, n: int = 3, replacement: str = "...") -> str:
         """
         ### Shorten Path
-        Truncate first `n` parts (exluding prefix) from `p` path. This method 
+        Truncate first `n` parts (exluding prefix) from `p` path. This method
         never truncates the suffix (last part).
 
         #### ARGS:
@@ -3657,10 +3657,10 @@ class Validator:
         if extension.count(".") > 1:
             return False
 
-        if " " in extension:
-            return False
-
         if cls.OS == "Windows":
+            if " " in extension:
+                return False
+
             for char in r'\/:*?"<>|':
                 if char in extension:
                     return False

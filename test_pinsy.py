@@ -1255,6 +1255,9 @@ def test_is_valid_filepath():
     else:  # Mac/Linux
         valid_paths = [
             "file.txt",  # just file
+            "file.<txt>",
+            "file.tx t",
+            "file.*txt*",
             "/home/username/Documents/file.txt",  # Normal fullpath
             "/usr/local/bin/executable",  # Path to bin
             "/home/username/Desktop/Valid<file>.txt",  # <> chars
@@ -1269,14 +1272,14 @@ def test_is_valid_filepath():
             "/home/username/symlink_to_file",  # symlink path
         ]
         for fpath in valid_paths:
-            assert Validator.is_valid_filepath(fpath, extension=None)
+            assert Validator.is_valid_filepath(fpath, extension=None) == True
 
     # Other Tests
-    assert Validator.is_valid_filepath("file", extension=None)
-    assert Validator.is_valid_filepath("file.py", extension=None)
-    assert Validator.is_valid_filepath("file.c", extension="*")
-    assert Validator.is_valid_filepath("file.java", extension="*")
-    assert Validator.is_valid_filepath("file.cpp", extension=".cpp")
+    assert Validator.is_valid_filepath("file", extension=None) == True
+    assert Validator.is_valid_filepath("file.py", extension=None) == True
+    assert Validator.is_valid_filepath("file.c", extension="*") == True
+    assert Validator.is_valid_filepath("file.java", extension="*") == True
+    assert Validator.is_valid_filepath("file.cpp", extension=".cpp") == True
 
     assert isinstance(Validator.is_valid_filepath("file.txt", extension=".py"), str)
     assert isinstance(Validator.is_valid_filepath("file", extension=".py"), str)
@@ -1293,10 +1296,6 @@ def test_is_valid_filepath():
         ),
         bool,
     )
-    assert isinstance(Validator.is_valid_filepath("file.<txt>"), str)
-    assert isinstance(Validator.is_valid_filepath("file.tx t"), str)
-    assert isinstance(Validator.is_valid_filepath("file.tx t", extension=None), str)
-    assert isinstance(Validator.is_valid_filepath("file.*txt*", extension=None), str)
 
     with raises(AssertionError):
         Validator.is_valid_filepath(123)
@@ -1326,27 +1325,28 @@ def test_is_valid_dirpath():
             "C:\\Users\\Username\\path/with\\mixed\\slashes",  # Mixed slashes
             "C:\\Users\\Username\\Desktop\\UnicodeÆÓÇ│▓█▌▌τì←∞?♫¢chars",  # Unicode chars
         ]
-        for fpath in valid_paths_win:
-            assert Validator.is_valid_dirpath(fpath)
+        for dpath in valid_paths_win:
+            assert Validator.is_valid_dirpath(dpath)
 
         # ILLEGAL CHARS <>
         assert isinstance(Validator.is_valid_dirpath("C:\\Invalid<file>.txt"), str)
 
     else:  # Mac/Linux
         valid_paths = [
-            "folder",  # just file
-            "/home/username/Documents/folder",  # Normal fullpath
-            "/usr/local/bin/",  # Path to bin
-            "/home/username/Desktop/Valid<folder>",  # <> chars
-            "/home/username/My Project/folder 1",  # Contains space
-            "/home/username/Documents/folder/",  # Trailing slash
-            "/mnt/data/folder with unicode ÆÓÇ│▓█▌▌τì←∞?♫¢",  # Unicode chars
-            "/home//username//folder",  # Double slashes
-            "/home/username/Documents/Longpath/very/long/path/to/a/deeply/nested/folder",  # Long path
-            "~/Documents/folder",  # tilde as home dir shorthand
+            "folder",
+            "folder 0 | folder 1",
+            "/home/username/Documents/folder",
+            "/usr/local/bin/",
+            "/home/username/Desktop/Valid<folder>",
+            "/home/username/My Project/folder 1",
+            "/home/username/Documents/folder/",
+            "/mnt/data/folder with unicode ÆÓÇ│▓█▌▌τì←∞?♫¢",
+            "/home//username//folder",
+            "/home/username/Documents/Longpath/very/long/path/to/a/deeply/nested/folder",
+            "~/Documents/folder",
         ]
-        for fpath in valid_paths:
-            assert Validator.is_valid_filepath(fpath, extension=None)
+        for dpath in valid_paths:
+            assert Validator.is_valid_dirpath(dpath)
 
     # Other Tests
     assert isinstance(
@@ -1356,9 +1356,6 @@ def test_is_valid_dirpath():
         str,
     )  # Length
     assert isinstance(Validator.is_valid_dirpath(""), str)  # Empty not allowed
-    assert isinstance(
-        Validator.is_valid_dirpath("folder 0 | folder 1"), str
-    )  # illegal chars
     assert isinstance(Validator.is_valid_dirpath("folder.<txt>"), str)  # illegal chars
 
     with raises(AssertionError):
