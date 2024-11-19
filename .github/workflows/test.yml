@@ -34,4 +34,4 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run Tests
-        run: python test_pinsy.py
+        run: pytest test_pinsy.py
