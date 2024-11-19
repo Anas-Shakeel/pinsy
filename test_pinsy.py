@@ -68,16 +68,17 @@ pins = Pins()
 # DONT ALTER THESE DUMMIES PLEASE!!! Used by tests.
 dummy = "This is a dummy string."
 dummy_lg = "pine ordinary factor control bear use nation after blind loss deep serve stiff give railroad cry whale gone save sing wire bank ear swamThis is a dummy string."
-dummy_items = ['item 1', 'item 2', 'item 3', 'item 4', 'item 5']
+dummy_items = ["item 1", "item 2", "item 3", "item 4", "item 5"]
 dummy_dict = {
     "name": "Pinsy",
     "author": "Anas Shakeel",
     "repository": "https://github.com/Anas-Shakeel/pinsy",
-    "created": None
+    "created": None,
 }
 
 
 # pinsy.Pins Tests
+
 
 def test_pins():
     p = Pins()
@@ -92,16 +93,16 @@ def test_pins():
         p.set_colormode("invalid colormode")
 
     # Promptchars
-    assert p.promptize("prompt: ") == '>> prompt: '
-    assert p.promptize("Your name: ", prompt_char=">") == '> Your name: '
-    assert p.promptize("Your name: ", prompt_char=123) == '123 Your name: '
+    assert p.promptize("prompt: ") == ">> prompt: "
+    assert p.promptize("Your name: ", prompt_char=">") == "> Your name: "
+    assert p.promptize("Your name: ", prompt_char=123) == "123 Your name: "
 
     # Charsets
-    assert p.create_hr(5) == '-----'
+    assert p.create_hr(5) == "-----"
     p.set_charset("box")
-    assert p.create_hr(5) == '─────'
+    assert p.create_hr(5) == "─────"
     p.set_charset("blocks")
-    assert p.create_hr(5) == '■■■■■'
+    assert p.create_hr(5) == "■■■■■"
 
     with raises(AssertionError):
         p.set_charset("invalid charset")
@@ -110,113 +111,272 @@ def test_pins():
 
     # Renew Pins instance
     p = Pins()
-    assert p.colorize("testing", "red") == '\x1b[31mtesting\x1b[0m'
+    assert p.colorize("testing", "red", force_color=True) == "\x1b[31mtesting\x1b[0m"
 
     p.disable_colors()
-    assert p.colorize("testing", "red") == 'testing'
+    assert p.colorize("testing", "red", force_color=True) == "testing"
     p.enable_colors()
 
 
 def test_colorize_4bit():
     # Test 4-bit
-    assert pins.colorize(dummy) == "This is a dummy string."
-    assert pins.colorize(dummy, fgcolor="red", bgcolor="dark_grey", attrs=(
-        'bold', 'italic')) == "\x1b[3m\x1b[1m\x1b[100m\x1b[31mThis is a dummy string.\x1b[0m"
-    assert pins.colorize(123, fgcolor="red", bgcolor="dark_grey", attrs=[
-                         'bold', 'italic']) == "\x1b[3m\x1b[1m\x1b[100m\x1b[31m123\x1b[0m"
-    assert pins.colorize("", fgcolor="red", attrs=['bold', 'italic']) == ""
-    assert pins.colorize(None, bgcolor="dark_grey",
-                         attrs=['bold', 'italic']) == ""
+    assert pins.colorize(dummy, force_color=True) == "This is a dummy string."
+
+    assert (
+        pins.colorize(
+            dummy,
+            fgcolor="red",
+            bgcolor="dark_grey",
+            attrs=("bold", "italic"),
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[100m\x1b[31mThis is a dummy string.\x1b[0m"
+    )
+
+    assert (
+        pins.colorize(
+            123,
+            fgcolor="red",
+            bgcolor="dark_grey",
+            attrs=["bold", "italic"],
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[100m\x1b[31m123\x1b[0m"
+    )
+
+    assert (
+        pins.colorize("", fgcolor="red", attrs=["bold", "italic"], force_color=True)
+        == ""
+    )
+
+    assert (
+        pins.colorize(
+            None, bgcolor="dark_grey", attrs=["bold", "italic"], force_color=True
+        )
+        == ""
+    )
 
     with raises(exceptions.ColorModeError):
-        pins.colorize(dummy, "light_red", color_mode="4")
+        pins.colorize(dummy, "light_red", color_mode="4", force_color=True)
 
     with raises(AttributeError):
-        pins.colorize(dummy, "light_red", attrs=['bol'])
+        pins.colorize(dummy, "light_red", attrs=["bol"], force_color=True)
 
     with raises(AssertionError):
-        pins.colorize(dummy, "light_red", attrs="bol")
+        pins.colorize(dummy, "light_red", attrs="bol", force_color=True)
 
     with raises(AssertionError):
-        pins.colorize(dummy, "light_red", attrs=123)
+        pins.colorize(dummy, "light_red", attrs=123, force_color=True)
 
     with raises(exceptions.InvalidColorError):
-        pins.colorize(dummy, "light_r")
+        pins.colorize(dummy, "light_r", force_color=True)
 
 
 def test_colorize_8bit():
     # Test 8-bit
-    assert pins.colorize(dummy, color_mode=8) == "This is a dummy string."
+    assert (
+        pins.colorize(dummy, color_mode=8, force_color=True)
+        == "This is a dummy string."
+    )
 
-    assert pins.colorize(dummy, fgcolor="plum", bgcolor="sea_green", attrs=[
-                         'bold', 'italic'], color_mode=8) == "\x1b[3m\x1b[1m\x1b[48;5;78m\x1b[38;5;183mThis is a dummy string.\x1b[0m"
-    assert pins.colorize(123, fgcolor="plum", bgcolor="sea_green", attrs=[
-                         'bold', 'italic'], color_mode=8) == "\x1b[3m\x1b[1m\x1b[48;5;78m\x1b[38;5;183m123\x1b[0m"
+    assert (
+        pins.colorize(
+            dummy,
+            fgcolor="plum",
+            bgcolor="sea_green",
+            attrs=["bold", "italic"],
+            color_mode=8,
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[48;5;78m\x1b[38;5;183mThis is a dummy string.\x1b[0m"
+    )
 
-    assert pins.colorize(dummy, fgcolor=250, bgcolor=20, attrs=[
-                         'bold', 'italic'], color_mode=8) == "\x1b[3m\x1b[1m\x1b[48;5;20m\x1b[38;5;250mThis is a dummy string.\x1b[0m"
-    assert pins.colorize(123, fgcolor="plum", bgcolor=25, attrs=[
-                         'bold', 'italic'], color_mode=8) == "\x1b[3m\x1b[1m\x1b[48;5;25m\x1b[38;5;183m123\x1b[0m"
+    assert (
+        pins.colorize(
+            123,
+            fgcolor="plum",
+            bgcolor="sea_green",
+            attrs=["bold", "italic"],
+            color_mode=8,
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[48;5;78m\x1b[38;5;183m123\x1b[0m"
+    )
 
-    assert pins.colorize("", fgcolor="brown_sandy", attrs=[
-                         'bold', 'italic'], color_mode=8) == ""
-    assert pins.colorize(None, bgcolor="dark_grey", attrs=[
-                         'bold', 'italic'], color_mode=8) == ""
+    assert (
+        pins.colorize(
+            dummy,
+            fgcolor=250,
+            bgcolor=20,
+            attrs=["bold", "italic"],
+            color_mode=8,
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[48;5;20m\x1b[38;5;250mThis is a dummy string.\x1b[0m"
+    )
+
+    assert (
+        pins.colorize(
+            123,
+            fgcolor="plum",
+            bgcolor=25,
+            attrs=["bold", "italic"],
+            color_mode=8,
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[48;5;25m\x1b[38;5;183m123\x1b[0m"
+    )
+
+    assert (
+        pins.colorize(
+            "",
+            fgcolor="brown_sandy",
+            attrs=["bold", "italic"],
+            color_mode=8,
+            force_color=True,
+        )
+        == ""
+    )
+
+    assert (
+        pins.colorize(
+            None,
+            bgcolor="dark_grey",
+            attrs=["bold", "italic"],
+            color_mode=8,
+            force_color=True,
+        )
+        == ""
+    )
 
     with raises(exceptions.InvalidColorError):
-        pins.colorize(dummy, "#555", color_mode=8)
+        pins.colorize(dummy, "#555", color_mode=8, force_color=True)
 
     with raises(exceptions.InvalidColorError):
-        pins.colorize(dummy, "light_reds", color_mode=8)
+        pins.colorize(dummy, "light_reds", color_mode=8, force_color=True)
 
     with raises(exceptions.InvalidColorError):
-        pins.colorize(dummy, 258, color_mode=8)
+        pins.colorize(dummy, 258, color_mode=8, force_color=True)
 
 
 def test_colorize_24bit():
     # Test 24-bit
-    assert pins.colorize(dummy, color_mode=24) == "This is a dummy string."
+    assert (
+        pins.colorize(dummy, color_mode=24, force_color=True)
+        == "This is a dummy string."
+    )
 
-    assert pins.colorize(dummy, fgcolor=(255, 52, 52), bgcolor=(50, 50, 50), attrs=[
-                         'bold', 'italic'], color_mode=24) == "\x1b[3m\x1b[1m\x1b[48;2;50;50;50m\x1b[38;2;255;52;52mThis is a dummy string.\x1b[0m"
-    assert pins.colorize(123, fgcolor=(255, 52, 52), bgcolor=(50, 50, 50), attrs=[
-                         'bold', 'italic'], color_mode=24) == "\x1b[3m\x1b[1m\x1b[48;2;50;50;50m\x1b[38;2;255;52;52m123\x1b[0m"
+    assert (
+        pins.colorize(
+            dummy,
+            fgcolor=(255, 52, 52),
+            bgcolor=(50, 50, 50),
+            attrs=["bold", "italic"],
+            color_mode=24,
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[48;2;50;50;50m\x1b[38;2;255;52;52mThis is a dummy string.\x1b[0m"
+    )
 
-    assert pins.colorize(dummy, fgcolor="fff", bgcolor="#555555", attrs=[
-                         'bold', 'italic'], color_mode=24) == "\x1b[3m\x1b[1m\x1b[48;2;85;85;85m\x1b[38;2;255;255;255mThis is a dummy string.\x1b[0m"
-    assert pins.colorize(123, fgcolor=(255, 255, 255), bgcolor="#555555", attrs=[
-                         'bold', 'italic'], color_mode=24) == "\x1b[3m\x1b[1m\x1b[48;2;85;85;85m\x1b[38;2;255;255;255m123\x1b[0m"
+    assert (
+        pins.colorize(
+            123,
+            fgcolor=(255, 52, 52),
+            bgcolor=(50, 50, 50),
+            attrs=["bold", "italic"],
+            color_mode=24,
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[48;2;50;50;50m\x1b[38;2;255;52;52m123\x1b[0m"
+    )
 
-    assert pins.colorize("", fgcolor="#356456", attrs=[
-                         'bold', 'italic'], color_mode=24) == ""
-    assert pins.colorize(None, bgcolor="#524658", attrs=[
-                         'bold', 'italic'], color_mode=24) == ""
+    assert (
+        pins.colorize(
+            dummy,
+            fgcolor="fff",
+            bgcolor="#555555",
+            attrs=["bold", "italic"],
+            color_mode=24,
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[48;2;85;85;85m\x1b[38;2;255;255;255mThis is a dummy string.\x1b[0m"
+    )
+
+    assert (
+        pins.colorize(
+            123,
+            fgcolor=(255, 255, 255),
+            bgcolor="#555555",
+            attrs=["bold", "italic"],
+            color_mode=24,
+            force_color=True,
+        )
+        == "\x1b[3m\x1b[1m\x1b[48;2;85;85;85m\x1b[38;2;255;255;255m123\x1b[0m"
+    )
+
+    assert (
+        pins.colorize(
+            "",
+            fgcolor="#356456",
+            attrs=["bold", "italic"],
+            color_mode=24,
+            force_color=True,
+        )
+        == ""
+    )
+
+    assert (
+        pins.colorize(
+            None,
+            bgcolor="#524658",
+            attrs=["bold", "italic"],
+            color_mode=24,
+            force_color=True,
+        )
+        == ""
+    )
 
     with raises(exceptions.InvalidColorError):
-        pins.colorize(dummy, "red", color_mode=24)
+        pins.colorize(dummy, "red", color_mode=24, force_color=True)
 
     with raises(exceptions.InvalidColorError):
-        pins.colorize(dummy, "plum", color_mode=24)
+        pins.colorize(dummy, "plum", color_mode=24, force_color=True)
 
     with raises(exceptions.InvalidColorError):
-        pins.colorize(dummy, (256, 258, 256), color_mode=24)
+        pins.colorize(dummy, (256, 258, 256), color_mode=24, force_color=True)
 
 
 def test_colorize_regex():
     assert pins.colorize_regex("", "", "red") == ""
     assert pins.colorize_regex(dummy, "") == "This is a dummy string."
-    assert pins.colorize_regex("8008135 is a number", re.compile(r"[0-9]+"),
-                               fgcolor="red") == '\x1b[31m8008135\x1b[0m is a number'
+    assert (
+        pins.colorize_regex("8008135 is a number", re.compile(r"[0-9]+"), fgcolor="red")
+        == "\x1b[31m8008135\x1b[0m is a number"
+    )
 
-    assert pins.colorize_regex(dummy, pattern="This", fgcolor="yellow", bgcolor="dark_grey", attrs=[
-                               'strike']) == "\x1b[9m\x1b[100m\x1b[33mThis\x1b[0m is a dummy string."
-    assert pins.colorize_regex(dummy, pattern="s",
-                               fgcolor="yellow") == "Thi\x1b[33ms\x1b[0m i\x1b[33ms\x1b[0m a dummy \x1b[33ms\x1b[0mtring."
+    assert (
+        pins.colorize_regex(
+            dummy,
+            pattern="This",
+            fgcolor="yellow",
+            bgcolor="dark_grey",
+            attrs=["strike"],
+        )
+        == "\x1b[9m\x1b[100m\x1b[33mThis\x1b[0m is a dummy string."
+    )
+    assert (
+        pins.colorize_regex(dummy, pattern="s", fgcolor="yellow")
+        == "Thi\x1b[33ms\x1b[0m i\x1b[33ms\x1b[0m a dummy \x1b[33ms\x1b[0mtring."
+    )
 
-    assert pins.colorize_regex(dummy, pattern=re.compile(r"[ast]"),
-                               fgcolor="yellow") == "Thi\x1b[33ms\x1b[0m i\x1b[33ms\x1b[0m \x1b[33ma\x1b[0m dummy \x1b[33ms\x1b[0m\x1b[33mt\x1b[0mring."
-    assert pins.colorize_regex(dummy, re.compile(
-        r"\s"), bgcolor="light_red") == 'This\x1b[101m \x1b[0mis\x1b[101m \x1b[0ma\x1b[101m \x1b[0mdummy\x1b[101m \x1b[0mstring.'
+    assert (
+        pins.colorize_regex(dummy, pattern=re.compile(r"[ast]"), fgcolor="yellow")
+        == "Thi\x1b[33ms\x1b[0m i\x1b[33ms\x1b[0m \x1b[33ma\x1b[0m dummy \x1b[33ms\x1b[0m\x1b[33mt\x1b[0mring."
+    )
+    assert (
+        pins.colorize_regex(dummy, re.compile(r"\s"), bgcolor="light_red")
+        == "This\x1b[101m \x1b[0mis\x1b[101m \x1b[0ma\x1b[101m \x1b[0mdummy\x1b[101m \x1b[0mstring."
+    )
 
     with raises(TypeError):
         pins.colorize_regex("None", None)
@@ -273,14 +433,31 @@ def test_create_hr():
 def test_create_status():
     label = "test"
 
-    assert pins.create_status("", "") == ""
-    assert pins.create_status("asd", "") == ""
+    assert pins.create_status("", "", force_color=True) == ""
+    assert pins.create_status("asd", "", force_color=True) == ""
+    assert (
+        pins.create_status(label, dummy, force_color=True)
+        == "█ test: This is a dummy string."
+    )
+
+    assert (
+        pins.create_status(
+            label,
+            dummy,
+            label_fg="light_blue",
+            label_bg="dark_grey",
+            label_attrs=["bold"],
+            text_fg="light_green",
+            text_bg="dark_grey",
+            text_attrs=["italic"],
+            force_color=True,
+        )
+        == "\x1b[1m\x1b[100m\x1b[94m█ test: \x1b[0m\x1b[3m\x1b[100m\x1b[92mThis is a dummy string.\x1b[0m"
+    )
+
     assert pins.create_status(
-        label, dummy) == "█ test: This is a dummy string."
-    assert pins.create_status(label, dummy, "light_blue", "dark_grey", ['bold'],
-                              "light_green", "dark_grey", ['italic']) == "\x1b[1m\x1b[100m\x1b[94m█ test: \x1b[0m\x1b[3m\x1b[100m\x1b[92mThis is a dummy string.\x1b[0m"
-    assert pins.create_status(label, dummy_lg, "light_blue").startswith(
-        '\x1b[94m█ test: \x1b[0mpine ordinary factor control')
+        label, dummy_lg, label_fg="light_blue", force_color=True
+    ).startswith("\x1b[94m█ test: \x1b[0mpine ordinary factor control")
 
     # Label and text
     with raises(AssertionError):
@@ -296,7 +473,7 @@ def test_create_status():
 
     # Attrs
     with raises(AttributeError):
-        pins.create_status(label, dummy, text_attrs=['vold'])
+        pins.create_status(label, dummy, text_attrs=["vold"])
     with raises(AssertionError):
         pins.create_status(label, dummy, text_attrs=123)
     with raises(AssertionError):
@@ -305,20 +482,48 @@ def test_create_status():
 
 def test_boxify():
     assert pins.boxify("", 5) == ""
-    assert pins.boxify(
-        dummy, 30) == "+----------------------------+\x1b[0m\n|\x1b[0mThis is a dummy string.     \x1b[0m|\x1b[0m\n+----------------------------+\x1b[0m"
-    assert pins.boxify(dummy, 30, x_align="center", y_align="center", border_color="blue",
-                       text_color="green") == "\x1b[34m+----------------------------+\x1b[0m\n\x1b[34m|\x1b[0m\x1b[32m  This is a dummy string.   \x1b[0m\x1b[34m|\x1b[0m\n\x1b[34m+----------------------------+\x1b[0m"
-    assert pins.boxify(
-        dummy, 6, wrap=True) == "+----+\x1b[0m\n|\x1b[0mThis\x1b[0m|\x1b[0m\n|\x1b[0mis a\x1b[0m|\x1b[0m\n|\x1b[0mdumm\x1b[0m|\x1b[0m\n|\x1b[0my st\x1b[0m|\x1b[0m\n|\x1b[0mring\x1b[0m|\x1b[0m\n|\x1b[0m.   \x1b[0m|\x1b[0m\n+----+\x1b[0m"
-    assert pins.boxify(dummy, 30, wrap=True, pad_x=2,
-                       x_align="center") == "+----------------------------+\x1b[0m\n|\x1b[0m  This is a dummy string. \x1b[0m  |\x1b[0m\n+----------------------------+\x1b[0m"
 
-    assert pins.boxify(dummy, 20, heading="Heading", charset="box_round", heading_color="yellow") == "╭───\x1b[0m \x1b[33mHeading\x1b[0m ────────────╮\x1b[0m\n│\x1b[0mThis is a dummy string. \x1b[0m│\x1b[0m\n╰────────────────────────╯\x1b[0m"
+    assert (
+        pins.boxify(dummy, width=30)
+        == "+----------------------------+\x1b[0m\n|\x1b[0mThis is a dummy string.     \x1b[0m|\x1b[0m\n+----------------------------+\x1b[0m"
+    )
+
+    assert (
+        pins.boxify(
+            dummy,
+            width=30,
+            x_align="center",
+            y_align="center",
+            border_color="blue",
+            text_color="green",
+        )
+        == "\x1b[34m+----------------------------+\x1b[0m\n\x1b[34m|\x1b[0m\x1b[32m  This is a dummy string.   \x1b[0m\x1b[34m|\x1b[0m\n\x1b[34m+----------------------------+\x1b[0m"
+    )
+
+    assert (
+        pins.boxify(dummy, width=6, wrap=True)
+        == "+----+\x1b[0m\n|\x1b[0mThis\x1b[0m|\x1b[0m\n|\x1b[0mis a\x1b[0m|\x1b[0m\n|\x1b[0mdumm\x1b[0m|\x1b[0m\n|\x1b[0my st\x1b[0m|\x1b[0m\n|\x1b[0mring\x1b[0m|\x1b[0m\n|\x1b[0m.   \x1b[0m|\x1b[0m\n+----+\x1b[0m"
+    )
+
+    assert (
+        pins.boxify(dummy, width=30, wrap=True, pad_x=2, x_align="center")
+        == "+----------------------------+\x1b[0m\n|\x1b[0m  This is a dummy string. \x1b[0m  |\x1b[0m\n+----------------------------+\x1b[0m"
+    )
+
+    assert (
+        pins.boxify(
+            dummy,
+            width=20,
+            heading="Heading",
+            charset="box_round",
+            heading_color="yellow",
+        )
+        == "╭───\x1b[0m \x1b[33mHeading\x1b[0m ────────────╮\x1b[0m\n│\x1b[0mThis is a dummy string. \x1b[0m│\x1b[0m\n╰────────────────────────╯\x1b[0m"
+    )
 
     with raises(TypeError):
         pins.boxify(123456)
-        
+
     with raises(TypeError):
         pins.boxify(None)
 
@@ -339,7 +544,7 @@ def test_boxify():
         pins.boxify(dummy, text_color="cyanish")
     with raises(exceptions.InvalidColorError):
         pins.boxify(dummy, text_color=404)
-    
+
     with raises(exceptions.InvalidColorError):
         pins.boxify(dummy, heading_color="cyanish")
     with raises(exceptions.InvalidColorError):
@@ -348,18 +553,52 @@ def test_boxify():
 
 def test_create_list_ordered():
     assert pins.create_list_ordered([]) == None
-    assert pins.create_list_ordered(dummy_items, num_color="magenta", num_attrs=['bold'], item_color="green", item_attrs=[
-                                    'italic']) == '\x1b[1m\x1b[35m1.\x1b[0m \x1b[3m\x1b[32mitem 1\x1b[0m\n\x1b[1m\x1b[35m2.\x1b[0m \x1b[3m\x1b[32mitem 2\x1b[0m\n\x1b[1m\x1b[35m3.\x1b[0m \x1b[3m\x1b[32mitem 3\x1b[0m\n\x1b[1m\x1b[35m4.\x1b[0m \x1b[3m\x1b[32mitem 4\x1b[0m\n\x1b[1m\x1b[35m5.\x1b[0m \x1b[3m\x1b[32mitem 5\x1b[0m'
-    assert pins.create_list_ordered(
-        dummy_items) == '1. item 1\n2. item 2\n3. item 3\n4. item 4\n5. item 5'
-    assert pins.create_list_ordered(
-        tuple(dummy_items)) == '1. item 1\n2. item 2\n3. item 3\n4. item 4\n5. item 5'
-    assert pins.create_list_ordered(
-        dummy_items, line_height=1) == "1. item 1\n\n2. item 2\n\n3. item 3\n\n4. item 4\n\n5. item 5"
-    assert pins.create_list_ordered(dummy_items, indent=4, list_indent=2, num_color="magenta",
-                                    item_color="green") == '    \x1b[35m1.\x1b[0m \x1b[32mitem 1\x1b[0m\n    \x1b[35m2.\x1b[0m \x1b[32mitem 2\x1b[0m\n    \x1b[35m3.\x1b[0m \x1b[32mitem 3\x1b[0m\n    \x1b[35m4.\x1b[0m \x1b[32mitem 4\x1b[0m\n    \x1b[35m5.\x1b[0m \x1b[32mitem 5\x1b[0m'
-    assert pins.create_list_ordered(["Starting multi-level list", dummy_items, "Ending multi-level list",], num_color="magenta", num_attrs=['bold'], item_color="green", item_attrs=[
-                                    'italic']) == '\x1b[1m\x1b[35m1.\x1b[0m \x1b[3m\x1b[32mStarting multi-level list\x1b[0m\n    \x1b[1m\x1b[35m1.1.\x1b[0m \x1b[3m\x1b[32mitem 1\x1b[0m\n    \x1b[1m\x1b[35m1.2.\x1b[0m \x1b[3m\x1b[32mitem 2\x1b[0m\n    \x1b[1m\x1b[35m1.3.\x1b[0m \x1b[3m\x1b[32mitem 3\x1b[0m\n    \x1b[1m\x1b[35m1.4.\x1b[0m \x1b[3m\x1b[32mitem 4\x1b[0m\n    \x1b[1m\x1b[35m1.5.\x1b[0m \x1b[3m\x1b[32mitem 5\x1b[0m\n\x1b[1m\x1b[35m2.\x1b[0m \x1b[3m\x1b[32mEnding multi-level list\x1b[0m'
+    assert (
+        pins.create_list_ordered(
+            dummy_items,
+            num_color="magenta",
+            num_attrs=["bold"],
+            item_color="green",
+            item_attrs=["italic"],
+        )
+        == "\x1b[1m\x1b[35m1.\x1b[0m \x1b[3m\x1b[32mitem 1\x1b[0m\n\x1b[1m\x1b[35m2.\x1b[0m \x1b[3m\x1b[32mitem 2\x1b[0m\n\x1b[1m\x1b[35m3.\x1b[0m \x1b[3m\x1b[32mitem 3\x1b[0m\n\x1b[1m\x1b[35m4.\x1b[0m \x1b[3m\x1b[32mitem 4\x1b[0m\n\x1b[1m\x1b[35m5.\x1b[0m \x1b[3m\x1b[32mitem 5\x1b[0m"
+    )
+    assert (
+        pins.create_list_ordered(dummy_items)
+        == "1. item 1\n2. item 2\n3. item 3\n4. item 4\n5. item 5"
+    )
+    assert (
+        pins.create_list_ordered(tuple(dummy_items))
+        == "1. item 1\n2. item 2\n3. item 3\n4. item 4\n5. item 5"
+    )
+    assert (
+        pins.create_list_ordered(dummy_items, line_height=1)
+        == "1. item 1\n\n2. item 2\n\n3. item 3\n\n4. item 4\n\n5. item 5"
+    )
+    assert (
+        pins.create_list_ordered(
+            dummy_items,
+            indent=4,
+            list_indent=2,
+            num_color="magenta",
+            item_color="green",
+        )
+        == "    \x1b[35m1.\x1b[0m \x1b[32mitem 1\x1b[0m\n    \x1b[35m2.\x1b[0m \x1b[32mitem 2\x1b[0m\n    \x1b[35m3.\x1b[0m \x1b[32mitem 3\x1b[0m\n    \x1b[35m4.\x1b[0m \x1b[32mitem 4\x1b[0m\n    \x1b[35m5.\x1b[0m \x1b[32mitem 5\x1b[0m"
+    )
+    assert (
+        pins.create_list_ordered(
+            [
+                "Starting multi-level list",
+                dummy_items,
+                "Ending multi-level list",
+            ],
+            num_color="magenta",
+            num_attrs=["bold"],
+            item_color="green",
+            item_attrs=["italic"],
+        )
+        == "\x1b[1m\x1b[35m1.\x1b[0m \x1b[3m\x1b[32mStarting multi-level list\x1b[0m\n    \x1b[1m\x1b[35m1.1.\x1b[0m \x1b[3m\x1b[32mitem 1\x1b[0m\n    \x1b[1m\x1b[35m1.2.\x1b[0m \x1b[3m\x1b[32mitem 2\x1b[0m\n    \x1b[1m\x1b[35m1.3.\x1b[0m \x1b[3m\x1b[32mitem 3\x1b[0m\n    \x1b[1m\x1b[35m1.4.\x1b[0m \x1b[3m\x1b[32mitem 4\x1b[0m\n    \x1b[1m\x1b[35m1.5.\x1b[0m \x1b[3m\x1b[32mitem 5\x1b[0m\n\x1b[1m\x1b[35m2.\x1b[0m \x1b[3m\x1b[32mEnding multi-level list\x1b[0m"
+    )
 
     with raises(TypeError):
         pins.create_list_ordered("dummy_items")
@@ -371,23 +610,53 @@ def test_create_list_ordered():
         pins.create_list_ordered(dummy_items, line_height="123")
 
     with raises(exceptions.InvalidColorError):
-        pins.create_list_ordered(
-            dummy_items, num_color="magentas", num_attrs=['bold'])
+        pins.create_list_ordered(dummy_items, num_color="magentas", num_attrs=["bold"])
     with raises(AttributeError):
-        pins.create_list_ordered(
-            dummy_items, num_color="magenta", num_attrs=['bolds'])
+        pins.create_list_ordered(dummy_items, num_color="magenta", num_attrs=["bolds"])
 
 
 def test_create_list_unordered():
     assert pins.create_list_unordered([]) == None
-    assert pins.create_list_unordered(["Starting multi-level list", dummy_items, "Ending multi-level list",],
-                                      bullet_map=['+', '-'], bullet_color="magenta", bullet_attrs=['bold'],
-                                      item_color="green", item_attrs=['italic']) == '\x1b[1m\x1b[35m+\x1b[0m \x1b[3m\x1b[32mStarting multi-level list\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 1\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 2\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 3\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 4\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 5\x1b[0m\n\x1b[1m\x1b[35m+\x1b[0m \x1b[3m\x1b[32mEnding multi-level list\x1b[0m'
-    assert pins.create_list_unordered(dummy_items, "+", indent=4, list_indent=2, line_height=1,
-                                      bullet_color="magenta", bullet_attrs=['bold'],
-                                      item_color="green", item_attrs=['italic', 'underline']) == '    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 1\x1b[0m\n\n    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 2\x1b[0m\n\n    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 3\x1b[0m\n\n    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 4\x1b[0m\n\n    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 5\x1b[0m'
-    assert pins.create_list_unordered(["Starting multi-level list", dummy_items, "Ending multi-level list",],
-                                      bullet_map="+-") == '+ Starting multi-level list\n    - item 1\n    - item 2\n    - item 3\n    - item 4\n    - item 5\n+ Ending multi-level list'
+    assert (
+        pins.create_list_unordered(
+            [
+                "Starting multi-level list",
+                dummy_items,
+                "Ending multi-level list",
+            ],
+            bullet_map=["+", "-"],
+            bullet_color="magenta",
+            bullet_attrs=["bold"],
+            item_color="green",
+            item_attrs=["italic"],
+        )
+        == "\x1b[1m\x1b[35m+\x1b[0m \x1b[3m\x1b[32mStarting multi-level list\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 1\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 2\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 3\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 4\x1b[0m\n    \x1b[1m\x1b[35m-\x1b[0m \x1b[3m\x1b[32mitem 5\x1b[0m\n\x1b[1m\x1b[35m+\x1b[0m \x1b[3m\x1b[32mEnding multi-level list\x1b[0m"
+    )
+    assert (
+        pins.create_list_unordered(
+            dummy_items,
+            "+",
+            indent=4,
+            list_indent=2,
+            line_height=1,
+            bullet_color="magenta",
+            bullet_attrs=["bold"],
+            item_color="green",
+            item_attrs=["italic", "underline"],
+        )
+        == "    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 1\x1b[0m\n\n    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 2\x1b[0m\n\n    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 3\x1b[0m\n\n    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 4\x1b[0m\n\n    \x1b[1m\x1b[35m+\x1b[0m \x1b[4m\x1b[3m\x1b[32mitem 5\x1b[0m"
+    )
+    assert (
+        pins.create_list_unordered(
+            [
+                "Starting multi-level list",
+                dummy_items,
+                "Ending multi-level list",
+            ],
+            bullet_map="+-",
+        )
+        == "+ Starting multi-level list\n    - item 1\n    - item 2\n    - item 3\n    - item 4\n    - item 5\n+ Ending multi-level list"
+    )
 
     with raises(TypeError):
         pins.create_list_unordered("dummy_items")
@@ -403,20 +672,35 @@ def test_create_list_unordered():
         pins.create_list_unordered(dummy_items, line_height="123")
 
     with raises(exceptions.InvalidColorError):
-        pins.create_list_unordered(dummy_items, bullet_color="magentas",
-                                   bullet_attrs=['bold'])
+        pins.create_list_unordered(
+            dummy_items, bullet_color="magentas", bullet_attrs=["bold"]
+        )
     with raises(AttributeError):
-        pins.create_list_unordered(dummy_items, bullet_color="magenta",
-                                   bullet_attrs=['bolds'])
+        pins.create_list_unordered(
+            dummy_items, bullet_color="magenta", bullet_attrs=["bolds"]
+        )
 
 
 def test_create_table():
     assert pins.create_table({}, values_fg="green") == None
-    assert pins.create_table(dummy_dict, values_fg="green",
-                             ignore_none=False) == 'name           \x1b[32mPinsy\x1b[0m\nauthor         \x1b[32mAnas Shakeel\x1b[0m\nrepository     \x1b[32mhttps://github.com/Anas-Shakeel/pinsy\x1b[0m\ncreated        \x1b[32mNone\x1b[0m'
-    assert pins.create_table(dummy_dict, heading="About Pinsy", line_height=0,
-                             heading_fg="magenta", heading_attrs=['reverse'],
-                             keys_fg="dark_grey", values_fg="green") == '\x1b[7m\x1b[35mAbout Pinsy\x1b[0m\n \n\x1b[90mname      \x1b[0m     \x1b[32mPinsy\x1b[0m\n\x1b[90mauthor    \x1b[0m     \x1b[32mAnas Shakeel\x1b[0m\n\x1b[90mrepository\x1b[0m     \x1b[32mhttps://github.com/Anas-Shakeel/pinsy\x1b[0m'
+
+    assert (
+        pins.create_table(dummy_dict, values_fg="green", ignore_none=False)
+        == "name           \x1b[32mPinsy\x1b[0m\nauthor         \x1b[32mAnas Shakeel\x1b[0m\nrepository     \x1b[32mhttps://github.com/Anas-Shakeel/pinsy\x1b[0m\ncreated        \x1b[32mNone\x1b[0m"
+    )
+
+    assert (
+        pins.create_table(
+            dummy_dict,
+            heading="About Pinsy",
+            line_height=0,
+            heading_fg="magenta",
+            heading_attrs=["reverse"],
+            keys_fg="dark_grey",
+            values_fg="green",
+        )
+        == "\x1b[7m\x1b[35mAbout Pinsy\x1b[0m\n \n\x1b[90mname      \x1b[0m     \x1b[32mPinsy\x1b[0m\n\x1b[90mauthor    \x1b[0m     \x1b[32mAnas Shakeel\x1b[0m\n\x1b[90mrepository\x1b[0m     \x1b[32mhttps://github.com/Anas-Shakeel/pinsy\x1b[0m"
+    )
 
     with raises(TypeError):
         pins.create_table("Dummy Dummy")
@@ -432,10 +716,18 @@ def test_promptize():
     assert pins.promptize(123) == ">> 123"
     assert pins.promptize(None, prompt_char="PROMPT") == "PROMPT None"
     assert pins.promptize(dummy) == ">> This is a dummy string."
-    assert pins.promptize(
-        dummy, "red") == '\x1b[31m>> This is a dummy string.\x1b[0m'
-    assert pins.promptize(dummy, "green", "dark_grey", ['bold'],
-                          prompt_char=">") == '\x1b[1m\x1b[100m\x1b[32m> This is a dummy string.\x1b[0m'
+
+    assert (
+        pins.promptize(dummy, fgcolor="red")
+        == "\x1b[31m>> This is a dummy string.\x1b[0m"
+    )
+
+    assert (
+        pins.promptize(
+            dummy, fgcolor="green", bgcolor="dark_grey", attrs=["bold"], prompt_char=">"
+        )
+        == "\x1b[1m\x1b[100m\x1b[32m> This is a dummy string.\x1b[0m"
+    )
 
     with raises(exceptions.InvalidColorError):
         pins.promptize(None, fgcolor="li")
@@ -451,10 +743,14 @@ def test_promptize():
 
 def test_textalign_x():
     assert pins.textalign_x("", 50) == ""
-    assert pins.textalign_x(dummy,
-                            50) == '             This is a dummy string.              '
-    assert pins.textalign_x(dummy, 50, align="right",
-                            fill_char="+") == '+++++++++++++++++++++++++++This is a dummy string.'
+    assert (
+        pins.textalign_x(dummy, 50)
+        == "             This is a dummy string.              "
+    )
+    assert (
+        pins.textalign_x(dummy, 50, align="right", fill_char="+")
+        == "+++++++++++++++++++++++++++This is a dummy string."
+    )
 
     with raises(AssertionError):
         pins.textalign_x(dummy, align="righty")
@@ -472,14 +768,19 @@ def test_textalign_y():
     assert pins.textalign_y("", 5) == ""
     assert pins.textalign_y(dummy, 0) == dummy
     assert pins.textalign_y(dummy, -100) == dummy
-    assert pins.textalign_y(
-        dummy, 3) == ' \n \n \nThis is a dummy string.\n \n \n '
-    assert pins.textalign_y(
-        dummy, 3, align="top") == 'This is a dummy string.\n \n \n \n \n \n '
-    assert pins.textalign_y(
-        dummy, 3, align="bottom") == ' \n \n \n \n \n \nThis is a dummy string.'
-    assert pins.textalign_y(
-        dummy, 3, fill_char="..") == "..\n..\n..\nThis is a dummy string.\n..\n..\n.."
+    assert pins.textalign_y(dummy, 3) == " \n \n \nThis is a dummy string.\n \n \n "
+    assert (
+        pins.textalign_y(dummy, 3, align="top")
+        == "This is a dummy string.\n \n \n \n \n \n "
+    )
+    assert (
+        pins.textalign_y(dummy, 3, align="bottom")
+        == " \n \n \n \n \n \nThis is a dummy string."
+    )
+    assert (
+        pins.textalign_y(dummy, 3, fill_char="..")
+        == "..\n..\n..\nThis is a dummy string.\n..\n..\n.."
+    )
 
     with raises(AssertionError):
         pins.textalign_y(dummy, align="topsy")
@@ -494,10 +795,12 @@ def test_textalign_y():
 
 
 def test_indent_text():
-    assert pins.indent_text("") == ''
-    assert pins.indent_text(dummy) == '    This is a dummy string.'
-    assert pins.indent_text(
-        dummy, 50, True) == '                                                  This is a dummy string.'
+    assert pins.indent_text("") == ""
+    assert pins.indent_text(dummy) == "    This is a dummy string."
+    assert (
+        pins.indent_text(dummy, 50, True)
+        == "                                                  This is a dummy string."
+    )
 
     with raises(TypeError):
         pins.indent_text(123)
@@ -525,12 +828,37 @@ def test_contains_ansi():
     assert not pins.contains_ansi(pins.colorize(""))
     assert not pins.contains_ansi(pins.colorize(dummy))
 
-    assert pins.contains_ansi(pins.colorize(
-        dummy, "red", "dark_grey", ['bold', 'underline']))
-    assert pins.contains_ansi(pins.colorize(
-        dummy, "brown_sandy", "dark_grey", ['bold', 'underline'], 8))
-    assert pins.contains_ansi(pins.colorize(
-        dummy, "#B00B1E", "#C0DDE5", ['bold', 'underline'], 24))
+    assert pins.contains_ansi(
+        pins.colorize(
+            dummy,
+            fgcolor="red",
+            bgcolor="dark_grey",
+            attrs=["bold", "underline"],
+            force_color=True,
+        )
+    )
+
+    assert pins.contains_ansi(
+        pins.colorize(
+            dummy,
+            fgcolor="brown_sandy",
+            bgcolor="dark_grey",
+            attrs=["bold", "underline"],
+            color_mode=8,
+            force_color=True,
+        )
+    )
+
+    assert pins.contains_ansi(
+        pins.colorize(
+            dummy,
+            fgcolor="#B00B1E",
+            bgcolor="#C0DDE5",
+            attrs=["bold", "underline"],
+            color_mode=24,
+            force_color=True,
+        )
+    )
 
     with raises(TypeError):
         pins.contains_ansi(123)
@@ -546,32 +874,32 @@ def test_shorten_path():
     assert pins.shorten_path(absolute_path, 0) == absolute_path
     assert pins.shorten_path(absolute_path, -1) == "C:\\...\\song.mp3"
     assert pins.shorten_path(absolute_path, 8000) == "C:\\...\\song.mp3"
-    assert pins.shorten_path(
-        absolute_path, n=1) == "C:\\...\\downloads\\files\\music\\song.mp3"
+    assert (
+        pins.shorten_path(absolute_path, n=1)
+        == "C:\\...\\downloads\\files\\music\\song.mp3"
+    )
 
     assert pins.shorten_path(relative_path, n=0) == relative_path
     assert pins.shorten_path(relative_path, n=-1) == "downloads\\...\\song.mp3"
-    assert pins.shorten_path(
-        relative_path, n=800) == "downloads\\...\\song.mp3"
-    assert pins.shorten_path(
-        relative_path, n=1) == "downloads\\...\\music\\song.mp3"
+    assert pins.shorten_path(relative_path, n=800) == "downloads\\...\\song.mp3"
+    assert pins.shorten_path(relative_path, n=1) == "downloads\\...\\music\\song.mp3"
 
     assert pins.shorten_path(relative_path_2, n=0) == relative_path_2
-    assert pins.shorten_path(
-        relative_path_2, n=-1) == "downloads\\...\\song.mp3"
-    assert pins.shorten_path(
-        relative_path_2, n=800) == "downloads\\...\\song.mp3"
-    assert pins.shorten_path(
-        relative_path_2, n=1) == "downloads\\...\\music\\song.mp3"
+    assert pins.shorten_path(relative_path_2, n=-1) == "downloads\\...\\song.mp3"
+    assert pins.shorten_path(relative_path_2, n=800) == "downloads\\...\\song.mp3"
+    assert pins.shorten_path(relative_path_2, n=1) == "downloads\\...\\music\\song.mp3"
 
     assert pins.shorten_path("") == ""
     assert pins.shorten_path("somefolder") == "somefolder"
     assert pins.shorten_path("somefile.txt") == "somefile.txt"
 
-    assert pins.shorten_path(
-        absolute_path, n=3, replacement="") == "C:\\music\\song.mp3"
-    assert pins.shorten_path(
-        absolute_path, n=3, replacement="123") == "C:\\123\\music\\song.mp3"
+    assert (
+        pins.shorten_path(absolute_path, n=3, replacement="") == "C:\\music\\song.mp3"
+    )
+    assert (
+        pins.shorten_path(absolute_path, n=3, replacement="123")
+        == "C:\\123\\music\\song.mp3"
+    )
 
     with raises(TypeError):
         pins.shorten_path(123)
@@ -650,8 +978,7 @@ def test_format_date():
 
     # Years test
     dt = datetime(year=2022, month=1, day=1)
-    assert pins.time_ago(dt.strftime(d_fmt),
-                         d_fmt) == f"{today.year - 2022} years ago"
+    assert pins.time_ago(dt.strftime(d_fmt), d_fmt) == f"{today.year - 2022} years ago"
 
     # Decades test
     dt = datetime(year=int(today.year - 20), month=1, day=1)
@@ -665,9 +992,9 @@ def test_format_date():
     with raises(TypeError):
         pins.time_ago(None, None)
     with raises(TypeError):
-        pins.time_ago(None, 'None')
+        pins.time_ago(None, "None")
     with raises(TypeError):
-        pins.time_ago('None', None)
+        pins.time_ago("None", None)
     with raises(TypeError):
         pins.time_ago(123, "123")
     with raises(TypeError):
@@ -695,18 +1022,40 @@ def test_get_calendar():
 def test_create_ansi_fmt():
     assert pins.create_ansi_fmt() == "%s"
 
-    fmt_4bit = pins.create_ansi_fmt("red", "dark_grey", ['bold', 'underline'])
-    assert fmt_4bit == colored("%s", "red", "dark_grey", ['bold', 'underline'])
+    fmt_4bit = pins.create_ansi_fmt("red", "dark_grey", ["bold", "underline"])
+    assert fmt_4bit == colored(
+        "%s",
+        fgcolor="red",
+        bgcolor="dark_grey",
+        attrs=["bold", "underline"],
+        force_color=True,
+    )
 
     fmt_8bit = pins.create_ansi_fmt(
-        "plum", "brown_sandy", ['bold'], color_mode=8)
-    assert fmt_8bit == colored("%s", "plum", "brown_sandy", [
-                               'bold'], color_mode=8)
+        fgcolor="plum", bgcolor="brown_sandy", attrs=["bold"], color_mode=8
+    )
+
+    assert fmt_8bit == colored(
+        "%s",
+        fgcolor="plum",
+        bgcolor="brown_sandy",
+        attrs=["bold"],
+        color_mode=8,
+        force_color=True,
+    )
 
     fmt_24bit = pins.create_ansi_fmt(
-        "#FFF", (255, 200, 200), ['bold'], color_mode=24)
-    assert fmt_24bit == colored("%s", "#FFF", (255, 200, 200), [
-                                'bold'], color_mode=24)
+        fgcolor="#FFF", bgcolor=(255, 200, 200), attrs=["bold"], color_mode=24
+    )
+
+    assert fmt_24bit == colored(
+        "%s",
+        fgcolor="#FFF",
+        bgcolor=(255, 200, 200),
+        attrs=["bold"],
+        color_mode=24,
+        force_color=True,
+    )
 
     with raises(exceptions.InvalidColorError):
         pins.create_ansi_fmt("")
@@ -728,8 +1077,8 @@ def test__validate_colors():
 
     pins.set_colormode(4)
     colors_4 = [
-        ("fg", 'red'),
-        ("bg", 'blue'),
+        ("fg", "red"),
+        ("bg", "blue"),
     ]
     assert pins._validate_colors(colors_4)
 
@@ -740,7 +1089,7 @@ def test__validate_colors():
 
     pins.set_colormode(8)
     colors_8 = [
-        ("fg", 'orchid'),
+        ("fg", "orchid"),
         ("bg", 250),
     ]
     assert pins._validate_colors(colors_8)
@@ -752,7 +1101,7 @@ def test__validate_colors():
 
     pins.set_colormode(24)
     colors_24 = [
-        ("fg", '#B00B1E'),
+        ("fg", "#B00B1E"),
         ("bg", (255, 15, 16)),
     ]
     assert pins._validate_colors(colors_24)
@@ -779,23 +1128,21 @@ def test__validate_attrs():
 
     # Invalid attr
     with raises(AttributeError):
-        pins._validate_attrs([("attr1", ['bolf', 'underfine'])])
+        pins._validate_attrs([("attr1", ["bolf", "underfine"])])
     with raises(AttributeError):
-        pins._validate_attrs([("attr2", ['strife', 'conceafed'])])
+        pins._validate_attrs([("attr2", ["strife", "conceafed"])])
 
 
 def test__longest_string():
     strings = [
-        "Carolyn Newman"
-        "subject",
+        "Carolyn Newman" "subject",
         "cutting waste business",
         "women begun balance lay crop",
         "future fresh dot poetry care inch move married",
     ]
 
     assert pins._longest_string(strings) == strings[-1]
-    assert pins._longest_string(ATTRIBUTES.keys()) == max(ATTRIBUTES.keys(),
-                                                          key=len)
+    assert pins._longest_string(ATTRIBUTES.keys()) == max(ATTRIBUTES.keys(), key=len)
 
     with raises(TypeError):
         pins._longest_string([123, 321, 132, 231])
@@ -838,15 +1185,33 @@ def test_is_strong_password():
 
 
 def test_is_valid_extension():
-    valid_exts = [".py", ".java", ".c", ".c++", ".txt",
-                  ".py-c", ".py_c", ".MD", ".somethinglonger"]
+    valid_exts = [
+        ".py",
+        ".java",
+        ".c",
+        ".c++",
+        ".txt",
+        ".py-c",
+        ".py_c",
+        ".MD",
+        ".somethinglonger",
+    ]
 
     for ext in valid_exts:
         assert Validator.is_valid_extension(ext)
 
     if CURRENT_OS == "Windows":
-        invalid_exts = ["", ".", ".c**", ".Ja va", '."py"',
-                        ".py|c", "..MD", ".C::", ".p/y"]
+        invalid_exts = [
+            "",
+            ".",
+            ".c**",
+            ".Ja va",
+            '."py"',
+            ".py|c",
+            "..MD",
+            ".C::",
+            ".p/y",
+        ]
         for ext in invalid_exts:
             assert Validator.is_valid_extension(ext) == False
         assert Validator.is_valid_extension(".tx\\t") == False
@@ -880,8 +1245,12 @@ def test_is_valid_filepath():
             assert Validator.is_valid_filepath(fpath, extension=None)
 
         # Invalid filepath , ILLEGAL CHARS <>
-        assert isinstance(Validator.is_valid_filepath("C:\\Users\\Username\\Desktop\\Invalid<file>.txt",
-                                                      extension=None), str)
+        assert isinstance(
+            Validator.is_valid_filepath(
+                "C:\\Users\\Username\\Desktop\\Invalid<file>.txt", extension=None
+            ),
+            str,
+        )
 
     else:  # Mac/Linux
         valid_paths = [
@@ -909,21 +1278,25 @@ def test_is_valid_filepath():
     assert Validator.is_valid_filepath("file.java", extension="*")
     assert Validator.is_valid_filepath("file.cpp", extension=".cpp")
 
-    assert isinstance(Validator.is_valid_filepath(
-        "file.txt", extension=".py"), str)
-    assert isinstance(Validator.is_valid_filepath(
-        "file", extension=".py"), str)
+    assert isinstance(Validator.is_valid_filepath("file.txt", extension=".py"), str)
+    assert isinstance(Validator.is_valid_filepath("file", extension=".py"), str)
     assert isinstance(Validator.is_valid_filepath("file", extension="*"), str)
-    assert isinstance(Validator.is_valid_filepath(
-        "path\\to\\a\\deeply\\nested\\file.txt", max_length=10), str)
-    assert isinstance(Validator.is_valid_filepath(
-        "path\\to\\a\\deeply\\nested\\file.txt", max_length=100), bool)
+    assert isinstance(
+        Validator.is_valid_filepath(
+            "path\\to\\a\\deeply\\nested\\file.txt", max_length=10
+        ),
+        str,
+    )
+    assert isinstance(
+        Validator.is_valid_filepath(
+            "path\\to\\a\\deeply\\nested\\file.txt", max_length=100
+        ),
+        bool,
+    )
     assert isinstance(Validator.is_valid_filepath("file.<txt>"), str)
     assert isinstance(Validator.is_valid_filepath("file.tx t"), str)
-    assert isinstance(Validator.is_valid_filepath(
-        "file.tx t", extension=None), str)
-    assert isinstance(Validator.is_valid_filepath(
-        "file.*txt*", extension=None), str)
+    assert isinstance(Validator.is_valid_filepath("file.tx t", extension=None), str)
+    assert isinstance(Validator.is_valid_filepath("file.*txt*", extension=None), str)
 
     with raises(AssertionError):
         Validator.is_valid_filepath(123)
@@ -957,8 +1330,7 @@ def test_is_valid_dirpath():
             assert Validator.is_valid_dirpath(fpath)
 
         # ILLEGAL CHARS <>
-        assert isinstance(Validator.is_valid_dirpath(
-            "C:\\Invalid<file>.txt"), str)
+        assert isinstance(Validator.is_valid_dirpath("C:\\Invalid<file>.txt"), str)
 
     else:  # Mac/Linux
         valid_paths = [
@@ -977,13 +1349,17 @@ def test_is_valid_dirpath():
             assert Validator.is_valid_filepath(fpath, extension=None)
 
     # Other Tests
-    assert isinstance(Validator.is_valid_dirpath(
-        "path\\to\\a\\deeply\\nested\\folder", max_length=10), str)  # Length
+    assert isinstance(
+        Validator.is_valid_dirpath(
+            "path\\to\\a\\deeply\\nested\\folder", max_length=10
+        ),
+        str,
+    )  # Length
     assert isinstance(Validator.is_valid_dirpath(""), str)  # Empty not allowed
-    assert isinstance(Validator.is_valid_dirpath(
-        "folder 0 | folder 1"), str)  # illegal chars
-    assert isinstance(Validator.is_valid_dirpath(
-        "folder.<txt>"), str)  # illegal chars
+    assert isinstance(
+        Validator.is_valid_dirpath("folder 0 | folder 1"), str
+    )  # illegal chars
+    assert isinstance(Validator.is_valid_dirpath("folder.<txt>"), str)  # illegal chars
 
     with raises(AssertionError):
         Validator.is_valid_dirpath(123)
@@ -1120,17 +1496,19 @@ def test_is_valid_url():
 
 
 def test_is_valid_email():
-    valid_emails = ["simple@example.com",
-                    "very.common@example.com",
-                    "disposable.style.email.with+symbol@example.com",
-                    "other.email-with-hyphen@example.com",
-                    "fully-qualified-domain@example.com",
-                    "example-indeed@strange-example.com",
-                    "admin@mailserver1",
-                    "test.email+alex@leetcode.com",
-                    "user@sub.example.com",
-                    "username@111.222.333.44444",
-                    "Abc..123@example.com",]
+    valid_emails = [
+        "simple@example.com",
+        "very.common@example.com",
+        "disposable.style.email.with+symbol@example.com",
+        "other.email-with-hyphen@example.com",
+        "fully-qualified-domain@example.com",
+        "example-indeed@strange-example.com",
+        "admin@mailserver1",
+        "test.email+alex@leetcode.com",
+        "user@sub.example.com",
+        "username@111.222.333.44444",
+        "Abc..123@example.com",
+    ]
 
     for email in valid_emails:
         assert Validator.is_valid_email(email)
@@ -1223,10 +1601,20 @@ def test_type_match():
 
     # Complex Types
     assert type_match(list(), List)
-    assert type_match([1,], List)
+    assert type_match(
+        [
+            1,
+        ],
+        List,
+    )
     assert type_match([1, 2, 3], List)
     assert type_match([1, 2, 3], List[int])
-    assert type_match([1,], List[int])
+    assert type_match(
+        [
+            1,
+        ],
+        List[int],
+    )
     assert not type_match([1, "2", 3], List[int])
     assert not type_match("123", List[int])
     assert not type_match(None, List[int])
@@ -1237,7 +1625,7 @@ def test_type_match():
     assert type_match((1,), Tuple)
     assert type_match((1, 2, 3), Tuple)
     assert type_match((1, 2, 3), Tuple[int])
-    assert type_match(("str", ), Tuple[str])
+    assert type_match(("str",), Tuple[str])
     # Two hints 'int' and 'str' assumes first item to be int and second to be str
     assert type_match((1, "2"), Tuple[int, str])
     assert not type_match((1, "2", 3), Tuple[int, str])
@@ -1259,7 +1647,12 @@ def test_type_match():
     assert type_match(set(), Set)
     assert type_match({"a", "b", "c"}, Set)
     assert type_match({"a", "b", "c"}, Set[str])
-    assert type_match({"a", }, Set[str])
+    assert type_match(
+        {
+            "a",
+        },
+        Set[str],
+    )
     assert not type_match({"a", "b", 123}, Set[int])
     assert not type_match("123", Set[str])
     assert not type_match(None, Set[str])
@@ -1309,6 +1702,7 @@ def test_type_check():
     @typecheck
     def wrong_return() -> str:
         return None
+
     with raises(TypeError):
         wrong_return()
 
@@ -1335,11 +1729,20 @@ def test_type_check():
     with raises(TypeError):
         complex_types({"1": [1, 2, 3, "str"]})
     with raises(TypeError):
-        complex_types({"key": [1, 2, 3,]}, False)
+        complex_types(
+            {
+                "key": [
+                    1,
+                    2,
+                    3,
+                ]
+            },
+            False,
+        )
 
     # Skip test
 
-    @typecheck(skip=['b', 'c'])
+    @typecheck(skip=["b", "c"])
     def skip_test(a: int, b: int, c: int):
         return a + b + c
 
@@ -1348,7 +1751,7 @@ def test_type_check():
         skip_test(1.5, 3.5, 2)
 
     # Only test
-    @typecheck(only=['b'])
+    @typecheck(only=["b"])
     def only_test(a: int, b: int, c: int):
         return a + b + c
 
@@ -1359,9 +1762,10 @@ def test_type_check():
     # Only Test 2
     try:
         # skip and only are mutually exclusive: Raise AssertionError if both provided
-        @typecheck(only=['b'], skip=['a'])
+        @typecheck(only=["b"], skip=["a"])
         def only_test_2(a: int, b: int, c: int):
             return a + b + c
+
     except AssertionError:
         pass
 
@@ -1427,11 +1831,11 @@ if __name__ == "__main__":
 
     if passed:
         printc(f"Tests Passed: {len(passed):<3}", "green", end=" ")
-        printc("."*len(passed), "light_green",  end="\n\n")
+        printc("." * len(passed), "light_green", end="\n\n")
 
     if failed:
         printc(f"Tests Failed: {len(failed):<3}", "red", end=" ")
-        printc("."*len(failed), "red")
+        printc("." * len(failed), "red")
         for name in failed:
             print("Failed:", colored(f"{name}()", "red"))
 

@@ -515,12 +515,10 @@ class Pins:
 
             # Length Validation
             if min_length != None and len(inp) < min_length:
-                self.print_error(f"input must be atleast {
-                    min_length} characters long.")
+                self.print_error(f"input must be atleast {min_length} characters long.")
                 continue
             if max_length != None and len(inp) > max_length:
-                self.print_error(f"input must be atmost {
-                    max_length} characters long.")
+                self.print_error(f"input must be atmost {max_length} characters long.")
                 continue
 
             if inp:
@@ -1454,10 +1452,8 @@ class Pins:
         - `align` is not a valid alignment
         """
         assert width == None or width > 0, "width must be greater than 0"
-        assert charset == None or charset in CHARSETS, f"Invalid charset: {
-            charset}"
-        assert align in ("center", "left", "right"), f"Invalid align: '{
-            align}'"
+        assert charset == None or charset in CHARSETS, f"Invalid charset: {charset}"
+        assert align in ("center", "left", "right"), f"Invalid align: '{align}'"
 
         # Ensure padding is non-negative
         pad_x = max(pad_x, 0)
@@ -1476,7 +1472,7 @@ class Pins:
         else:
             hr = hr.ljust(terminal_width)
 
-        return self.colorize(hr.rstrip(), color)
+        return self.colorize(hr.rstrip(), color, force_color=True)
 
     def create_status(self, label: str,
                       text: str,
@@ -1485,7 +1481,10 @@ class Pins:
                       label_attrs: Iterable[Attribute] = None,
                       text_fg: Color = None,
                       text_bg: Color = None,
-                      text_attrs: Iterable[Attribute] = None):
+                      text_attrs: Iterable[Attribute] = None,
+                      *,
+                      no_color: bool = None,
+                      force_color: bool = None):
         """ 
         ### Create Status
         Creates a formatted Status. Nicely handles newline characters.
@@ -1548,12 +1547,14 @@ class Pins:
 
         # Create Status
         lines = text.splitlines()
-        first_line = colored_ansy(
-            f"@bar[{status_text}]@line[{lines[0]}]", style)
+        first_line = colored_ansy(f"@bar[{status_text}]@line[{lines[0]}]", 
+                                  style, no_color=no_color,
+                                   force_color=force_color)
         other_lines = ""
         for line in lines[1:]:
             other_lines += colored_ansy(f"@bar[{bar}] {indent}@line[{line}]\n",
-                                        style)
+                                        style, no_color=no_color,
+                                         force_color=force_color)
 
         if other_lines:
             first_line += "\n"
@@ -1853,14 +1854,16 @@ class Pins:
         for key, value in dictionary.items():
             if ignore_none and value == None:
                 continue
-            table.append(f"{key_ansi % key.ljust(space)} {
-                         pad}{value_ansi % value}")
+            table.append(f"{key_ansi % key.ljust(space)} {pad}{value_ansi % value}")
         table = newlines.join(table)
 
         # Add heading
         if heading:
-            return "\n".join([self.colorize(heading, heading_fg,
-                                            heading_bg, heading_attrs), " ", table])
+            return "\n".join([self.colorize(heading, 
+                                            heading_fg,
+                                            heading_bg,
+                                            heading_attrs,
+                                            force_color=True), " ", table])
         return table
 
     def promptize(self, prompt: str,
@@ -1887,7 +1890,7 @@ class Pins:
         """
         prompt_char = prompt_char if prompt_char else self.PROMPT_CHAR
         s = f"{prompt_char} {prompt}"
-        return self.colorize(s, fgcolor, bgcolor, attrs=attrs)
+        return self.colorize(s, fgcolor, bgcolor, attrs=attrs, force_color=True)
 
     @typecheck()
     def textalign_x(self, text: str,
@@ -2331,8 +2334,8 @@ class Pins:
             raise AssertionError(
                 "Either both year and month should be provided or None.")
 
-        assert month <= 12 and month > 0, f"Invalid month {
-            month}: must be 1-12"
+        assert month <= 12 and month > 0, \
+            f"Invalid month {month}: must be 1-12"
 
         return calendar_month(year, month)
 
@@ -2567,8 +2570,7 @@ class Pins:
         """
         for name, clr in colors:
             if clr != None and not is_valid_color(clr, self.COLORMODE):
-                err = f"Invalid {name}: {
-                    clr}, maybe try a different color mode?"
+                err = f"Invalid {name}: {clr}, maybe try a different color mode?"
                 raise InvalidColorError(err)
 
         return True
