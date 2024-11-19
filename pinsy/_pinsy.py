@@ -16,21 +16,49 @@ from datetime import datetime
 from time import sleep
 from calendar import month as calendar_month
 from itertools import batched
-from os.path import isfile, isdir, splitext, join as path_join, sep as path_sep, normpath
-from ansy import (colored, colored_ansy, make_ansi, de_ansi,
-                  create_style, is_valid_color, ANSI_REGEX,
-                  ANSI_CODES, ATTRIBUTES, Attribute, Color, ColorMode)
+from os.path import (
+    isfile,
+    isdir,
+    splitext,
+    join as path_join,
+    sep as path_sep,
+    normpath,
+)
+from ansy import (
+    colored,
+    colored_ansy,
+    make_ansi,
+    de_ansi,
+    create_style,
+    is_valid_color,
+    ANSI_REGEX,
+    ANSI_CODES,
+    ATTRIBUTES,
+    Attribute,
+    Color,
+    ColorMode,
+)
 from ansy.exceptions import InvalidColorError
 from cursor import HiddenCursor
 from . import utils
 from .utils import get_terminal_size, typecheck
-from ._others import (PromptChar, FillChar, Charset, YAlign, XAlign, Bullet,
-                      StrConstraint, CONSTRAINTS, CHARSETS, REGEX_PATTERNS)
+from ._others import (
+    PromptChar,
+    FillChar,
+    Charset,
+    YAlign,
+    XAlign,
+    Bullet,
+    StrConstraint,
+    CONSTRAINTS,
+    CHARSETS,
+    REGEX_PATTERNS,
+)
 from typing import List, Tuple, Dict, Iterable, Callable, Optional, Union, Any
 
 
 class Pins:
-    """ 
+    """
     ### Pins
     This is the `1st` and main class of the `pinsy` package.
 
@@ -50,10 +78,13 @@ class Pins:
     ```
     """
 
-    def __init__(self, use_colors: bool = True,
-                 charset: Charset = 'ascii',
-                 prompt_char: PromptChar = '>>',
-                 color_mode: int = 4) -> None:
+    def __init__(
+        self,
+        use_colors: bool = True,
+        charset: Charset = "ascii",
+        prompt_char: PromptChar = ">>",
+        color_mode: int = 4,
+    ) -> None:
 
         self.OS: str = platform.system()
         if self.OS == "Windows":
@@ -85,26 +116,27 @@ class Pins:
 
     @classmethod
     def fix_windows_console(cls):
-        """ Fix windows terminal (ancient ones like powershell, cmd etc.) """
+        """Fix windows terminal (ancient ones like powershell, cmd etc.)"""
         try:
             from colorama import just_fix_windows_console
+
             just_fix_windows_console()
         except ModuleNotFoundError:
             print(f"colorama is not installed")
             exit(1)
 
     def enable_colors(self):
-        """ Enable Terminal Colors. Just a convenience function to enable colors. """
+        """Enable Terminal Colors. Just a convenience function to enable colors."""
         self.USE_COLORS = True
 
     def disable_colors(self):
-        """ Disable Terminal Colors. Just a convenience function to disable colors. """
+        """Disable Terminal Colors. Just a convenience function to disable colors."""
         self.USE_COLORS = False
 
     def set_colormode(self, mode: int):
         """
         ### Set Colormode
-        Change/override the pins.COLORMODE. 
+        Change/override the pins.COLORMODE.
 
         Raises `AssertionError` if:
         - `mode` is not `4`, `8` or `24`.
@@ -113,24 +145,30 @@ class Pins:
         self.COLORMODE = mode
         self.DEFAULT_COLORS = self._assign_colors()
 
-    def set_default_colors(self, error: Color = None,
-                           info: Color = None,
-                           success: Color = None,
-                           warn: Color = None):
-        """ 
+    def set_default_colors(
+        self,
+        error: Color = None,
+        info: Color = None,
+        success: Color = None,
+        warn: Color = None,
+    ):
+        """
         ### Set Default Colors
         Change the default colors of certain things like errors & info messages etc.
         """
-        self._validate_colors([("error", error), ("info", info),
-                               ("success", success), ("warn", warn)])
+        self._validate_colors(
+            [("error", error), ("info", info), ("success", success), ("warn", warn)]
+        )
 
-        self.DEFAULT_COLORS['error'] = error if error else self.DEFAULT_COLORS['error']
-        self.DEFAULT_COLORS['info'] = info if info else self.DEFAULT_COLORS['info']
-        self.DEFAULT_COLORS['success'] = success if success else self.DEFAULT_COLORS['success']
-        self.DEFAULT_COLORS['warn'] = warn if warn else self.DEFAULT_COLORS['warn']
+        self.DEFAULT_COLORS["error"] = error if error else self.DEFAULT_COLORS["error"]
+        self.DEFAULT_COLORS["info"] = info if info else self.DEFAULT_COLORS["info"]
+        self.DEFAULT_COLORS["success"] = (
+            success if success else self.DEFAULT_COLORS["success"]
+        )
+        self.DEFAULT_COLORS["warn"] = warn if warn else self.DEFAULT_COLORS["warn"]
 
     def set_charset(self, charset: Charset):
-        """  
+        """
         ### Set Charset
         Change/override the pins.CHARSET.
 
@@ -141,15 +179,18 @@ class Pins:
         self.CHARSET: Dict = CHARSETS[charset]
         self.charset_name: str = charset
 
-    def colorize(self, text: str,
-                 fgcolor: Color = None,
-                 bgcolor: Color = None,
-                 attrs: Iterable[Attribute] = None,
-                 color_mode: int = None,
-                 *,
-                 no_color: Optional[bool] = None,
-                 force_color: Optional[bool] = None) -> str:
-        """ 
+    def colorize(
+        self,
+        text: str,
+        fgcolor: Color = None,
+        bgcolor: Color = None,
+        attrs: Iterable[Attribute] = None,
+        color_mode: int = None,
+        *,
+        no_color: Optional[bool] = None,
+        force_color: Optional[bool] = None,
+    ) -> str:
+        """
         ### Colorize
         Colorize the `text`. This method sets `fgcolor` and `bgcolor`
         to `None` if the module-level `USE_COLORS` is set to False.
@@ -191,21 +232,30 @@ class Pins:
             return ""
 
         if attrs:
-            assert isinstance(attrs, (tuple, list)), \
-                "attrs must be a list or tuple."
+            assert isinstance(attrs, (tuple, list)), "attrs must be a list or tuple."
 
         color_mode = color_mode if color_mode else self.COLORMODE
         no_color = no_color if no_color else not self.USE_COLORS
 
-        return colored(text, fgcolor, bgcolor, attrs, color_mode,
-                       no_color=no_color, force_color=force_color)
+        return colored(
+            text,
+            fgcolor,
+            bgcolor,
+            attrs,
+            color_mode,
+            no_color=no_color,
+            force_color=force_color,
+        )
 
-    def colorize_regex(self, text: str,
-                       pattern: Union[Pattern, str],
-                       fgcolor: Color = None,
-                       bgcolor: Color = None,
-                       attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    def colorize_regex(
+        self,
+        text: str,
+        pattern: Union[Pattern, str],
+        fgcolor: Color = None,
+        bgcolor: Color = None,
+        attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Colorize Regex
         Colorize all matches of `pattern` found in `text`.
 
@@ -242,7 +292,7 @@ class Pins:
         if not text:
             return text
 
-        self._validate_attrs([('attrs', attrs)])
+        self._validate_attrs([("attrs", attrs)])
 
         ansi_fmt = self.create_ansi_fmt(fgcolor, bgcolor, attrs)
 
@@ -252,14 +302,17 @@ class Pins:
 
         return re.sub(pattern, colorize_match_, text)
 
-    def inputc(self, prompt: Any = "",
-               prompt_fg: Color = None,
-               prompt_bg: Color = None,
-               prompt_attrs: Iterable[Attribute] = None,
-               input_fg: Color = None,
-               input_bg: Color = None,
-               input_attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    def inputc(
+        self,
+        prompt: Any = "",
+        prompt_fg: Color = None,
+        prompt_bg: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_fg: Color = None,
+        input_bg: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Colored Input
         Python's `input()` with color support. All three color modes are supported.
 
@@ -281,13 +334,11 @@ class Pins:
         Raises all exceptions raised by `ansy` and `Pins.olorize`
         """
         # ANSI sequence to style user-input
-        input_ansi = self._make_ansi(input_fg, input_bg, input_attrs,
-                                     self.COLORMODE)
+        input_ansi = self._make_ansi(input_fg, input_bg, input_attrs, self.COLORMODE)
 
         std = sys.stdout
         try:
-            std.write(self.colorize(str(prompt), prompt_fg, prompt_bg,
-                                    prompt_attrs))
+            std.write(self.colorize(str(prompt), prompt_fg, prompt_bg, prompt_attrs))
             if input_ansi:
                 std.write(input_ansi)
             std.flush()
@@ -295,18 +346,21 @@ class Pins:
 
         finally:
             # Reset before returning
-            std.write(ANSI_CODES['reset'])
+            std.write(ANSI_CODES["reset"])
             std.flush()
 
-    def input_multiline(self, prompt: str = '',
-                        stop_word: str = '',
-                        ignore_newlines: bool = False,
-                        prompt_fg: Color = None,
-                        prompt_bg: Color = None,
-                        prompt_attrs: Iterable[Attribute] = None,
-                        input_fg: Color = None,
-                        input_bg: Color = None,
-                        input_attrs: Iterable[Attribute] = None) -> str:
+    def input_multiline(
+        self,
+        prompt: str = "",
+        stop_word: str = "",
+        ignore_newlines: bool = False,
+        prompt_fg: Color = None,
+        prompt_bg: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_fg: Color = None,
+        input_bg: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> str:
         """
         ### Input Multiline
         Take multiline input from user.
@@ -331,26 +385,29 @@ class Pins:
         ```
         """
         stop_word = stop_word.lower()
-        print(self.promptize(prompt, prompt_fg, prompt_bg, prompt_attrs), end='')
+        print(self.promptize(prompt, prompt_fg, prompt_bg, prompt_attrs), end="")
         userinput = ""
         newline = " " if ignore_newlines else "\n"
         while True:
-            tmp = self.inputc(input_fg=input_fg,
-                              input_bg=input_bg,
-                              input_attrs=input_attrs)
+            tmp = self.inputc(
+                input_fg=input_fg, input_bg=input_bg, input_attrs=input_attrs
+            )
             if tmp.strip().lower() == stop_word:
                 return userinput
             userinput += tmp + newline
 
-    @typecheck(only=['prompt', 'min_', 'max_'])
-    def input_int(self, prompt: str = '',
-                  min_: Optional[int] = None,
-                  max_: Optional[int] = None,
-                  prompt_color: Color = None,
-                  prompt_attrs: Iterable[Attribute] = None,
-                  input_color: Color = None,
-                  input_attrs: Iterable[Attribute] = None) -> int:
-        """ 
+    @typecheck(only=["prompt", "min_", "max_"])
+    def input_int(
+        self,
+        prompt: str = "",
+        min_: Optional[int] = None,
+        max_: Optional[int] = None,
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> int:
+        """
         ### Input Int
         Take `int` input from user. Keeps asking until a valid
         integer entered or `KeyboardInterrupt`.
@@ -360,7 +417,7 @@ class Pins:
         - `min_`: minimum accepted integer (`None` removes minimum constraint)
         - `max_`: maximum accepted integer (`None` removes maximum constraint)
         - `prompt_color`: foreground color of prompt
-        - `prompt_attrs`: attributes for prompt 
+        - `prompt_attrs`: attributes for prompt
         - `input_color`: foreground color of input
         - `input_attrs`: attributes for input
 
@@ -376,14 +433,19 @@ class Pins:
         if (min_ != None and max_ != None) and min_ > max_:
             raise ValueError("min_ cannot be greater than max_")
 
-        prompt = prompt if prompt else self.PROMPTS['int']
+        prompt = prompt if prompt else self.PROMPTS["int"]
         prompt = self.promptize(prompt)
         while True:
             try:
-                i = int(self.inputc(prompt, prompt_fg=prompt_color,
-                                    prompt_attrs=prompt_attrs,
-                                    input_fg=input_color,
-                                    input_attrs=input_attrs))
+                i = int(
+                    self.inputc(
+                        prompt,
+                        prompt_fg=prompt_color,
+                        prompt_attrs=prompt_attrs,
+                        input_fg=input_color,
+                        input_attrs=input_attrs,
+                    )
+                )
             except ValueError:
                 self.print_error("Only integers accepted.")
                 continue
@@ -398,15 +460,18 @@ class Pins:
 
             return i
 
-    @typecheck(only=['prompt', 'min_', 'max_'])
-    def input_float(self, prompt: str = '',
-                    min_: Optional[float] = None,
-                    max_: Optional[float] = None,
-                    prompt_color: Color = None,
-                    prompt_attrs: Iterable[Attribute] = None,
-                    input_color: Color = None,
-                    input_attrs: Iterable[Attribute] = None) -> float:
-        """ 
+    @typecheck(only=["prompt", "min_", "max_"])
+    def input_float(
+        self,
+        prompt: str = "",
+        min_: Optional[float] = None,
+        max_: Optional[float] = None,
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> float:
+        """
         ### Input Float
         Take `float` input from user. Keeps asking until a valid
         float entered or `KeyboardInterrupt`.
@@ -432,14 +497,19 @@ class Pins:
         if (min_ != None and max_ != None) and min_ > max_:
             raise ValueError("'min_' cannot be greater than 'max_'")
 
-        prompt = prompt if prompt else self.PROMPTS['float']
+        prompt = prompt if prompt else self.PROMPTS["float"]
         prompt = self.promptize(prompt)
         while True:
             try:
-                i = float(self.inputc(prompt, prompt_fg=prompt_color,
-                                      prompt_attrs=prompt_attrs,
-                                      input_fg=input_color,
-                                      input_attrs=input_attrs))
+                i = float(
+                    self.inputc(
+                        prompt,
+                        prompt_fg=prompt_color,
+                        prompt_attrs=prompt_attrs,
+                        input_fg=input_color,
+                        input_attrs=input_attrs,
+                    )
+                )
             except ValueError:
                 self.print_error("Only numbers accepted.")
                 continue
@@ -454,17 +524,20 @@ class Pins:
 
             return i
 
-    @typecheck(only=['prompt', 'constraint', 'min_length', 'max_length'])
-    def input_str(self, prompt: str = '',
-                  empty_allowed: bool = False,
-                  constraint: Union[StrConstraint, str, None] = None,
-                  min_length: Optional[int] = None,
-                  max_length: Optional[int] = None,
-                  prompt_color: Color = None,
-                  prompt_attrs: Iterable[Attribute] = None,
-                  input_color: Color = None,
-                  input_attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    @typecheck(only=["prompt", "constraint", "min_length", "max_length"])
+    def input_str(
+        self,
+        prompt: str = "",
+        empty_allowed: bool = False,
+        constraint: Union[StrConstraint, str, None] = None,
+        min_length: Optional[int] = None,
+        max_length: Optional[int] = None,
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Input Str
         Take `str` input from user. Keeps asking until a valid
         string entered or `KeyboardInterrupt`.
@@ -498,17 +571,21 @@ class Pins:
         - `min_length` is greater than max_length
         """
         if constraint:
-            assert constraint in CONSTRAINTS, \
-                f"Invalid constraint: '{constraint}'"
+            assert constraint in CONSTRAINTS, f"Invalid constraint: '{constraint}'"
 
         if (min_length != None and max_length != None) and min_length > max_length:
             raise ValueError("min_length cannot be greater than max_length")
 
-        prompt = prompt if prompt else self.PROMPTS['str']
+        prompt = prompt if prompt else self.PROMPTS["str"]
         prompt = self.promptize(prompt)
         while True:
-            inp = self.inputc(prompt, prompt_fg=prompt_color, prompt_attrs=prompt_attrs,
-                              input_fg=input_color, input_attrs=input_attrs)
+            inp = self.inputc(
+                prompt,
+                prompt_fg=prompt_color,
+                prompt_attrs=prompt_attrs,
+                input_fg=input_color,
+                input_attrs=input_attrs,
+            )
             if not empty_allowed and not inp:
                 self.print_error("Field cannot be empty.")
                 continue
@@ -531,19 +608,21 @@ class Pins:
                     continue
 
                 elif constraint == "only_alnum" and not inp.isalnum():
-                    self.print_error(
-                        "Only alphabets and digits are allowed.")
+                    self.print_error("Only alphabets and digits are allowed.")
                     continue
 
             return inp
 
-    @typecheck(only=['prompt'])
-    def input_question(self, prompt: str = '',
-                       prompt_color: Color = None,
-                       prompt_attrs: Iterable[Attribute] = None,
-                       input_color: Color = None,
-                       input_attrs: Iterable[Attribute] = None) -> bool:
-        """ 
+    @typecheck(only=["prompt"])
+    def input_question(
+        self,
+        prompt: str = "",
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> bool:
+        """
         ### Input Question
         Ask user a question, accepts `y` or `n` only. Keeps asking until a
         valid answer entered or `KeyboardInterrupt`.
@@ -559,16 +638,19 @@ class Pins:
         ```
         >> pins.input_question()
         .. >> Do you agree? (y/N): y
-        True 
+        True
         ```
         """
-        prompt = prompt if prompt else self.PROMPTS['question']
+        prompt = prompt if prompt else self.PROMPTS["question"]
         prompt = self.promptize(prompt)
         while True:
-            answer = self.inputc(prompt, prompt_fg=prompt_color,
-                                 prompt_attrs=prompt_attrs,
-                                 input_fg=input_color,
-                                 input_attrs=input_attrs).lower()
+            answer = self.inputc(
+                prompt,
+                prompt_fg=prompt_color,
+                prompt_attrs=prompt_attrs,
+                input_fg=input_color,
+                input_attrs=input_attrs,
+            ).lower()
             if answer == "y":
                 return True
             elif answer == "n":
@@ -576,13 +658,16 @@ class Pins:
             else:
                 self.print_error("Only 'y' or 'n' is accepted.")
 
-    @typecheck(only=['prompt'])
-    def input_email(self, prompt: str = '',
-                    prompt_color: Color = None,
-                    prompt_attrs: Iterable[Attribute] = None,
-                    input_color: Color = None,
-                    input_attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    @typecheck(only=["prompt"])
+    def input_email(
+        self,
+        prompt: str = "",
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Input Email
         Take `email` input from user. Keeps asking until a valid
         email entered or `KeyboardInterrupt`.
@@ -601,13 +686,16 @@ class Pins:
         'pins@python.com'
         ```
         """
-        prompt = prompt if prompt else self.PROMPTS['email']
+        prompt = prompt if prompt else self.PROMPTS["email"]
         prompt = self.promptize(prompt)
         while True:
-            e = self.inputc(prompt, prompt_fg=prompt_color,
-                            prompt_attrs=prompt_attrs,
-                            input_fg=input_color,
-                            input_attrs=input_attrs)
+            e = self.inputc(
+                prompt,
+                prompt_fg=prompt_color,
+                prompt_attrs=prompt_attrs,
+                input_fg=input_color,
+                input_attrs=input_attrs,
+            )
             if not e:
                 self.print_error("Email cannot be empty.")
                 continue
@@ -617,15 +705,18 @@ class Pins:
 
             self.print_error(f"Invalid email: '{e}'")
 
-    @typecheck(only=['prompt', 'custom_regex', 'custom_regex_error'])
-    def input_password(self, prompt: str = '',
-                       confirm: bool = False,
-                       require_strong: bool = False,
-                       custom_regex: Union[Pattern, str, None] = None,
-                       custom_regex_error: str = '',
-                       prompt_color: Color = None,
-                       prompt_attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    @typecheck(only=["prompt", "custom_regex", "custom_regex_error"])
+    def input_password(
+        self,
+        prompt: str = "",
+        confirm: bool = False,
+        require_strong: bool = False,
+        custom_regex: Union[Pattern, str, None] = None,
+        custom_regex_error: str = "",
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Input password
         Take `password` input from user. Keeps asking until a valid
         password entered or `KeyboardInterrupt`.
@@ -648,15 +739,18 @@ class Pins:
         #### Example:
         ```
         >> pins.input_password()
-        .. >> Enter password (hidden on purpose): 
+        .. >> Enter password (hidden on purpose):
         'root'
         ```
         """
-        prompt = prompt if prompt else self.PROMPTS['password']
-        custom_regex_error = custom_regex_error if custom_regex_error else "Invalid password, try again!"
+        prompt = prompt if prompt else self.PROMPTS["password"]
+        custom_regex_error = (
+            custom_regex_error if custom_regex_error else "Invalid password, try again!"
+        )
         prompt = self.promptize(prompt, prompt_color, attrs=prompt_attrs)
-        prompt_confirm = self.promptize("Confirm password: ", prompt_color,
-                                        attrs=prompt_attrs)
+        prompt_confirm = self.promptize(
+            "Confirm password: ", prompt_color, attrs=prompt_attrs
+        )
         while True:
             p = getpass(prompt)
             if not p:
@@ -665,7 +759,8 @@ class Pins:
 
             if require_strong and not Validator.is_strong_password(p):
                 self.print_error(
-                    """Password must have length between 8-500 and must contain atleast one lowercase letter, one uppercase letter, one digit and one special character.""")
+                    """Password must have length between 8-500 and must contain atleast one lowercase letter, one uppercase letter, one digit and one special character."""
+                )
                 continue
 
             if custom_regex and not re.fullmatch(custom_regex, p):
@@ -679,16 +774,19 @@ class Pins:
 
             return p
 
-    @typecheck(only=['prompt', 'extension', 'max_length'])
-    def input_file(self, prompt: str = '',
-                   extension: Optional[str] = "*",
-                   max_length: int = 250,
-                   must_exist: bool = True,
-                   prompt_color: Color = None,
-                   prompt_attrs: Iterable[Attribute] = None,
-                   input_color: Color = None,
-                   input_attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    @typecheck(only=["prompt", "extension", "max_length"])
+    def input_file(
+        self,
+        prompt: str = "",
+        extension: Optional[str] = "*",
+        max_length: int = 250,
+        must_exist: bool = True,
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Input File
         Take `file` input from user. Keeps asking until a valid
         filepath entered or `KeyboardInterrupt`.
@@ -723,16 +821,18 @@ class Pins:
         if extension != None and (extension != "*" and not extension.startswith(".")):
             raise ValueError("extension must start with a period ('.').")
 
-        prompt = prompt if prompt else self.PROMPTS['file']
+        prompt = prompt if prompt else self.PROMPTS["file"]
         prompt = self.promptize(prompt)
         while True:
-            filepath = self.inputc(prompt, prompt_fg=prompt_color,
-                                   prompt_attrs=prompt_attrs,
-                                   input_fg=input_color,
-                                   input_attrs=input_attrs)
+            filepath = self.inputc(
+                prompt,
+                prompt_fg=prompt_color,
+                prompt_attrs=prompt_attrs,
+                input_fg=input_color,
+                input_attrs=input_attrs,
+            )
 
-            is_valid = Validator.is_valid_filepath(filepath, extension,
-                                                   max_length)
+            is_valid = Validator.is_valid_filepath(filepath, extension, max_length)
             if is_valid != True:
                 self.print_error(is_valid)
                 continue
@@ -744,15 +844,18 @@ class Pins:
 
             return filepath
 
-    @typecheck(only=['prompt', 'max_length'])
-    def input_dir(self, prompt: str = '',
-                  max_length: int = 250,
-                  must_exist: bool = True,
-                  prompt_color: Color = None,
-                  prompt_attrs: Iterable[Attribute] = None,
-                  input_color: Color = None,
-                  input_attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    @typecheck(only=["prompt", "max_length"])
+    def input_dir(
+        self,
+        prompt: str = "",
+        max_length: int = 250,
+        must_exist: bool = True,
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Input Directory
         Take `directory` input from user. Keeps asking until a valid
         directory path entered or `KeyboardInterrupt`.
@@ -773,13 +876,16 @@ class Pins:
         'somefolder/anotherfolder'
         ```
         """
-        prompt = prompt if prompt else self.PROMPTS['dir']
+        prompt = prompt if prompt else self.PROMPTS["dir"]
         prompt = self.promptize(prompt)
         while True:
-            directory = self.inputc(prompt, prompt_fg=prompt_color,
-                                    prompt_attrs=prompt_attrs,
-                                    input_fg=input_color,
-                                    input_attrs=input_attrs)
+            directory = self.inputc(
+                prompt,
+                prompt_fg=prompt_color,
+                prompt_attrs=prompt_attrs,
+                input_fg=input_color,
+                input_attrs=input_attrs,
+            )
 
             is_valid = Validator.is_valid_dirpath(directory, max_length)
             if is_valid != True:
@@ -788,20 +894,22 @@ class Pins:
 
             # Directory Exist?
             if must_exist and not isdir(directory):
-                self.print_error(
-                    f"Directory '{directory}' does not exist.")
+                self.print_error(f"Directory '{directory}' does not exist.")
                 continue
 
             return normpath(directory)
 
-    @typecheck(only=['prompt', 'version'])
-    def input_ip(self, prompt: str = '',
-                 version: int = 4,
-                 prompt_color: Color = None,
-                 prompt_attrs: Iterable[Attribute] = None,
-                 input_color: Color = None,
-                 input_attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    @typecheck(only=["prompt", "version"])
+    def input_ip(
+        self,
+        prompt: str = "",
+        version: int = 4,
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Input IP Address
         Take `ipaddress` input from user. Keeps asking until a valid
         ip address entered or `KeyboardInterrupt`.
@@ -826,13 +934,16 @@ class Pins:
         """
         assert version in {4, 6}, "version must be 4 or 6."
 
-        prompt = prompt if prompt else self.PROMPTS['ip'] % version
+        prompt = prompt if prompt else self.PROMPTS["ip"] % version
         prompt = self.promptize(prompt)
         while True:
-            ip = self.inputc(prompt, prompt_fg=prompt_color,
-                             prompt_attrs=prompt_attrs,
-                             input_fg=input_color,
-                             input_attrs=input_attrs)
+            ip = self.inputc(
+                prompt,
+                prompt_fg=prompt_color,
+                prompt_attrs=prompt_attrs,
+                input_fg=input_color,
+                input_attrs=input_attrs,
+            )
             if not ip:
                 self.print_error("IP Address cannot be empty.")
                 continue
@@ -842,13 +953,16 @@ class Pins:
 
             self.print_error(f"Invalid IPv{version} Address: '{ip}'")
 
-    @typecheck(only=['prompt'])
-    def input_url(self, prompt: str = '',
-                  prompt_color: Color = None,
-                  prompt_attrs: Iterable[Attribute] = None,
-                  input_color: Color = None,
-                  input_attrs: Iterable[Attribute] = None) -> str:
-        """ 
+    @typecheck(only=["prompt"])
+    def input_url(
+        self,
+        prompt: str = "",
+        prompt_color: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+        input_color: Color = None,
+        input_attrs: Iterable[Attribute] = None,
+    ) -> str:
+        """
         ### Input URL
         Asks user for a URL. Keeps asking until a valid
         url is entered or `KeyboardInterrupt`.
@@ -867,13 +981,16 @@ class Pins:
         'https://github.com/Anas-Shakeel'
         ```
         """
-        prompt = prompt if prompt else self.PROMPTS['url']
+        prompt = prompt if prompt else self.PROMPTS["url"]
         prompt = self.promptize(prompt)
         while True:
-            url = self.inputc(prompt, prompt_fg=prompt_color,
-                              prompt_attrs=prompt_attrs,
-                              input_fg=input_color,
-                              input_attrs=input_attrs)
+            url = self.inputc(
+                prompt,
+                prompt_fg=prompt_color,
+                prompt_attrs=prompt_attrs,
+                input_fg=input_color,
+                input_attrs=input_attrs,
+            )
             if not url:
                 self.print_error("URL cannot be empty.")
                 continue
@@ -883,21 +1000,24 @@ class Pins:
 
             self.print_error(f"Invalid URL: '{url}'")
 
-    @typecheck(only=['options', 'bullet'])
-    def input_menu(self, options: List[str],
-                   bullet: Union[Bullet, str] = ">",
-                   bullet_fg: Color = None,
-                   bullet_bg: Color = None,
-                   bullet_attrs: Iterable[Attribute] = None,
-                   selected_fg: Color = None,
-                   selected_bg: Color = None,
-                   selected_attrs: Iterable[Attribute] = None,
-                   normal_fg: Color = None,
-                   normal_bg: Color = None,
-                   normal_attrs: Iterable[Attribute] = None) -> int:
-        """ 
+    @typecheck(only=["options", "bullet"])
+    def input_menu(
+        self,
+        options: List[str],
+        bullet: Union[Bullet, str] = ">",
+        bullet_fg: Color = None,
+        bullet_bg: Color = None,
+        bullet_attrs: Iterable[Attribute] = None,
+        selected_fg: Color = None,
+        selected_bg: Color = None,
+        selected_attrs: Iterable[Attribute] = None,
+        normal_fg: Color = None,
+        normal_bg: Color = None,
+        normal_attrs: Iterable[Attribute] = None,
+    ) -> int:
+        """
         ### Input Menu
-        Lets users select an item from a menu (using Up/Down arrow keys) 
+        Lets users select an item from a menu (using Up/Down arrow keys)
         and returns the selection as number (`index + 1`).
 
         #### NOTE:
@@ -927,27 +1047,30 @@ class Pins:
         2
         ```
 
-        Raises all exceptions that `ansy` would raise for 
+        Raises all exceptions that `ansy` would raise for
         invalid colors and attributes.
         """
         # Ansi sequences
         bullet = self.colorize(bullet, bullet_fg, bullet_bg, bullet_attrs)
-        selected_ansi = self._make_ansi(selected_fg, selected_bg, selected_attrs,
-                                        color_mode=self.COLORMODE)
-        normal_ansi = self._make_ansi(normal_fg, normal_bg, normal_attrs,
-                                      color_mode=self.COLORMODE)
+        selected_ansi = self._make_ansi(
+            selected_fg, selected_bg, selected_attrs, color_mode=self.COLORMODE
+        )
+        normal_ansi = self._make_ansi(
+            normal_fg, normal_bg, normal_attrs, color_mode=self.COLORMODE
+        )
 
         total_options = len(options)
         selected_index = 0
 
         with HiddenCursor():
             # Move cursor total_options lines down first
-            print("\n"*total_options, end='', flush=True)
+            print("\n" * total_options, end="", flush=True)
 
             while True:
                 utils.clear_lines_above(total_options)
-                self._render_menu(options, selected_index, bullet,
-                                  selected_ansi, normal_ansi)
+                self._render_menu(
+                    options, selected_index, bullet, selected_ansi, normal_ansi
+                )
 
                 # Wait for a keypress
                 try:
@@ -959,11 +1082,11 @@ class Pins:
                     selected_index -= 1
                 elif key == utils.DOWN and selected_index < total_options - 1:  # DOWN
                     selected_index += 1
-                elif key == '\r':  # ENTER
+                elif key == "\r":  # ENTER
                     return selected_index + 1
 
     def print_error(self, error: str, quit_too: bool = False):
-        """ 
+        """
         ### Print error
         Print a formatted `error`. Closes the application with an exit
         status `1` if `quit_too` is set to `True`.
@@ -978,15 +1101,21 @@ class Pins:
         █ Error: This is error
         ```
         """
-        print(self.create_status("Error", str(error),
-                                 label_fg=self.DEFAULT_COLORS['error'],
-                                 label_attrs=['bold'], text_attrs=['italic']))
+        print(
+            self.create_status(
+                "Error",
+                str(error),
+                label_fg=self.DEFAULT_COLORS["error"],
+                label_attrs=["bold"],
+                text_attrs=["italic"],
+            )
+        )
 
         if quit_too:
             exit(1)
 
     def print_info(self, info: str):
-        """ 
+        """
         ### Print info
         Prints a formatted `info`.
 
@@ -999,12 +1128,18 @@ class Pins:
         █ Info: This is info
         ```
         """
-        print(self.create_status("Info", str(info),
-                                 label_fg=self.DEFAULT_COLORS['info'],
-                                 label_attrs=['bold'], text_attrs=['italic']))
+        print(
+            self.create_status(
+                "Info",
+                str(info),
+                label_fg=self.DEFAULT_COLORS["info"],
+                label_attrs=["bold"],
+                text_attrs=["italic"],
+            )
+        )
 
     def print_warning(self, warning: str):
-        """ 
+        """
         ### Print Warning
         Prints a formatted `warning`.
 
@@ -1017,12 +1152,18 @@ class Pins:
         █ Warning: This is warning
         ```
         """
-        print(self.create_status("Warning", str(warning),
-                                 label_fg=self.DEFAULT_COLORS['warn'],
-                                 label_attrs=['bold'], text_attrs=['italic']))
+        print(
+            self.create_status(
+                "Warning",
+                str(warning),
+                label_fg=self.DEFAULT_COLORS["warn"],
+                label_attrs=["bold"],
+                text_attrs=["italic"],
+            )
+        )
 
     def print_success(self, success: str):
-        """ 
+        """
         ### Print Warning
         Prints a formatted `success`.
 
@@ -1035,28 +1176,46 @@ class Pins:
         █ Success: This is success
         ```
         """
-        print(self.create_status("Success", str(success),
-                                 label_fg=self.DEFAULT_COLORS['success'],
-                                 label_attrs=['bold'], text_attrs=['italic']))
+        print(
+            self.create_status(
+                "Success",
+                str(success),
+                label_fg=self.DEFAULT_COLORS["success"],
+                label_attrs=["bold"],
+                text_attrs=["italic"],
+            )
+        )
 
-    @typecheck(skip=["border_color", "heading_fg", "heading_bg", "heading_attrs", "keys_color", "values_color"])
-    def print_about(self, name: Optional[str] = None,
-                    version: Optional[str] = None,
-                    description: Optional[str] = None,
-                    author: Optional[str] = None,
-                    author_email: Optional[str] = None,
-                    source_url: Optional[str] = None,
-                    license: Optional[str] = None,
-                    platforms: Union[List[str], str, None] = None,
-                    *,
-                    show_heading: bool = True,
-                    border_color: Color = None,
-                    heading_fg: Color = None,
-                    heading_bg: Color = None,
-                    heading_attrs: Iterable[Attribute] = None,
-                    keys_color: Color = None,
-                    values_color: Color = None):
-        """  
+    @typecheck(
+        skip=[
+            "border_color",
+            "heading_fg",
+            "heading_bg",
+            "heading_attrs",
+            "keys_color",
+            "values_color",
+        ]
+    )
+    def print_about(
+        self,
+        name: Optional[str] = None,
+        version: Optional[str] = None,
+        description: Optional[str] = None,
+        author: Optional[str] = None,
+        author_email: Optional[str] = None,
+        source_url: Optional[str] = None,
+        license: Optional[str] = None,
+        platforms: Union[List[str], str, None] = None,
+        *,
+        show_heading: bool = True,
+        border_color: Color = None,
+        heading_fg: Color = None,
+        heading_bg: Color = None,
+        heading_attrs: Iterable[Attribute] = None,
+        keys_color: Color = None,
+        values_color: Color = None,
+    ):
+        """
         ### Print About
         Print information about your program.
 
@@ -1097,30 +1256,38 @@ class Pins:
 
         heading = f"  About {name.title()}  " if name and show_heading else None
         # Create table
-        new_table = self.create_table(dictionary=table,
-                                      heading=heading,
-                                      heading_fg=heading_fg,
-                                      heading_bg=heading_bg,
-                                      heading_attrs=heading_attrs,
-                                      keys_fg=keys_color,
-                                      values_fg=values_color)
+        new_table = self.create_table(
+            dictionary=table,
+            heading=heading,
+            heading_fg=heading_fg,
+            heading_bg=heading_bg,
+            heading_attrs=heading_attrs,
+            keys_fg=keys_color,
+            values_fg=values_color,
+        )
 
         # Create a box around table
-        new_table = self.boxify(new_table,
-                                wrap=False,
-                                pad_x=6, pad_y=1,
-                                y_align="center",
-                                border_color=border_color)
+        new_table = self.boxify(
+            new_table,
+            wrap=False,
+            pad_x=6,
+            pad_y=1,
+            y_align="center",
+            border_color=border_color,
+        )
         print(new_table)
 
-    def print_more(self, text: str,
-                   n: int = 1,
-                   prompt: str = "",
-                   prompt_align: XAlign = "left",
-                   prompt_fg: Color = None,
-                   prompt_bg: Color = None,
-                   prompt_attrs: Iterable[Attribute] = None):
-        """ 
+    def print_more(
+        self,
+        text: str,
+        n: int = 1,
+        prompt: str = "",
+        prompt_align: XAlign = "left",
+        prompt_fg: Color = None,
+        prompt_bg: Color = None,
+        prompt_attrs: Iterable[Attribute] = None,
+    ):
+        """
         ### Print More
         Prints `text` in the terminal. when number of lines in `text` are more than
         terminal's height, it adds a `MORE` line and waits for enter keypress
@@ -1162,7 +1329,7 @@ class Pins:
 
         # Print first section (first page)
         lines = text.splitlines()
-        stop_ = min(h-2, len(lines))
+        stop_ = min(h - 2, len(lines))
         print("\n".join(lines[:stop_]))
 
         # Print remaining lines (line by line)
@@ -1175,16 +1342,18 @@ class Pins:
             except KeyboardInterrupt:
                 utils.clear_line()
 
-    def print_pages(self, text: str,
-                    lines_per_page: int = 10,
-                    show_statusbar: bool = True,
-                    statusbar_fg: Color = None,
-                    statusbar_bg: Color = None,
-                    statusbar_attrs: Iterable[Attribute] = None,
-                    text_fg: Color = None,
-                    text_bg: Color = None,
-                    text_attrs: Iterable[Attribute] = None,
-                    ):
+    def print_pages(
+        self,
+        text: str,
+        lines_per_page: int = 10,
+        show_statusbar: bool = True,
+        statusbar_fg: Color = None,
+        statusbar_bg: Color = None,
+        statusbar_attrs: Iterable[Attribute] = None,
+        text_fg: Color = None,
+        text_bg: Color = None,
+        text_attrs: Iterable[Attribute] = None,
+    ):
         """
         ### Print Pages
         Prints paginated `text`. It prints a page, asks for keypress `enter` and
@@ -1207,7 +1376,7 @@ class Pins:
         ```
         >> text = "line 1\\nline 2\\nline 3\\nline 4\\nline 5"
         >> p.print_pages(text, 2)
-        line 1 
+        line 1
         line 2
 
         [CTRL+C] : Stop    [ENTER] : Next Page    (Page: 1 / 3)
@@ -1227,8 +1396,12 @@ class Pins:
 
         # Create statusbar
         if show_statusbar:
-            statusbar_fmt = self.colorize("[CTRL+C] : Stop    [ENTER] : Next Page    (Page: %d / %d)",
-                                          statusbar_fg, statusbar_bg, statusbar_attrs)
+            statusbar_fmt = self.colorize(
+                "[CTRL+C] : Stop    [ENTER] : Next Page    (Page: %d / %d)",
+                statusbar_fg,
+                statusbar_bg,
+                statusbar_attrs,
+            )
             other_lines += 1
 
         text_fmt = self.create_ansi_fmt(text_fg, text_bg, text_attrs)
@@ -1240,22 +1413,21 @@ class Pins:
 
                 # Print Statusbar, if asked to.
                 if show_statusbar:
-                    print(statusbar_fmt %
-                          (batches.batch_no, batches.total_batches))
+                    print(statusbar_fmt % (batches.batch_no, batches.total_batches))
 
                 # Wait for keypress
                 if batches.has_next_batch:
                     try:
-                        self.inputc(input_attrs=['concealed'])
-                        utils.clear_lines_above(len(batch)+other_lines)
+                        self.inputc(input_attrs=["concealed"])
+                        utils.clear_lines_above(len(batch) + other_lines)
                     except EOFError:
-                        utils.clear_lines_above(len(batch)+other_lines)
+                        utils.clear_lines_above(len(batch) + other_lines)
                     except KeyboardInterrupt:
                         break
         utils.clear_line()
 
     def paginate(self, text: str, lines_per_page: int = 10):
-        """ 
+        """
         ### Paginate
         Paginates a lengthy multiline text. Returns a generator object which,
         yields a page on each iteration.
@@ -1291,15 +1463,18 @@ class Pins:
             for page in pages.iterate():
                 yield "\n".join(page)
 
-    def print_json(self, data: Any,
-                   indent: int = 4,
-                   quotes: bool = False,
-                   str_color: Color = None,
-                   number_color: Color = None,
-                   keyword_color: Color = None,
-                   key_color: Color = None,
-                   symbol_color: Color = None,):
-        """ 
+    def print_json(
+        self,
+        data: Any,
+        indent: int = 4,
+        quotes: bool = False,
+        str_color: Color = None,
+        number_color: Color = None,
+        keyword_color: Color = None,
+        key_color: Color = None,
+        symbol_color: Color = None,
+    ):
+        """
         ### Print Json
         Pretty-print json with syntax highlighting. This method uses `Pins.JsonHighlight`
 
@@ -1335,13 +1510,20 @@ class Pins:
             str_color, number_color, symbol_color = None, None, None
             key_color, keyword_color = None, None
 
-        jsh = JsonHighlight(indent, quotes, self.COLORMODE,
-                            str_color, number_color, keyword_color,
-                            key_color, symbol_color)
+        jsh = JsonHighlight(
+            indent,
+            quotes,
+            self.COLORMODE,
+            str_color,
+            number_color,
+            keyword_color,
+            key_color,
+            symbol_color,
+        )
         print(jsh.highlight(data))
 
     def typewrite(self, text: str, interval: float = 0.01, hide_cursor: bool = True):
-        """ 
+        """
         ### Typewrite
         Print `text` in the terminal with a typewriter-like effect, where each
         character is "Written" (printed) with a short delay.
@@ -1366,12 +1548,16 @@ class Pins:
         else:
             w.write(text)
 
-    def reveal_text(self, text: str, interval: float = 0.01,
-                    max_seconds: int = 1,
-                    initial_color: Color = None,
-                    final_color: Color = None,
-                    color_mode: int = 4):
-        """ 
+    def reveal_text(
+        self,
+        text: str,
+        interval: float = 0.01,
+        max_seconds: int = 1,
+        initial_color: Color = None,
+        final_color: Color = None,
+        color_mode: int = 4,
+    ):
+        """
         ### Reveal Text
         Print `text` in the terminal with a reveal-text effect.
 
@@ -1392,22 +1578,27 @@ class Pins:
         "Print this text with reveal effect"
         ```
         """
-        revealer = RevealText(interval=interval,
-                              max_seconds=max_seconds,
-                              initial_color=initial_color,
-                              final_color=final_color,
-                              color_mode=color_mode)
+        revealer = RevealText(
+            interval=interval,
+            max_seconds=max_seconds,
+            initial_color=initial_color,
+            final_color=final_color,
+            color_mode=color_mode,
+        )
         revealer.reveal(text)
 
-    def print_hr(self, width: int = None,
-                 pad_x: int = 0,
-                 align: XAlign = "left",
-                 charset: Charset = None,
-                 fill_char: FillChar = None,
-                 color: Color = None):
+    def print_hr(
+        self,
+        width: int = None,
+        pad_x: int = 0,
+        align: XAlign = "left",
+        charset: Charset = None,
+        fill_char: FillChar = None,
+        color: Color = None,
+    ):
         """
         ### Print HR (Horizontal Rule)
-        Prints the string returned from  `Pins.create_hr(args)` 
+        Prints the string returned from  `Pins.create_hr(args)`
 
         #### Example:
         ```
@@ -1417,14 +1608,17 @@ class Pins:
         """
         print(self.create_hr(width, pad_x, align, charset, fill_char, color))
 
-    @typecheck(skip=['color'])
-    def create_hr(self, width: Optional[int] = None,
-                  pad_x: int = 0,
-                  align: Union[XAlign, str] = "left",
-                  charset: Union[Charset, str, None] = None,
-                  fill_char: Union[FillChar, str, None] = None,
-                  color: Color = None):
-        """ 
+    @typecheck(skip=["color"])
+    def create_hr(
+        self,
+        width: Optional[int] = None,
+        pad_x: int = 0,
+        align: Union[XAlign, str] = "left",
+        charset: Union[Charset, str, None] = None,
+        fill_char: Union[FillChar, str, None] = None,
+        color: Color = None,
+    ):
+        """
         ### Create Horizontal Rule (line)
         Creates a horizontal line. Uses characters from `charset` if provided,
         otherwise uses the module level `charset`. `fill_char` takes
@@ -1462,7 +1656,7 @@ class Pins:
         width = width if width else terminal_width
 
         charset = CHARSETS[charset] if charset else self.CHARSET
-        fill_char = fill_char if fill_char else charset['NORMAL']
+        fill_char = fill_char if fill_char else charset["NORMAL"]
         hr = fill_char * (width - pad_x)
 
         if align == "center":
@@ -1474,18 +1668,21 @@ class Pins:
 
         return self.colorize(hr.rstrip(), color, force_color=True)
 
-    def create_status(self, label: str,
-                      text: str,
-                      label_fg: Color = None,
-                      label_bg: Color = None,
-                      label_attrs: Iterable[Attribute] = None,
-                      text_fg: Color = None,
-                      text_bg: Color = None,
-                      text_attrs: Iterable[Attribute] = None,
-                      *,
-                      no_color: bool = None,
-                      force_color: bool = None):
-        """ 
+    def create_status(
+        self,
+        label: str,
+        text: str,
+        label_fg: Color = None,
+        label_bg: Color = None,
+        label_attrs: Iterable[Attribute] = None,
+        text_fg: Color = None,
+        text_bg: Color = None,
+        text_attrs: Iterable[Attribute] = None,
+        *,
+        no_color: bool = None,
+        force_color: bool = None,
+    ):
+        """
         ### Create Status
         Creates a formatted Status. Nicely handles newline characters.
         Returns a `str` status.
@@ -1528,8 +1725,7 @@ class Pins:
         if not self.USE_COLORS:
             label_fg, label_bg, text_fg, text_bg = None, None, None, None
 
-        self._validate_attrs([('label_attrs', label_attrs),
-                              ('text_attrs', text_attrs)])
+        self._validate_attrs([("label_attrs", label_attrs), ("text_attrs", text_attrs)])
 
         # Defining styles for colored_ansy func.
         style = {
@@ -1539,7 +1735,7 @@ class Pins:
 
         bar = self.STATUS_CHAR
         status_text = f"{bar} {label}: "
-        indent = " "*(len(status_text) - 2)
+        indent = " " * (len(status_text) - 2)
 
         # Wrap the text
         max_width = get_terminal_size()[0] - len(status_text)
@@ -1547,34 +1743,43 @@ class Pins:
 
         # Create Status
         lines = text.splitlines()
-        first_line = colored_ansy(f"@bar[{status_text}]@line[{lines[0]}]", 
-                                  style, no_color=no_color,
-                                   force_color=force_color)
+        first_line = colored_ansy(
+            f"@bar[{status_text}]@line[{lines[0]}]",
+            style,
+            no_color=no_color,
+            force_color=force_color,
+        )
         other_lines = ""
         for line in lines[1:]:
-            other_lines += colored_ansy(f"@bar[{bar}] {indent}@line[{line}]\n",
-                                        style, no_color=no_color,
-                                         force_color=force_color)
+            other_lines += colored_ansy(
+                f"@bar[{bar}] {indent}@line[{line}]\n",
+                style,
+                no_color=no_color,
+                force_color=force_color,
+            )
 
         if other_lines:
             first_line += "\n"
 
         return first_line + other_lines.rstrip("\n")
 
-    def boxify(self, text: str,
-               width: int = None,
-               wrap: bool = False,
-               replace_whitespace: bool = False,
-               pad_x: int = 0,
-               pad_y: int = 0,
-               heading: Optional[str] = None,
-               x_align: XAlign = "left",
-               y_align: YAlign = "top",
-               charset: Charset = None,
-               border_color: Color = None,
-               text_color: Color = None,
-               heading_color: Color = None) -> str:
-        """  
+    def boxify(
+        self,
+        text: str,
+        width: int = None,
+        wrap: bool = False,
+        replace_whitespace: bool = False,
+        pad_x: int = 0,
+        pad_y: int = 0,
+        heading: Optional[str] = None,
+        x_align: XAlign = "left",
+        y_align: YAlign = "top",
+        charset: Charset = None,
+        border_color: Color = None,
+        text_color: Color = None,
+        heading_color: Color = None,
+    ) -> str:
+        """
         ### Boxify
         Returns a formatted version of `text` in a box. This method uses
         `Pins.Box` under the hood.
@@ -1607,77 +1812,96 @@ class Pins:
             text_color, border_color = None, None
 
         charset = charset if charset else self.charset_name
-        box = Box(text=text,
-                  width=width,
-                  pad_x=pad_x,
-                  pad_y=pad_y,
-                  heading=heading,
-                  x_align=x_align,
-                  y_align=y_align,
-                  charset=charset,
-                  border_color=border_color,
-                  text_color=text_color,
-                  heading_color=heading_color,
-                  color_mode=self.COLORMODE)
+        box = Box(
+            text=text,
+            width=width,
+            pad_x=pad_x,
+            pad_y=pad_y,
+            heading=heading,
+            x_align=x_align,
+            y_align=y_align,
+            charset=charset,
+            border_color=border_color,
+            text_color=text_color,
+            heading_color=heading_color,
+            color_mode=self.COLORMODE,
+        )
 
         return box.create(wrap=wrap, replace_whitespace=replace_whitespace)
 
-    def print_list_ordered(self, items: Union[List, Tuple],
-                           indent: int = 0,
-                           list_indent: int = 4,
-                           line_height: int = 0,
-                           num_color: Color = None,
-                           num_attrs: Iterable[Attribute] = None,
-                           item_color: Color = None,
-                           item_attrs: Iterable[Attribute] = None):
+    def print_list_ordered(
+        self,
+        items: Union[List, Tuple],
+        indent: int = 0,
+        list_indent: int = 4,
+        line_height: int = 0,
+        num_color: Color = None,
+        num_attrs: Iterable[Attribute] = None,
+        item_color: Color = None,
+        item_attrs: Iterable[Attribute] = None,
+    ):
         """
         ### Print List Ordered
         Prints the string returned from `create_list_ordered(args)`
         """
-        print(self.create_list_ordered(items=items,
-                                       indent=indent,
-                                       list_indent=list_indent,
-                                       line_height=line_height,
-                                       num_color=num_color,
-                                       num_attrs=num_attrs,
-                                       item_color=item_color,
-                                       item_attrs=item_attrs))
+        print(
+            self.create_list_ordered(
+                items=items,
+                indent=indent,
+                list_indent=list_indent,
+                line_height=line_height,
+                num_color=num_color,
+                num_attrs=num_attrs,
+                item_color=item_color,
+                item_attrs=item_attrs,
+            )
+        )
 
-    def print_list_unordered(self, items: Union[List, Tuple],
-                             bullet: Bullet = '+',
-                             bullet_map: Iterable[Bullet] = None,
-                             indent: int = 0,
-                             list_indent: int = 4,
-                             line_height: int = 0,
-                             bullet_color: Color = None,
-                             bullet_attrs: Iterable[Attribute] = None,
-                             item_color: Color = None,
-                             item_attrs: Iterable[Attribute] = None):
+    def print_list_unordered(
+        self,
+        items: Union[List, Tuple],
+        bullet: Bullet = "+",
+        bullet_map: Iterable[Bullet] = None,
+        indent: int = 0,
+        list_indent: int = 4,
+        line_height: int = 0,
+        bullet_color: Color = None,
+        bullet_attrs: Iterable[Attribute] = None,
+        item_color: Color = None,
+        item_attrs: Iterable[Attribute] = None,
+    ):
         """
         ### Print List Unordered
         Prints the string returned from `create_list_unordered(*args, **kwargs)`
         """
-        print(self.create_list_unordered(items=items,
-                                         bullet=bullet,
-                                         bullet_map=bullet_map,
-                                         indent=indent,
-                                         list_indent=list_indent,
-                                         line_height=line_height,
-                                         bullet_color=bullet_color,
-                                         bullet_attrs=bullet_attrs,
-                                         item_color=item_color,
-                                         item_attrs=item_attrs))
+        print(
+            self.create_list_unordered(
+                items=items,
+                bullet=bullet,
+                bullet_map=bullet_map,
+                indent=indent,
+                list_indent=list_indent,
+                line_height=line_height,
+                bullet_color=bullet_color,
+                bullet_attrs=bullet_attrs,
+                item_color=item_color,
+                item_attrs=item_attrs,
+            )
+        )
 
-    @typecheck(only=['items', 'indent', 'list_indent', 'line_height'])
-    def create_list_ordered(self, items: Union[List, Tuple],
-                            indent: int = 0,
-                            list_indent: int = 4,
-                            line_height: int = 0,
-                            num_color: Color = None,
-                            num_attrs: Iterable[Attribute] = None,
-                            item_color: Color = None,
-                            item_attrs: Iterable[Attribute] = None):
-        """  
+    @typecheck(only=["items", "indent", "list_indent", "line_height"])
+    def create_list_ordered(
+        self,
+        items: Union[List, Tuple],
+        indent: int = 0,
+        list_indent: int = 4,
+        line_height: int = 0,
+        num_color: Color = None,
+        num_attrs: Iterable[Attribute] = None,
+        item_color: Color = None,
+        item_attrs: Iterable[Attribute] = None,
+    ):
+        """
         ### Create List Ordered
         Creates a numbered list from `items`. This method also supports nested lists.
 
@@ -1712,31 +1936,36 @@ class Pins:
         num_fmt = self.create_ansi_fmt(num_color, None, num_attrs)
         item_fmt = self.create_ansi_fmt(item_color, None, item_attrs)
 
-        newlines = '\n'*(max(line_height, 0) + 1)
-        pad = ' '*indent
+        newlines = "\n" * (max(line_height, 0) + 1)
+        pad = " " * indent
 
         # Create list
-        return self._recurse_list(items=items,
-                                  list_indent=list_indent,
-                                  pad=pad,
-                                  bullet="",
-                                  prefix_fmt=num_fmt,
-                                  item_fmt=item_fmt,
-                                  list_type="ordered",
-                                  newline=newlines)
+        return self._recurse_list(
+            items=items,
+            list_indent=list_indent,
+            pad=pad,
+            bullet="",
+            prefix_fmt=num_fmt,
+            item_fmt=item_fmt,
+            list_type="ordered",
+            newline=newlines,
+        )
 
-    @typecheck(only=['items', 'indent', 'bullet', 'list_indent', 'line_height'])
-    def create_list_unordered(self, items: Union[List, Tuple],
-                              bullet: Union[Bullet, str] = '+',
-                              bullet_map: Iterable[Bullet] = None,
-                              indent: int = 0,
-                              list_indent: int = 4,
-                              line_height: int = 0,
-                              bullet_color: Color = None,
-                              bullet_attrs: Iterable[Attribute] = None,
-                              item_color: Color = None,
-                              item_attrs: Iterable[Attribute] = None):
-        """  
+    @typecheck(only=["items", "indent", "bullet", "list_indent", "line_height"])
+    def create_list_unordered(
+        self,
+        items: Union[List, Tuple],
+        bullet: Union[Bullet, str] = "+",
+        bullet_map: Iterable[Bullet] = None,
+        indent: int = 0,
+        list_indent: int = 4,
+        line_height: int = 0,
+        bullet_color: Color = None,
+        bullet_attrs: Iterable[Attribute] = None,
+        item_color: Color = None,
+        item_attrs: Iterable[Attribute] = None,
+    ):
+        """
         ### Create List Unordered
         Creates an unordered list from `items`. This method also supports nested lists.
 
@@ -1779,36 +2008,41 @@ class Pins:
         bullet_fmt = self.create_ansi_fmt(bullet_color, None, bullet_attrs)
         item_fmt = self.create_ansi_fmt(item_color, None, item_attrs)
 
-        newlines = '\n'*(max(line_height, 0) + 1)
-        pad = ' '*indent
+        newlines = "\n" * (max(line_height, 0) + 1)
+        pad = " " * indent
 
         # Create list
-        return self._recurse_list(items=items,
-                                  list_indent=list_indent,
-                                  pad=pad,
-                                  bullet=bullet,
-                                  bullet_map=bullet_map,
-                                  prefix_fmt=bullet_fmt,
-                                  item_fmt=item_fmt,
-                                  list_type="unordered",
-                                  newline=newlines)
+        return self._recurse_list(
+            items=items,
+            list_indent=list_indent,
+            pad=pad,
+            bullet=bullet,
+            bullet_map=bullet_map,
+            prefix_fmt=bullet_fmt,
+            item_fmt=item_fmt,
+            list_type="unordered",
+            newline=newlines,
+        )
 
-    @typecheck(only=['dictionary', 'heading', 'indent_values', 'line_height'])
-    def create_table(self, dictionary: Dict,
-                     heading: Optional[str] = None,
-                     indent_values: int = 4,
-                     line_height: int = 0,
-                     ignore_none: bool = True,
-                     heading_fg: Color = None,
-                     heading_bg: Color = None,
-                     heading_attrs: Iterable[Attribute] = None,
-                     keys_fg: Color = None,
-                     keys_bg: Color = None,
-                     keys_attrs: Iterable[Attribute] = None,
-                     values_fg: Color = None,
-                     values_bg: Color = None,
-                     values_attrs: Iterable[Attribute] = None):
-        """ 
+    @typecheck(only=["dictionary", "heading", "indent_values", "line_height"])
+    def create_table(
+        self,
+        dictionary: Dict,
+        heading: Optional[str] = None,
+        indent_values: int = 4,
+        line_height: int = 0,
+        ignore_none: bool = True,
+        heading_fg: Color = None,
+        heading_bg: Color = None,
+        heading_attrs: Iterable[Attribute] = None,
+        keys_fg: Color = None,
+        keys_bg: Color = None,
+        keys_attrs: Iterable[Attribute] = None,
+        values_fg: Color = None,
+        values_bg: Color = None,
+        values_attrs: Iterable[Attribute] = None,
+    ):
+        """
         ### Create Table
         Formats a dictionary as a table (sort of). This method does not
         colorize already colored text.
@@ -1847,8 +2081,8 @@ class Pins:
 
         # Space inbetween keys and values in table
         space: int = len(self._longest_string(dictionary.keys()))
-        pad = " "*indent_values
-        newlines: str = "\n"*(line_height+1)
+        pad = " " * indent_values
+        newlines: str = "\n" * (line_height + 1)
 
         table = []
         for key, value in dictionary.items():
@@ -1859,19 +2093,26 @@ class Pins:
 
         # Add heading
         if heading:
-            return "\n".join([self.colorize(heading, 
-                                            heading_fg,
-                                            heading_bg,
-                                            heading_attrs,
-                                            force_color=True), " ", table])
+            return "\n".join(
+                [
+                    self.colorize(
+                        heading, heading_fg, heading_bg, heading_attrs, force_color=True
+                    ),
+                    " ",
+                    table,
+                ]
+            )
         return table
 
-    def promptize(self, prompt: str,
-                  fgcolor: Color = None,
-                  bgcolor: Color = None,
-                  attrs: Iterable[Attribute] = None,
-                  prompt_char: str = None) -> str:
-        """ 
+    def promptize(
+        self,
+        prompt: str,
+        fgcolor: Color = None,
+        bgcolor: Color = None,
+        attrs: Iterable[Attribute] = None,
+        prompt_char: str = None,
+    ) -> str:
+        """
         ### Promptize
         Returns a formatted version of `prompt`, which you can use to create
         your own `input` functions.
@@ -1893,10 +2134,13 @@ class Pins:
         return self.colorize(s, fgcolor, bgcolor, attrs=attrs, force_color=True)
 
     @typecheck()
-    def textalign_x(self, text: str,
-                    width: Optional[int] = None,
-                    align: Union[XAlign, str] = "center",
-                    fill_char: str = " "):
+    def textalign_x(
+        self,
+        text: str,
+        width: Optional[int] = None,
+        align: Union[XAlign, str] = "center",
+        fill_char: str = " ",
+    ):
         """
         ### Text Align X
         Align `text` on the x axis.
@@ -1920,7 +2164,11 @@ class Pins:
         Raises `AssertionError` if:
         - `align` is not left, center or right.
         """
-        assert align in ("center", "left", "right"), f"Invalid align: '{
+        assert align in (
+            "center",
+            "left",
+            "right",
+        ), f"Invalid align: '{
             align}'"
 
         if text == "":
@@ -1932,19 +2180,22 @@ class Pins:
         for line in text.splitlines():
             diff = len(line) - len(de_ansi(line))  # difference
             if align == "center":
-                newtext.append(line.strip().center(width+diff, fill_char))
+                newtext.append(line.strip().center(width + diff, fill_char))
             elif align == "right":
-                newtext.append(line.strip().rjust(width+diff, fill_char))
+                newtext.append(line.strip().rjust(width + diff, fill_char))
             else:
-                newtext.append(line.strip().ljust(width+diff, fill_char))
+                newtext.append(line.strip().ljust(width + diff, fill_char))
 
         return "\n".join(newtext)
 
     @typecheck()
-    def textalign_y(self, text: str,
-                    height: Optional[int] = None,
-                    align: Union[YAlign, str] = "center",
-                    fill_char: str = " "):
+    def textalign_y(
+        self,
+        text: str,
+        height: Optional[int] = None,
+        align: Union[YAlign, str] = "center",
+        fill_char: str = " ",
+    ):
         """
         ### Text Align Y
         Align `text` on the y axis.
@@ -1966,8 +2217,7 @@ class Pins:
         Raises `AssertionError` if:
         - `align` is not top, center or bottom.
         """
-        assert align in ("center", "top", "bottom"), \
-            f"Invalid align: '{align}'"
+        assert align in ("center", "top", "bottom"), f"Invalid align: '{align}'"
 
         if not text:
             return text
@@ -1988,7 +2238,7 @@ class Pins:
 
     @typecheck()
     def indent_text(self, text: str, indent: int = 4, wrap: bool = True):
-        """ 
+        """
         ### Indent Text
         Indents `text` to `indent` spaces (left to right)
 
@@ -2009,21 +2259,21 @@ class Pins:
         max_width = get_terminal_size()[0]
 
         # Clip indent
-        indent = min(indent, max_width-1)
+        indent = min(indent, max_width - 1)
         indent = max(indent, 0)
 
         # Wrap text if needed
-        if wrap and max_width < (len(text)+indent):
+        if wrap and max_width < (len(text) + indent):
             text = fill(text, max_width - indent)
 
         # Indent
-        pad = " "*indent
-        return '\n'.join([pad+line for line in text.splitlines()])
+        pad = " " * indent
+        return "\n".join([pad + line for line in text.splitlines()])
 
     def for_each(self, items: Iterable[Any], func: Callable[[Any], Any]) -> List[Any]:
-        """ 
+        """
         ### For Each
-        As name implies, this method runs `func` for each item in `items`, 
+        As name implies, this method runs `func` for each item in `items`,
         passing item to `func`.
 
         #### ARGS:
@@ -2039,20 +2289,23 @@ class Pins:
         """
         return [func(item) for item in items]
 
-    def wrap_text(self, text: str,
-                  width: int = None,
-                  initial_indent: str = "",
-                  subsequent_indent: str = "",
-                  expand_tabs: bool = True,
-                  tabsize: int = 8,
-                  replace_whitespace: bool = True,
-                  fix_sentence_endings: bool = False,
-                  break_long_words: bool = True,
-                  break_on_hyphens: bool = True,
-                  drop_whitespace: bool = True,
-                  max_lines: int = None,
-                  placeholder: str = " [...]") -> str:
-        """ 
+    def wrap_text(
+        self,
+        text: str,
+        width: int = None,
+        initial_indent: str = "",
+        subsequent_indent: str = "",
+        expand_tabs: bool = True,
+        tabsize: int = 8,
+        replace_whitespace: bool = True,
+        fix_sentence_endings: bool = False,
+        break_long_words: bool = True,
+        break_on_hyphens: bool = True,
+        drop_whitespace: bool = True,
+        max_lines: int = None,
+        placeholder: str = " [...]",
+    ) -> str:
+        """
         ### Wrap Text
         Wrap the text. This method is merely a thin wrapper around the `fill()`
         function from `textwrap` library.
@@ -2070,23 +2323,25 @@ class Pins:
         ```
         """
         width = width if width else get_terminal_size()[0]
-        return fill(text=text,
-                    width=width,
-                    initial_indent=initial_indent,
-                    subsequent_indent=subsequent_indent,
-                    expand_tabs=expand_tabs,
-                    tabsize=tabsize,
-                    replace_whitespace=replace_whitespace,
-                    fix_sentence_endings=fix_sentence_endings,
-                    break_long_words=break_long_words,
-                    break_on_hyphens=break_on_hyphens,
-                    drop_whitespace=drop_whitespace,
-                    max_lines=max_lines,
-                    placeholder=placeholder)
+        return fill(
+            text=text,
+            width=width,
+            initial_indent=initial_indent,
+            subsequent_indent=subsequent_indent,
+            expand_tabs=expand_tabs,
+            tabsize=tabsize,
+            replace_whitespace=replace_whitespace,
+            fix_sentence_endings=fix_sentence_endings,
+            break_long_words=break_long_words,
+            break_on_hyphens=break_on_hyphens,
+            drop_whitespace=drop_whitespace,
+            max_lines=max_lines,
+            placeholder=placeholder,
+        )
 
     @typecheck()
     def splice_text(self, text: str, chars: str = "_", steps: int = 1) -> str:
-        """ 
+        """
         ### Splice Text
         Inserts the `chars` AFTER each `i` characters within the text.
 
@@ -2109,10 +2364,10 @@ class Pins:
         if not chars:
             return text
 
-        return chars.join([text[i:i+steps] for i in range(0, len(text), steps)])
+        return chars.join([text[i : i + steps] for i in range(0, len(text), steps)])
 
     def contains_ansi(self, text: str) -> bool:
-        """ 
+        """
         ### Contains ansi
         Returns `True` if text contains ansi codes, else `False`.
         """
@@ -2120,7 +2375,7 @@ class Pins:
 
     @typecheck()
     def shorten_path(self, p: str, n: int = 3, replacement: str = "...") -> str:
-        """ 
+        """
         ### Shorten Path
         Truncate first `n` parts (exluding prefix) from `p` path. This method also
         never truncates the suffix (last part).
@@ -2156,7 +2411,7 @@ class Pins:
 
     @typecheck()
     def ellipsis(self, text: str, max_chars: int = 4) -> str:
-        """ 
+        """
         ### Ellipsis
         Truncate from end, part of string that exceeds `max_chars`.
 
@@ -2170,7 +2425,7 @@ class Pins:
         >> pins.ellipsis(text, 10)
         'Truncat...' # total 10 max chars including '...'
         ```
-        
+
         Raises `AssertionError` if:
         - `max_chars` is less than 4
         """
@@ -2180,11 +2435,11 @@ class Pins:
             return ""
 
         if (len(text) + 3) > max_chars:
-            return text[:max_chars-3] + "..."
+            return text[: max_chars - 3] + "..."
         return text
 
     def now(self, format_: str = "%d %B %Y %I:%M %p") -> str:
-        """  
+        """
         ### Now
         Returns the current local date & time, formatted as `format_`.
         This method is equivalent to `datetime.now().strftime(format_)`
@@ -2226,9 +2481,9 @@ class Pins:
 
     @typecheck()
     def time_ago(self, date_string: str, format_: str) -> str:
-        """ 
+        """
         ### Time Ago
-        Converts a date/time string to a human-readable format like `10 minutes ago` or 
+        Converts a date/time string to a human-readable format like `10 minutes ago` or
         `6 years ago` etc.
 
         #### ARGS:
@@ -2258,11 +2513,17 @@ class Pins:
         now = datetime.now()
 
         # Handle time-only strings by assuming today's date
-        if '%H' in format_ or '%I' in format_:
-            if '%Y' not in format_ and '%d' not in format_:  # Year and Day not in format?
+        if "%H" in format_ or "%I" in format_:
+            if (
+                "%Y" not in format_ and "%d" not in format_
+            ):  # Year and Day not in format?
                 # Add past_date's time in today's date
-                past_date = now.replace(hour=past_date.hour, minute=past_date.minute,
-                                        second=past_date.second, microsecond=0)
+                past_date = now.replace(
+                    hour=past_date.hour,
+                    minute=past_date.minute,
+                    second=past_date.second,
+                    microsecond=0,
+                )
 
         diff = now - past_date
 
@@ -2299,7 +2560,7 @@ class Pins:
             return f"Just now"
 
     def get_calendar(self, year: int = None, month: int = None) -> str:
-        """ 
+        """
         ### Get Calendar
         Returns a multi-column calendar of `month` of `year`. If both are `None`,
         Returns the calender of current month.
@@ -2332,18 +2593,21 @@ class Pins:
 
         if month == None or year == None:
             raise AssertionError(
-                "Either both year and month should be provided or None.")
+                "Either both year and month should be provided or None."
+            )
 
-        assert month <= 12 and month > 0, \
-            f"Invalid month {month}: must be 1-12"
+        assert month <= 12 and month > 0, f"Invalid month {month}: must be 1-12"
 
         return calendar_month(year, month)
 
-    def print_calendar(self, year: int = None,
-                       month: int = None,
-                       month_color: Color = None,
-                       date_color: Color = None):
-        """ 
+    def print_calendar(
+        self,
+        year: int = None,
+        month: int = None,
+        month_color: Color = None,
+        date_color: Color = None,
+    ):
+        """
         ### Print Calendar
         Prints calendar returned from `Pins.get_calendar(args)`.
 
@@ -2361,25 +2625,27 @@ class Pins:
         calendar = calendar.splitlines()
         month_year = calendar[0]
         daynames = calendar[1]
-        dates = '\n'.join(calendar[2:])
+        dates = "\n".join(calendar[2:])
 
         day, dayname, year_, month_ = self.now("%d %a %Y %B").split()
 
         # Colorize the parts
         month_year_chunks = month_year.split()
         if month_year_chunks[0] == month_ and month_year_chunks[1] == year_:
-            dates = self.colorize_regex(
-                dates, r'\s%d\s' % int(day), date_color)
+            dates = self.colorize_regex(dates, r"\s%d\s" % int(day), date_color)
             daynames = self.colorize_regex(daynames, dayname[:-1], date_color)
 
         month_year = self.colorize(month_year, month_color)
 
-        print('\n'.join([month_year, daynames, dates]))
+        print("\n".join([month_year, daynames, dates]))
 
-    def create_ansi_fmt(self, fgcolor: Color = None,
-                        bgcolor: Color = None,
-                        attrs: Iterable[Attribute] = None,
-                        color_mode: int = None) -> str:
+    def create_ansi_fmt(
+        self,
+        fgcolor: Color = None,
+        bgcolor: Color = None,
+        attrs: Iterable[Attribute] = None,
+        color_mode: int = None,
+    ) -> str:
         """
         ### Create Ansi Format
         Returns an ansi format string with a string placeholder and reset code.
@@ -2403,20 +2669,23 @@ class Pins:
         """
         color_mode = color_mode if color_mode else self.COLORMODE
         ansi_seq = self._make_ansi(fgcolor, bgcolor, attrs, color_mode)
-        return f"{ansi_seq}%s{ANSI_CODES['reset']}" if ansi_seq else '%s'
+        return f"{ansi_seq}%s{ANSI_CODES['reset']}" if ansi_seq else "%s"
 
-    def _recurse_list(self, items: List,
-                      level: int = 0,
-                      list_indent: int = 4,
-                      pad: str = "",
-                      bullet: str = "+",
-                      bullet_map: Iterable[Bullet] = None,
-                      prefix_fmt: str = "%s",
-                      item_fmt: str = "%s",
-                      list_type: str = "unordered",
-                      newline: str = "\n",
-                      num_prefix: str = '') -> str:
-        """ 
+    def _recurse_list(
+        self,
+        items: List,
+        level: int = 0,
+        list_indent: int = 4,
+        pad: str = "",
+        bullet: str = "+",
+        bullet_map: Iterable[Bullet] = None,
+        prefix_fmt: str = "%s",
+        item_fmt: str = "%s",
+        list_type: str = "unordered",
+        newline: str = "\n",
+        num_prefix: str = "",
+    ) -> str:
+        """
         Recursively traverse through items and create a list (the `str` list
         not the `list` list). Each list inside `items` will be indented.
 
@@ -2437,25 +2706,34 @@ class Pins:
         - `items` include anything except `str` and `list`
         """
         # Indentation of each level
-        indent = (" "*list_indent)*level
+        indent = (" " * list_indent) * level
 
         count = 1  # For numbered (ordered) list
-        nest = [None]*len(items)  # Preallocation for current list
+        nest = [None] * len(items)  # Preallocation for current list
         for i, item in enumerate(items):
             # Choose prefix
             if list_type == "ordered":
                 prefix = prefix_fmt % f"{num_prefix}{count}."
             else:
                 if bullet_map:
-                    bullet = bullet_map[min(level, len(bullet_map)-1)]
+                    bullet = bullet_map[min(level, len(bullet_map) - 1)]
                 prefix = prefix_fmt % bullet
 
             if isinstance(item, list):
                 # For list, recurse
-                nest[i] = self._recurse_list(item, level+1, list_indent, pad,
-                                             bullet, bullet_map, prefix_fmt,
-                                             item_fmt, list_type, newline,
-                                             f"{num_prefix}{i}.")
+                nest[i] = self._recurse_list(
+                    item,
+                    level + 1,
+                    list_indent,
+                    pad,
+                    bullet,
+                    bullet_map,
+                    prefix_fmt,
+                    item_fmt,
+                    list_type,
+                    newline,
+                    f"{num_prefix}{i}.",
+                )
             elif isinstance(item, str):
                 # For str, add to nest
                 nest[i] = f"{pad}{indent}{prefix} {item_fmt % item}"
@@ -2467,11 +2745,14 @@ class Pins:
         # Join nest
         return newline.join(nest)
 
-    def _render_menu(self, menu: List,
-                     selected_index: int,
-                     bullet: str = ">",
-                     selected_ansi: str = None,
-                     normal_ansi: str = None):
+    def _render_menu(
+        self,
+        menu: List,
+        selected_index: int,
+        bullet: str = ">",
+        selected_ansi: str = None,
+        normal_ansi: str = None,
+    ):
         """
         Renders menu with ansi formatting.
 
@@ -2488,11 +2769,10 @@ class Pins:
                 # Selected
                 print(f"{bullet} {selected_ansi}{option}\033[0m", flush=True)
             else:
-                print(f"{' '*normal_pad} {normal_ansi}{option}\033[0m",
-                      flush=True)
+                print(f"{' '*normal_pad} {normal_ansi}{option}\033[0m", flush=True)
 
     def _extract(self, text: str, pattern: Pattern):
-        """ 
+        """
         ### Extract
         Extracts `pattern` from `text` and yields a match on each iteration.
         Returns a generator object.
@@ -2500,11 +2780,14 @@ class Pins:
         for m in re.finditer(pattern, text):
             yield m.group(1)
 
-    def _make_ansi(self, fgcolor: Color = None,
-                   bgcolor: Color = None,
-                   attrs: Iterable[Attribute] = None,
-                   color_mode: int = None) -> str:
-        """ 
+    def _make_ansi(
+        self,
+        fgcolor: Color = None,
+        bgcolor: Color = None,
+        attrs: Iterable[Attribute] = None,
+        color_mode: int = None,
+    ) -> str:
+        """
         Interface between `ansy.make_ansi()` and `Pins`. It's just for `Pins`,
         you can safely use `ansy.make_ansi()` for you purposes.
 
@@ -2517,7 +2800,7 @@ class Pins:
         return make_ansi(fgcolor, bgcolor, attrs, color_mode)
 
     def _assign_colors(self) -> Dict:
-        """ 
+        """
         Assign colors based on `COLOR_MODE`. Returns a dictionary.
         #### Keys in dictionary:
         `error` `info` `success` `warn`
@@ -2525,32 +2808,38 @@ class Pins:
         match self.COLORMODE:
             case 4:
                 # return 4-bit standard colors
-                return {'info': "light_blue",
-                        'success': "light_green",
-                        'error': "light_red",
-                        'warn': "light_yellow"}
+                return {
+                    "info": "light_blue",
+                    "success": "light_green",
+                    "error": "light_red",
+                    "warn": "light_yellow",
+                }
             case 8:
                 # Assign 8-bit 256 colors
-                return {'info': "sky_blue_deep_6",
-                        'success': "spring_green_3",
-                        'error': "indian_red_2",
-                        'warn': "orange_light_2"}
+                return {
+                    "info": "sky_blue_deep_6",
+                    "success": "spring_green_3",
+                    "error": "indian_red_2",
+                    "warn": "orange_light_2",
+                }
 
             case 24:
                 # Assign 24-bit RGB colors (RGB TUPLES)
-                return {'info': (79, 195, 247),
-                        'success': (156, 204, 101),
-                        'error': (255, 23, 68),
-                        'warn': (255, 179, 0)}
+                return {
+                    "info": (79, 195, 247),
+                    "success": (156, 204, 101),
+                    "error": (255, 23, 68),
+                    "warn": (255, 179, 0),
+                }
 
             case _:
                 raise ValueError("Invalid COLORMODE:", self.COLORMODE)
 
     def _validate_colors(self, colors: List[Tuple]):
-        """ 
+        """
         ### Validate Colors
         Validate the colors based on `COLORMODE`. Returns `True` if all colors are valid.
-        Raises `InvalidColorError` if a color is invalid. It iterates through 
+        Raises `InvalidColorError` if a color is invalid. It iterates through
         the `colors` list and validates each tuple.
 
         #### Syntax for `colors`:
@@ -2576,7 +2865,7 @@ class Pins:
         return True
 
     def _validate_attrs(self, attributes: List[Tuple]):
-        """ 
+        """
         ### Validate Attrs
         Validate the attrs in `attributes`. Returns `True` if all attrs are valid.
         It iterates through the `attributes` list and validates each tuple.
@@ -2595,8 +2884,9 @@ class Pins:
         """
         for name, attrs in attributes:
             if attrs != None:
-                assert isinstance(attrs, (list, tuple)), \
-                    f"{name} must be a list or tuple"
+                assert isinstance(
+                    attrs, (list, tuple)
+                ), f"{name} must be a list or tuple"
                 # Iterate through attrs
                 for a in attrs:
                     if a not in ATTRIBUTES:
@@ -2608,7 +2898,7 @@ class Pins:
     def _longest_string(self, strings) -> str:
         """
         ### Longest String
-        Traverses the Iterable (except strings) of strings and 
+        Traverses the Iterable (except strings) of strings and
         returns the longest string in it.
         """
         assert isinstance(strings, Iterable), "strings must be an iterable."
@@ -2617,13 +2907,13 @@ class Pins:
 
 
 class Batched:
-    """ 
+    """
     ### Batched
     Batch items of length `items_per_batch`. Accepts any iterable that
     supports slicing like `str`, `list`, `tuple` etc.
 
     Works similar to `batched()` from `itertools`, but also provides more
-    information about the process like `total_batches`, `remaining_batches`, 
+    information about the process like `total_batches`, `remaining_batches`,
     `batch_no`, and `has_next_batch`. But unlike `batched()` which returns tuples,
     it returns the same type as input `items`.
 
@@ -2658,12 +2948,14 @@ class Batched:
 
     def _calculate(self):
         self.batch_no = 1  # current page number
-        self.total_batches = ceil(self._total_items/self.items_per_batch)
+        self.total_batches = ceil(self._total_items / self.items_per_batch)
         self.remaining_batches = self.total_batches - 1
-        self.has_next_batch: bool = True if self.total_batches > self.batch_no else False
+        self.has_next_batch: bool = (
+            True if self.total_batches > self.batch_no else False
+        )
 
     def iterate(self):
-        """ yields a batch of length `items_per_page` from `items` on each iteration. """
+        """yields a batch of length `items_per_page` from `items` on each iteration."""
         current_item = 0
         while current_item < self._total_items:
             if self.total_batches <= self.batch_no:
@@ -2686,7 +2978,7 @@ class Batched:
 
 
 class JsonHighlight:
-    """ 
+    """
     ### JsonHighlight
     Pretty-print json with syntax highlighting.
 
@@ -2715,14 +3007,18 @@ class JsonHighlight:
     ```
     """
 
-    def __init__(self, indent: int = 4, quotes: bool = True,
-                 color_mode: ColorMode = 4,
-                 str_color: Color = "green",
-                 number_color: Color = "yellow",
-                 keyword_color: Color = "magenta",
-                 key_color: Color = "red",
-                 symbol_color: Color = "dark_grey",
-                 other_color: Color = "cyan") -> None:
+    def __init__(
+        self,
+        indent: int = 4,
+        quotes: bool = True,
+        color_mode: ColorMode = 4,
+        str_color: Color = "green",
+        number_color: Color = "yellow",
+        keyword_color: Color = "magenta",
+        key_color: Color = "red",
+        symbol_color: Color = "dark_grey",
+        other_color: Color = "cyan",
+    ) -> None:
 
         self.indent = max(indent, 0)
         self.quotes = quotes
@@ -2738,20 +3034,20 @@ class JsonHighlight:
             "other": self._create_fmt(other_color, color_mode=self.color_mode),
         }
 
-        self.LEFT_BRACKET = self.FMT['symbol'] % "["
-        self.RIGHT_BRACKET = self.FMT['symbol'] % "]"
-        self.COMMA = self.FMT['symbol'] % ","
-        self.LEFT_PAREN = self.FMT['symbol'] % "{"
-        self.RIGHT_PAREN = self.FMT['symbol'] % "}"
-        self.COLON = self.FMT['symbol'] % ":"
+        self.LEFT_BRACKET = self.FMT["symbol"] % "["
+        self.RIGHT_BRACKET = self.FMT["symbol"] % "]"
+        self.COMMA = self.FMT["symbol"] % ","
+        self.LEFT_PAREN = self.FMT["symbol"] % "{"
+        self.RIGHT_PAREN = self.FMT["symbol"] % "}"
+        self.COLON = self.FMT["symbol"] % ":"
 
     def _create_fmt(self, fgcolor=None, bgcolor=None, attrs=None, color_mode=4):
         ansi_seq = make_ansi(fgcolor, bgcolor, attrs, color_mode)
-        return f"{ansi_seq}%s{ANSI_CODES['reset']}" if ansi_seq else '%s'
+        return f"{ansi_seq}%s{ANSI_CODES['reset']}" if ansi_seq else "%s"
 
     def _parse(self, data, level=0) -> str:
-        """ Parse and colorize data """
-        indent = " "*self.indent
+        """Parse and colorize data"""
+        indent = " " * self.indent
         pad = indent * level
         quote_fmt = '"%s"' if self.quotes else "%s"
 
@@ -2759,8 +3055,10 @@ class JsonHighlight:
             items = [None] * len(data)
             for i, (k, v) in enumerate(data.items()):
                 value = self._parse(v, level + 1)
-                items[i] = f"{pad}{indent}{self.FMT['key'] %
+                items[i] = (
+                    f"{pad}{indent}{self.FMT['key'] %
                                            (quote_fmt % k)}{self.COLON} {value}"
+                )
 
             paren_fmt = f"{self.LEFT_PAREN}\n%s\n{pad}{self.RIGHT_PAREN}"
             return paren_fmt % f"{self.COMMA}\n".join(items)
@@ -2768,22 +3066,24 @@ class JsonHighlight:
         elif isinstance(data, list):
             items = [self._parse(item, level + 1) for item in data]
             bracket_fmt = f"{self.LEFT_BRACKET}\n%s\n{pad}{self.RIGHT_BRACKET}"
-            return bracket_fmt % f"{self.COMMA}\n".join(pad+indent+item for item in items)
+            return bracket_fmt % f"{self.COMMA}\n".join(
+                pad + indent + item for item in items
+            )
 
         elif isinstance(data, str):
-            return self.FMT['str'] % (quote_fmt % data)
+            return self.FMT["str"] % (quote_fmt % data)
         elif isinstance(data, bool):
-            return self.FMT['keyword'] % str(data).lower()
+            return self.FMT["keyword"] % str(data).lower()
         elif isinstance(data, (int, float)):
-            return self.FMT['number'] % str(data)
+            return self.FMT["number"] % str(data)
         elif data is None:
-            return self.FMT['keyword'] % "null"
+            return self.FMT["keyword"] % "null"
         else:
-            return self.FMT['other'] % str(data)
+            return self.FMT["other"] % str(data)
 
     @typecheck()
     def highlight(self, data: Any, indent: Optional[int] = None) -> str:
-        """ 
+        """
         ### Highlight
         Applies Syntax Highlighting to Json `data`.
 
@@ -2797,7 +3097,7 @@ class JsonHighlight:
 
 
 class Typewriter:
-    """ 
+    """
     ### Typewriter
     Write text to `stdout` with a typewriter-like effect.
 
@@ -2819,7 +3119,7 @@ class Typewriter:
 
     @typecheck()
     def write(self, text: Any, interval: Optional[float] = None, end: str = "\n"):
-        """ 
+        """
         ### Write
         Write the `text` character by character to `stdout`.
 
@@ -2860,7 +3160,7 @@ class Typewriter:
 
 
 class RevealText:
-    """ 
+    """
     ### Reveal Text
     A class to animate text by shuffling and progressively revealing each letter.
 
@@ -2888,12 +3188,15 @@ class RevealText:
     - `initial_color` is invalid
     """
 
-    @typecheck(skip=['initial_color', 'final_color'])
-    def __init__(self, interval: float = 0.05,
-                 max_seconds: int = 1,
-                 initial_color: Color = None,
-                 final_color: Color = None,
-                 color_mode: int = 4):
+    @typecheck(skip=["initial_color", "final_color"])
+    def __init__(
+        self,
+        interval: float = 0.05,
+        max_seconds: int = 1,
+        initial_color: Color = None,
+        final_color: Color = None,
+        color_mode: int = 4,
+    ):
         assert interval >= 0, "interval must not be negative."
         assert max_seconds > 0, "max_seconds must be greater than zero."
         assert color_mode in (4, 8, 24), f"Invalid color_mode: {color_mode}."
@@ -2907,16 +3210,18 @@ class RevealText:
         self.interval = interval
         self.max_seconds = max_seconds
         self.color_mode = color_mode
-        self.initial_fmt = make_ansi(initial_color,
-                                     color_mode=color_mode) + "%s" + ANSI_CODES['reset']
-        self.final_fmt = make_ansi(final_color,
-                                   color_mode=color_mode) + "%s" + ANSI_CODES['reset']
+        self.initial_fmt = (
+            make_ansi(initial_color, color_mode=color_mode) + "%s" + ANSI_CODES["reset"]
+        )
+        self.final_fmt = (
+            make_ansi(final_color, color_mode=color_mode) + "%s" + ANSI_CODES["reset"]
+        )
 
     @typecheck()
     def reveal(self, text: Any, interval: Optional[float] = None):
-        """ 
+        """
         ### Reveal
-        Animates the process of gradually revealing each letter 
+        Animates the process of gradually revealing each letter
         in shuffled `text` (after shuffling it, ofcourse).
 
         #### ARGS:
@@ -2961,7 +3266,7 @@ class RevealText:
                             temp += self.final_fmt % char1
 
                     # Print the string
-                    sys.stdout.write(temp+"\n")
+                    sys.stdout.write(temp + "\n")
                     sys.stdout.flush()
 
                     # Store the string
@@ -2972,7 +3277,7 @@ class RevealText:
                     utils.clear_lines_above(text_lines)
 
                 # Print text finally after animation
-                sys.stdout.write(self.final_fmt % text+"\n")
+                sys.stdout.write(self.final_fmt % text + "\n")
             except (KeyboardInterrupt, EOFError):
                 pass
 
@@ -2986,9 +3291,9 @@ class RevealText:
 
 
 class Box:
-    """ 
+    """
     ### Box
-    Create a frame (box) around text. 
+    Create a frame (box) around text.
 
     #### ARGS:
     - `text`: the text to create the box around
@@ -3019,42 +3324,40 @@ class Box:
     ```
 
     Raises `ValueError` if:
-    - `x_align` is invalid 
-    - `y_align` is invalid 
+    - `x_align` is invalid
+    - `y_align` is invalid
 
     Raises `AssertionError` if:
-    - `border_color` is invalid 
-    - `text_color` is invalid 
+    - `border_color` is invalid
+    - `text_color` is invalid
     """
 
-    @typecheck(skip=['border_color', 'text_color', 'heading_color'])
-    def __init__(self, text: Optional[str] = None,
-                 width: Optional[int] = None,
-                 pad_x: int = 0,
-                 pad_y: int = 0,
-                 heading: Optional[str] = None,
-                 x_align: Union[XAlign, str] = "left",
-                 y_align: Union[YAlign, str] = "top",
-                 charset: Union[Charset, str, None] = None,
-                 border_color: Color = None,
-                 text_color: Color = None,
-                 heading_color: Color = None,
-                 color_mode: int = 4) -> None:
+    @typecheck(skip=["border_color", "text_color", "heading_color"])
+    def __init__(
+        self,
+        text: Optional[str] = None,
+        width: Optional[int] = None,
+        pad_x: int = 0,
+        pad_y: int = 0,
+        heading: Optional[str] = None,
+        x_align: Union[XAlign, str] = "left",
+        y_align: Union[YAlign, str] = "top",
+        charset: Union[Charset, str, None] = None,
+        border_color: Color = None,
+        text_color: Color = None,
+        heading_color: Color = None,
+        color_mode: int = 4,
+    ) -> None:
 
-        assert x_align in ("center", "left", "right"),\
-            f"Invalid x_align: '{x_align}'"
-        assert y_align in {"center", "top", "bottom"},\
-            f"Invalid y_align: '{y_align}'"
+        assert x_align in ("center", "left", "right"), f"Invalid x_align: '{x_align}'"
+        assert y_align in {"center", "top", "bottom"}, f"Invalid y_align: '{y_align}'"
 
         if border_color and not is_valid_color(border_color, color_mode):
-            raise InvalidColorError(
-                f"Invalid {color_mode}-bit color: '{border_color}'")
+            raise InvalidColorError(f"Invalid {color_mode}-bit color: '{border_color}'")
         if text_color and not is_valid_color(text_color, color_mode):
-            raise InvalidColorError(
-                f"Invalid {color_mode}-bit color: '{text_color}'")
+            raise InvalidColorError(f"Invalid {color_mode}-bit color: '{text_color}'")
         if heading_color and not is_valid_color(heading_color, color_mode):
-            raise InvalidColorError(
-                f"Invalid {color_mode}-bit color: '{text_color}'")
+            raise InvalidColorError(f"Invalid {color_mode}-bit color: '{text_color}'")
 
         self.x_align = x_align
         self.y_align = y_align
@@ -3069,14 +3372,17 @@ class Box:
             self.charset: Dict = CHARSETS[charset]
         except KeyError:
             # Fallback: ascii
-            self.charset: Dict = CHARSETS['ascii']
+            self.charset: Dict = CHARSETS["ascii"]
 
-        self.border_fmt = make_ansi(border_color,
-                                    color_mode=color_mode)+"%s"+ANSI_CODES['reset']
-        self.text_fmt = make_ansi(text_color,
-                                  color_mode=color_mode)+"%s"+ANSI_CODES['reset']
-        self.heading_fmt = make_ansi(heading_color,
-                                  color_mode=color_mode)+"%s"+ANSI_CODES['reset']
+        self.border_fmt = (
+            make_ansi(border_color, color_mode=color_mode) + "%s" + ANSI_CODES["reset"]
+        )
+        self.text_fmt = (
+            make_ansi(text_color, color_mode=color_mode) + "%s" + ANSI_CODES["reset"]
+        )
+        self.heading_fmt = (
+            make_ansi(heading_color, color_mode=color_mode) + "%s" + ANSI_CODES["reset"]
+        )
 
     def _calculate_width_padding(self, text, width, pad_x, pad_y, wrap):
         self.terminal_width = get_terminal_size()[0]
@@ -3084,7 +3390,7 @@ class Box:
 
         if not wrap:
             # Width less than text width?
-            self.width = max(self.width, len(text)+4)
+            self.width = max(self.width, len(text) + 4)
 
         # Width more than terminal width?
         self.width = min(self.width, self.terminal_width)
@@ -3099,35 +3405,40 @@ class Box:
         self.padding_x = max(pad_x, 0)
         self.padding_y = max(pad_y, 0)
 
-        half_width = (self.width / 2)
-        if self.padding_x*2 >= half_width:
-            self.padding_x = floor(half_width/2)
+        half_width = self.width / 2
+        if self.padding_x * 2 >= half_width:
+            self.padding_x = floor(half_width / 2)
 
         # Force padding to be even
         if self.padding_x % 2 != 0:
             self.padding_x -= 1
 
     def _create_top_bottom_lines(self, fmt):
-        """ Create top and bottom lines of the box """
-        top_st = self.charset['TOP_ST']
-        top_lt = self.charset['TOP_LEFT']
-        top_rt = self.charset['TOP_RIGHT']
+        """Create top and bottom lines of the box"""
+        top_st = self.charset["TOP_ST"]
+        top_lt = self.charset["TOP_LEFT"]
+        top_rt = self.charset["TOP_RIGHT"]
         width = self.width - 2
 
         # Add heading if available
         if self.heading:
-            rem_line = (top_st * ((width - 5) - len(self.heading))) + top_rt # Remaining line
+            rem_line = (
+                top_st * ((width - 5) - len(self.heading))
+            ) + top_rt  # Remaining line
             top_line = f"{fmt % (top_lt + (top_st * 3))} {self.heading_fmt % self.heading} {fmt % rem_line}"
         else:
             top_line = fmt % f"{top_lt}{top_st * width}{top_rt}"
-        
-        bottom_line = fmt % f"{self.charset['BOTTOM_LEFT']}{self.charset['BOTTOM_ST']*width}{self.charset['BOTTOM_RIGHT']}"
+
+        bottom_line = (
+            fmt
+            % f"{self.charset['BOTTOM_LEFT']}{self.charset['BOTTOM_ST']*width}{self.charset['BOTTOM_RIGHT']}"
+        )
 
         return top_line, bottom_line
 
     def _create_mid_lines(self, text, width, x_align, charset, border_fmt, text_fmt):
-        border_l = border_fmt % charset['LEFT_V']
-        border_r = border_fmt % charset['RIGHT_V']
+        border_l = border_fmt % charset["LEFT_V"]
+        border_r = border_fmt % charset["RIGHT_V"]
 
         mid_lines = ""
         for line in text.splitlines():
@@ -3139,7 +3450,7 @@ class Box:
             if self.padding_x >= rem_chars:
                 self.padding_x = rem_chars // 2
 
-            pad = " "*self.padding_x
+            pad = " " * self.padding_x
 
             # Align line on x-axis
             line = self._align(line, len(line) + empty_space, align=x_align)
@@ -3164,14 +3475,17 @@ class Box:
         # Create padding Y
         padding_lines = ""
         for _ in range(lines):
-            padding_lines += border_fmt % f"{charset['LEFT_V']}{
-                " "*(width-2)}{charset['RIGHT_V']}" + '\n'
+            padding_lines += (
+                border_fmt
+                % f"{charset['LEFT_V']}{
+                " "*(width-2)}{charset['RIGHT_V']}"
+                + "\n"
+            )
 
         return padding_lines.rstrip()
 
-    def _ypad_midlines(self, mid_lines, padding, width,
-                       charset, border_fmt, y_align):
-        """ Add Y-Axis Padding to midlines """
+    def _ypad_midlines(self, mid_lines, padding, width, charset, border_fmt, y_align):
+        """Add Y-Axis Padding to midlines"""
         padding_y = self._create_padding_y(padding, width, charset, border_fmt)
         if not padding_y:
             return mid_lines
@@ -3186,14 +3500,17 @@ class Box:
             return padding_y + "\n" + padding_y + "\n" + mid_lines
 
     @typecheck()
-    def create(self, text: Optional[str] = None,
-               width: Optional[int] = None,
-               pad_x: Optional[int] = None,
-               pad_y: Optional[int] = None,
-               wrap: bool = False,
-               replace_whitespace: bool = False) -> str:
+    def create(
+        self,
+        text: Optional[str] = None,
+        width: Optional[int] = None,
+        pad_x: Optional[int] = None,
+        pad_y: Optional[int] = None,
+        wrap: bool = False,
+        replace_whitespace: bool = False,
+    ) -> str:
         """
-        ### Create 
+        ### Create
         Create the box around `text`.
 
         #### ARGS:
@@ -3215,39 +3532,45 @@ class Box:
         pad_x = pad_x if pad_x else self.padding_x
         pad_y = pad_y if pad_y else self.padding_y
 
-        self._calculate_width_padding(text, width,
-                                      pad_x, pad_y, wrap)
+        self._calculate_width_padding(text, width, pad_x, pad_y, wrap)
 
         # Wrap the text
         if wrap and len(text) > self.width:
-            text = fill(text, (self.width-2) - self.padding_x,
-                        replace_whitespace=replace_whitespace)
+            text = fill(
+                text,
+                (self.width - 2) - self.padding_x,
+                replace_whitespace=replace_whitespace,
+            )
 
         # Create top and bottom lines
         top_line, bottom_line = self._create_top_bottom_lines(self.border_fmt)
 
         # Create midlines
-        mid_lines = self._create_mid_lines(text, self.width,
-                                           self.x_align,
-                                           self.charset,
-                                           self.border_fmt,
-                                           self.text_fmt)
+        mid_lines = self._create_mid_lines(
+            text, self.width, self.x_align, self.charset, self.border_fmt, self.text_fmt
+        )
 
         # ADD Y-Padding to the mid_lines
-        mid_lines = self._ypad_midlines(mid_lines, self.padding_y, self.width,
-                                        self.charset, self.border_fmt, self.y_align)
+        mid_lines = self._ypad_midlines(
+            mid_lines,
+            self.padding_y,
+            self.width,
+            self.charset,
+            self.border_fmt,
+            self.y_align,
+        )
 
         # Join everything
         return "\n".join([top_line, mid_lines.rstrip(), bottom_line])
 
 
 class Validator:
-    """ 
+    """
     ### Validator
-    This class provides some validation methods. 
+    This class provides some validation methods.
 
     #### NOTE:
-    It is not a full-fledged validtor, for more advanced (proper) validations use 
+    It is not a full-fledged validtor, for more advanced (proper) validations use
     the `validators` (or similar) module.
 
     #### Example:
@@ -3256,6 +3579,7 @@ class Validator:
     True
     ```
     """
+
     OS: str = platform.system()
 
     def __init__(self) -> None:
@@ -3263,7 +3587,7 @@ class Validator:
 
     @classmethod
     def is_strong_password(cls, password: str) -> bool:
-        """ 
+        """
         ### Is Strong Password
         Returns `True` if password is strong, `False` otherwise.
 
@@ -3292,7 +3616,7 @@ class Validator:
         if not password:
             return False
 
-        if re.match(REGEX_PATTERNS['password'], password):
+        if re.match(REGEX_PATTERNS["password"], password):
             return True
         return False
 
@@ -3346,17 +3670,18 @@ class Validator:
             for char in r'\/:*?"<>|':
                 if char in extension:
                     return False
-        elif cls.OS == "Darwin" and ('/' in extension or ':' in extension):
+        elif cls.OS == "Darwin" and ("/" in extension or ":" in extension):
             return False
-        elif cls.OS == "Linux" and '/' in extension:
+        elif cls.OS == "Linux" and "/" in extension:
             return False
 
         return True
 
     @classmethod
-    def is_valid_filepath(cls, filepath: str, extension="*",
-                          max_length: int = 250) -> Union[bool, str]:
-        """ 
+    def is_valid_filepath(
+        cls, filepath: str, extension="*", max_length: int = 250
+    ) -> Union[bool, str]:
+        """
         ### Is Valid Filepath
         Validates filepath. Returns `True` if valid, Returns `str` if invalid.
         This `str` contains the reason for path being invalid.
@@ -3384,11 +3709,11 @@ class Validator:
         """
         assert isinstance(filepath, str), "filepath must be a string."
         if extension != None:
-            assert isinstance(extension, str), \
-                "extension must be None or a string."
+            assert isinstance(extension, str), "extension must be None or a string."
 
-            assert extension.startswith(".") or extension == "*", \
-                "extension must be set to '*' or an extension followed by a period."
+            assert (
+                extension.startswith(".") or extension == "*"
+            ), "extension must be set to '*' or an extension followed by a period."
 
         if not filepath:
             return "Path cannot be empty."
@@ -3408,9 +3733,9 @@ class Validator:
         if isinstance(extension, str):
             if len(ext_) < 2:
                 return "Filepath is missing an extension."
-            if extension != '*' and ext_.lower() != extension.lower():
+            if extension != "*" and ext_.lower() != extension.lower():
                 return f"Only '{extension}' files are allowed."
-            elif extension == '*' and not cls.is_valid_extension(ext_):
+            elif extension == "*" and not cls.is_valid_extension(ext_):
                 return f"Invalid extension: '{ext_}'"
         else:
             if ext_ and not cls.is_valid_extension(ext_):
@@ -3420,7 +3745,7 @@ class Validator:
 
     @classmethod
     def is_valid_dirpath(cls, dirpath: str, max_length: int = 250):
-        """ 
+        """
         ### Is Valid Dirpath
         Validates directory path. Returns `True` if valid, Returns `str` if invalid.
         This `str` contains the reason for path being invalid.
@@ -3440,8 +3765,7 @@ class Validator:
         Raises `AssertionError` if:
         - `dirpath` is not a string
         """
-        assert isinstance(dirpath, str), \
-            "dirpath must be a string."
+        assert isinstance(dirpath, str), "dirpath must be a string."
 
         if not dirpath:
             return "Path must not be empty."
@@ -3460,17 +3784,17 @@ class Validator:
             if cls._contains(root_parts, r'\/:?*<>"|'):
                 return """Illegal characters are not allowed: '\\/:?*<>|"'"""
         elif cls.OS == "Darwin":
-            if cls._contains(root_parts, r'/:?'):
+            if cls._contains(root_parts, r"/:?"):
                 return """Illegal characters are not allowed: '/:?'"""
         else:
-            if cls._contains(root_parts, r'/:?'):
+            if cls._contains(root_parts, r"/:?"):
                 return "Illegal characters are not allowed: '/:?'"
 
         return True
 
     @classmethod
     def is_valid_email(cls, email: str) -> bool:
-        """ 
+        """
         ### Is Valid Email
         Returns `True` if email is valid, `False` otherwise.
 
@@ -3489,13 +3813,13 @@ class Validator:
         - `email` is not a string
         """
         assert type(email) == str, "email must be a string."
-        if re.match(REGEX_PATTERNS['email'], email):
+        if re.match(REGEX_PATTERNS["email"], email):
             return True
         return False
 
     @classmethod
     def is_valid_url(cls, url: str) -> bool:
-        """ 
+        """
         ### Is Valid URL
         Returns `True` if url is valid, `False` otherwise.
 
@@ -3514,13 +3838,13 @@ class Validator:
         - `url` is not a string
         """
         assert type(url) == str, "url must be a string."
-        if re.match(REGEX_PATTERNS['url'], url):
+        if re.match(REGEX_PATTERNS["url"], url):
             return True
         return False
 
     @classmethod
     def is_valid_ip(cls, addr: str, version=4) -> bool:
-        """ 
+        """
         ### Is Valid IP
         Returns `True` if ipaddress is valid, `False` otherwise.
 
@@ -3541,8 +3865,7 @@ class Validator:
         - `version` is not 4 or 6
         """
         assert type(addr) == str, "addr must be a string."
-        assert version in (4, 6), \
-            f"Invalid version: {version}, must be 4 or 6."
+        assert version in (4, 6), f"Invalid version: {version}, must be 4 or 6."
         try:
             address = ipaddress.ip_address(addr)
         except ValueError:
@@ -3557,7 +3880,7 @@ class Validator:
     def _contains(cls, parts: Iterable[str], chars: str) -> bool:
         """
         ### Contains
-        Checks whether a string in `parts` contains a character from `chars`. 
+        Checks whether a string in `parts` contains a character from `chars`.
         Returns `True` if it does, `False` if does not.
         """
         for char in chars:

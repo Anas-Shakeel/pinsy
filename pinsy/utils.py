@@ -25,7 +25,8 @@ import sys
 import os
 from shutil import get_terminal_size
 import re
-if os.name == 'nt':  # Windows
+
+if os.name == "nt":  # Windows
     import msvcrt
     import ctypes
     from ctypes import wintypes
@@ -35,53 +36,64 @@ else:  # Unix (mac/linux)
 
 from inspect import signature
 from functools import wraps
-from typing import (get_origin, get_args, get_type_hints, List, Tuple,
-                    Dict, Set, Union, Optional, Literal, Any, AnyStr)
+from typing import (
+    get_origin,
+    get_args,
+    get_type_hints,
+    List,
+    Tuple,
+    Dict,
+    Set,
+    Union,
+    Optional,
+    Literal,
+    Any,
+    AnyStr,
+)
 from collections.abc import Iterable
 
 
 # ANSI Codes for cursor movement
-UP = '\x1b[A'
-DOWN = '\x1b[B'
+UP = "\x1b[A"
+DOWN = "\x1b[B"
 
 
 def read_key():
-    """ Read a single keypress from stdin, handles arrow keys """
-    if os.name == 'nt':  # Windows
+    """Read a single keypress from stdin, handles arrow keys"""
+    if os.name == "nt":  # Windows
         return read_key_windows()
     else:  # Unix
         return read_key_unix()
 
 
 def read_key_windows():
-    """ Reads keypresses on Windows, supporting arrow keys """
+    """Reads keypresses on Windows, supporting arrow keys"""
     key = msvcrt.getch()
     # Arrow keys are two bytes in Windows
     # \xe0 OR \x00 and the keycode.
-    if key == b'\xe0' or key == b'\x00':
+    if key == b"\xe0" or key == b"\x00":
         key = msvcrt.getch()
-        if key == b'H':  # UP
+        if key == b"H":  # UP
             return UP
-        elif key == b'P':  # DOWN
+        elif key == b"P":  # DOWN
             return DOWN
-    return key.decode('utf-8')
+    return key.decode("utf-8")
 
 
 def read_key_unix():
-    """ Reads keypresses on unix systems, supporting arrow keys """
+    """Reads keypresses on unix systems, supporting arrow keys"""
     fd = sys.stdin.fileno()
     old_settings = termios.tcgetattr(fd)
     try:
         tty.setraw(fd)
-        key = sys.stdin.read(3) if sys.stdin.read(
-            1) == '\x1b' else sys.stdin.read(1)
+        key = sys.stdin.read(3) if sys.stdin.read(1) == "\x1b" else sys.stdin.read(1)
     finally:
         termios.tcsetattr(fd, termios.TCSAFRAIN, old_settings)
     return key
 
 
 def clear_lines_above(n):
-    """ Clears `n` lines above and including (current line). 
+    """Clears `n` lines above and including (current line).
     (only erase `n` lines that are is display)"""
     move_cursor_up(n)
     sys.stdout.write(f"\x1b[J")
@@ -89,73 +101,73 @@ def clear_lines_above(n):
 
 
 def clear_lines_below():
-    """ Clears all lines below cursor. (erases lines that are is display only)"""
+    """Clears all lines below cursor. (erases lines that are is display only)"""
     sys.stdout.write(f"\x1b[0J")
     sys.stdout.flush()
 
 
 def move_cursor_right(columns: int = 1):
-    """ Move cursor `columns` characters to the right  >> (stops if hits the end of line) """
+    """Move cursor `columns` characters to the right  >> (stops if hits the end of line)"""
     sys.stdout.write(f"\x1b[{columns}C")
     sys.stdout.flush()
 
 
 def move_cursor_left(columns: int = 1):
-    """ Move cursor `columns` characters to the left << (stops if hits the end of line)"""
+    """Move cursor `columns` characters to the left << (stops if hits the end of line)"""
     sys.stdout.write(f"\x1b[{columns}D")
     sys.stdout.flush()
 
 
 def move_cursor_to(column: int):
-    """ Move cursor to `column` in current line, starting from `1` (stops if hits the end of line) """
+    """Move cursor to `column` in current line, starting from `1` (stops if hits the end of line)"""
     sys.stdout.write(f"\x1b[{column+1}G")
     sys.stdout.flush()
 
 
 def clear_line():
-    """ Clears current line """
-    sys.stdout.write('\x1b[2K\r')
+    """Clears current line"""
+    sys.stdout.write("\x1b[2K\r")
     sys.stdout.flush()
 
 
 def clear_screen():
-    """ Clear the visible screen """
-    sys.stdout.write('\033[H\033[J')
+    """Clear the visible screen"""
+    sys.stdout.write("\033[H\033[J")
     sys.stdout.flush()
 
 
 def clear_terminal():
-    """ Clear the terminal session """
-    os.system('cls' if os.name == 'nt' else 'clear')
+    """Clear the terminal session"""
+    os.system("cls" if os.name == "nt" else "clear")
 
 
 def move_cursor_up(n=None):
-    """ Move cursor n lines up. (in visible screen) """
+    """Move cursor n lines up. (in visible screen)"""
     n = n if n and n > 0 else None
-    sys.stdout.write(f'\x1b[{n}A')
+    sys.stdout.write(f"\x1b[{n}A")
     sys.stdout.flush()
 
 
 def move_cursor_down(n=None):
-    """ Move cursor n lines down. (in visible screen) """
+    """Move cursor n lines down. (in visible screen)"""
     n = n if n and n > 0 else None
-    sys.stdout.write(f'\x1b[{n}B')
+    sys.stdout.write(f"\x1b[{n}B")
     sys.stdout.flush()
 
 
 def get_cursor_pos() -> tuple[int, int]:
-    """ Returns the cursor location on visible terminal screen `(x, y)` """
-    if sys.platform == 'win32':
+    """Returns the cursor location on visible terminal screen `(x, y)`"""
+    if sys.platform == "win32":
         # For Windows
         oldstdin_mode = ctypes.wintypes.DWORD()
         oldstdout_mode = ctypes.wintypes.DWORD()
         kernel32 = ctypes.windll.kernel32
 
-        kernel32.GetConsoleMode(
-            kernel32.GetStdHandle(-10), ctypes.byref(oldstdin_mode))
+        kernel32.GetConsoleMode(kernel32.GetStdHandle(-10), ctypes.byref(oldstdin_mode))
         kernel32.SetConsoleMode(kernel32.GetStdHandle(-10), 0)
         kernel32.GetConsoleMode(
-            kernel32.GetStdHandle(-11), ctypes.byref(oldstdout_mode))
+            kernel32.GetStdHandle(-11), ctypes.byref(oldstdout_mode)
+        )
         kernel32.SetConsoleMode(kernel32.GetStdHandle(-11), 7)
     else:
         # For Unix-like systems (Mac|Linux)
@@ -170,11 +182,11 @@ def get_cursor_pos() -> tuple[int, int]:
         sys.stdout.write("\x1b[6n")
         sys.stdout.flush()
         # Read the response (keep reading until 'R')
-        while not (temp := temp+sys.stdin.read(1)).endswith('R'):
+        while not (temp := temp + sys.stdin.read(1)).endswith("R"):
             pass
 
         # Extract X, Y from response
-        res = re.match(r'.*\[(?P<y>\d*);(?P<x>\d*)R', temp)
+        res = re.match(r".*\[(?P<y>\d*);(?P<x>\d*)R", temp)
     finally:
         if sys.platform == "win32":
             kernel32.SetConsoleMode(kernel32.GetStdHandle(-10), oldstdin_mode)
@@ -183,16 +195,16 @@ def get_cursor_pos() -> tuple[int, int]:
             termios.tcsetattr(sys.stdin, termios.TCSAFLUSH, oldstdin_mode)
 
     if res:
-        return (res.group('x'), res.group('y'))
+        return (res.group("x"), res.group("y"))
 
     # If cursor pos not found
     return (-1, -1)
 
 
 def type_match(value: Any, expected_type: Any) -> bool:
-    """ 
+    """
     ### Type Match
-    Checks if a value is an instance of the expected type, supporting complex 
+    Checks if a value is an instance of the expected type, supporting complex
     types from the typing module.
 
     Similar to built-in `isintance()` but handles more complex types as well.
@@ -257,8 +269,7 @@ def type_match(value: Any, expected_type: Any) -> bool:
     # Handle List
     if origin_type is list:
         if type_args:
-            items_check = all(type_match(item,
-                                         type_args[0]) for item in value)
+            items_check = all(type_match(item, type_args[0]) for item in value)
             return isinstance(value, list) and items_check
         return isinstance(value, list)
 
@@ -266,7 +277,10 @@ def type_match(value: Any, expected_type: Any) -> bool:
     if origin_type is tuple:
         if type_args and isinstance(value, tuple):
             if len(type_args) == len(value):
-                return all(type_match(item, type_arg) for item, type_arg in zip(value, type_args))
+                return all(
+                    type_match(item, type_arg)
+                    for item, type_arg in zip(value, type_args)
+                )
             elif len(type_args) == 1:
                 return all(type_match(item, type_args[0]) for item in value)
             return False
@@ -277,8 +291,7 @@ def type_match(value: Any, expected_type: Any) -> bool:
         if type_args and isinstance(value, dict):
             key_type, value_type = type_args
             key_check = all(type_match(k, key_type) for k in value.keys())
-            value_check = all(type_match(v,
-                                         value_type) for v in value.values())
+            value_check = all(type_match(v, value_type) for v in value.values())
             return key_check and value_check
         return isinstance(value, dict)
 
@@ -294,16 +307,14 @@ def type_match(value: Any, expected_type: Any) -> bool:
 
     # Handle Optional (equivalent to Union[Any, None])
     if origin_type is Union and type(None) in type_args:
-        actual_type = type_args[0] if type_args[1] is type(
-            None) else type_args[1]
+        actual_type = type_args[0] if type_args[1] is type(None) else type_args[1]
         return value is None or type_match(value, actual_type)
 
     # Handle Iterable
     if origin_type is Iterable:
         if not isinstance(value, Iterable):
             return False
-        items_check = all(type_match(
-            item, type_args[0]) for item in value)
+        items_check = all(type_match(item, type_args[0]) for item in value)
         return items_check
 
     # TODO: Handle these too...
@@ -315,12 +326,12 @@ def type_match(value: Any, expected_type: Any) -> bool:
 
 
 def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = None):
-    """ 
+    """
     ### Type Check
     A decorator that enforces type checking on function arguments and return values
     based on the type hints provided in the function.
 
-    If an argument doesn't match the specified type, a `TypeError` is raised with 
+    If an argument doesn't match the specified type, a `TypeError` is raised with
     a message.
 
     #### ARGS:
@@ -373,12 +384,12 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = No
     @typecheck
     >> def add(a:int, b:int) -> int:
     ..    return a + b
-    .. 
+    ..
     # Simple fix, Just add parentheses
     @typecheck()
     >> def add(a:int, b:int) -> int:
     ..    return a + b
-    .. 
+    ..
     ```
 
     Raises `TypeError` if argument types or return type do not match annotated type hints.
@@ -415,19 +426,24 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = No
                     # TODO: Normalize Hint names
                     expected_type = hints[arg_name]
                     if not type_match(arg_value, expected_type):
-                        raise TypeError(f"Argument '{arg_name}' must be {
-                                        expected_type}, but got {type(arg_value)}")
+                        raise TypeError(
+                            f"Argument '{arg_name}' must be {
+                                        expected_type}, but got {type(arg_value)}"
+                        )
 
             # Execute the function and capture result
             result = func(*args, **kwargs)
 
             # Check return type (if there's a return type)
-            if 'return' in hints:
-                if not type_match(result, hints['return']):
-                    raise TypeError(f"Return value must be {
-                                    hints['return']}, but got {type(result)}")
+            if "return" in hints:
+                if not type_match(result, hints["return"]):
+                    raise TypeError(
+                        f"Return value must be {
+                                    hints['return']}, but got {type(result)}"
+                    )
 
             return result
+
         return wrapper
 
     # If 'typecheck' used without arguments
@@ -439,7 +455,7 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = No
 
 
 def _normalize_hint(hint) -> str:
-    """ 
+    """
     Normalize a hint name to a more readable format.
 
     ```

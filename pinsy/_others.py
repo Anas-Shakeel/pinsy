@@ -11,18 +11,26 @@ CONSTRAINTS: list = [
 ]
 
 REGEX_PATTERNS = {
-    "email": re.compile(r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$", re.IGNORECASE),
-
+    "email": re.compile(
+        r"^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$",
+        re.IGNORECASE,
+    ),
     # diegoperini created this url regex
     # https://gist.github.com/dperini/729294
-    "url": re.compile(r"^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\u00a1-\uffff][a-z0-9\u00a1-\uffff_-]{0,62})?[a-z0-9\u00a1-\uffff]\.)+(?:[a-z\u00a1-\uffff]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$", re.IGNORECASE),
-
+    "url": re.compile(
+        r"^(?:(?:(?:https?|ftp):)?\/\/)(?:\S+(?::\S*)?@)?(?:(?!(?:10|127)(?:\.\d{1,3}){3})(?!(?:169\.254|192\.168)(?:\.\d{1,3}){2})(?!172\.(?:1[6-9]|2\d|3[0-1])(?:\.\d{1,3}){2})(?:[1-9]\d?|1\d\d|2[01]\d|22[0-3])(?:\.(?:1?\d{1,2}|2[0-4]\d|25[0-5])){2}(?:\.(?:[1-9]\d?|1\d\d|2[0-4]\d|25[0-4]))|(?:(?:[a-z0-9\u00a1-\uffff][a-z0-9\u00a1-\uffff_-]{0,62})?[a-z0-9\u00a1-\uffff]\.)+(?:[a-z\u00a1-\uffff]{2,}\.?))(?::\d{2,5})?(?:[/?#]\S*)?$",
+        re.IGNORECASE,
+    ),
     # Pattern taken from https://stackoverflow.com/a/72686232
-    "password": re.compile(r'^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,500}$'),
-    "json_keys": re.compile(r'(\".+?\"):'),
-    "json_str_values": re.compile(r': (\".+?\")'),
-    "json_num_values": re.compile(r': (\d+\.?\d+)'),
-    "json_arrays": re.compile(r": \[((?:\s*?(?:.*?),*)*)\s*\]", (re.MULTILINE | re.DOTALL))
+    "password": re.compile(
+        r"^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*\W)(?!.* ).{8,500}$"
+    ),
+    "json_keys": re.compile(r"(\".+?\"):"),
+    "json_str_values": re.compile(r": (\".+?\")"),
+    "json_num_values": re.compile(r": (\d+\.?\d+)"),
+    "json_arrays": re.compile(
+        r": \[((?:\s*?(?:.*?),*)*)\s*\]", (re.MULTILINE | re.DOTALL)
+    ),
 }
 
 
@@ -38,7 +46,7 @@ CHARSETS = {
         "BOTTOM_ST": "-",
         "VERTICAL": "|",
         "LEFT_V": "|",
-        "RIGHT_V": "|"
+        "RIGHT_V": "|",
     },
     "box": {
         "TOP_LEFT": "┌",
@@ -50,7 +58,7 @@ CHARSETS = {
         "BOTTOM_ST": "─",
         "VERTICAL": "│",
         "LEFT_V": "│",
-        "RIGHT_V": "│"
+        "RIGHT_V": "│",
     },
     "box_round": {
         "TOP_LEFT": "╭",
@@ -62,7 +70,7 @@ CHARSETS = {
         "BOTTOM_ST": "─",
         "VERTICAL": "│",
         "LEFT_V": "│",
-        "RIGHT_V": "│"
+        "RIGHT_V": "│",
     },
     "box_heavy": {
         "TOP_LEFT": "┏",
@@ -74,7 +82,7 @@ CHARSETS = {
         "BOTTOM_ST": "━",
         "VERTICAL": "┃",
         "LEFT_V": "┃",
-        "RIGHT_V": "┃"
+        "RIGHT_V": "┃",
     },
     "box_double": {
         "TOP_LEFT": "╔",
@@ -86,7 +94,7 @@ CHARSETS = {
         "BOTTOM_ST": "═",
         "VERTICAL": "║",
         "LEFT_V": "║",
-        "RIGHT_V": "║"
+        "RIGHT_V": "║",
     },
     "blocks": {
         "TOP_LEFT": "▛",
@@ -99,7 +107,7 @@ CHARSETS = {
         "VERTICAL": "|",
         "LEFT_V": "▏",
         "RIGHT_V": "▕",
-    }
+    },
 }
 
 
@@ -117,14 +125,7 @@ PromptChar = Literal[
     ">>>",
 ]
 
-Charset = Literal[
-    "ascii",
-    "box",
-    "box_round",
-    "box_heavy",
-    "box_double",
-    "blocks"
-]
+Charset = Literal["ascii", "box", "box_round", "box_heavy", "box_double", "blocks"]
 
 
 # Alignments
@@ -143,64 +144,48 @@ YAlign = Literal[
 
 # Fill Character
 FillChar = Literal[
-    '-',
-    '─',
-    '━',
-    '═',
-    '■',
-    '█',
-    '░',
-    '▒',
-    '▓',
-    '➔',
-    '➞',
-    '◀',
-    '▶',
-    '▲',
-    '▼',
-    '◉',
-    '◈'
+    "-", "─", "━", "═", "■", "█", "░", "▒", "▓", "➔", "➞", "◀", "▶", "▲", "▼", "◉", "◈"
 ]
 
 # Bullet Characters
 Bullet = Literal[
-    '-',
-    '+',
-    '╼',
-    '>',
-    '»',
-    '➔',
-    '❯',
-    '▶',
-    '➥',
-    '➤',
-    '·',
-    '•',
-    '◉',
-    '●',
-    '■',
-    '◈',
-    '✓',
-    '✔ ',
-    '🞬',
-    '✗',
-    '✕',
-    '✘',
-    '✚',
-    '❖',
-    '✸',
-    '✦',
-    '✩',
-    '✭',
-    '🟊',
-    '✪',
-    '🞅',
-    '🞇',
-    '🞉',
-    '🟂',
-    '◆',
-    '⮚',
-    '☑',
-    '☒',
-    '♥',
+    "-",
+    "+",
+    "╼",
+    ">",
+    "»",
+    "➔",
+    "❯",
+    "▶",
+    "➥",
+    "➤",
+    "·",
+    "•",
+    "◉",
+    "●",
+    "■",
+    "◈",
+    "✓",
+    "✔ ",
+    "🞬",
+    "✗",
+    "✕",
+    "✘",
+    "✚",
+    "❖",
+    "✸",
+    "✦",
+    "✩",
+    "✭",
+    "🟊",
+    "✪",
+    "🞅",
+    "🞇",
+    "🞉",
+    "🟂",
+    "◆",
+    "⮚",
+    "☑",
+    "☒",
+    "♥",
 ]
