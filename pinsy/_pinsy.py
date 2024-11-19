@@ -2168,8 +2168,7 @@ class Pins:
             "center",
             "left",
             "right",
-        ), f"Invalid align: '{
-            align}'"
+        ), f"Invalid align: '{align}'"
 
         if text == "":
             return text
