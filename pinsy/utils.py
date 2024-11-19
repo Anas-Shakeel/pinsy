@@ -427,8 +427,7 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = No
                     expected_type = hints[arg_name]
                     if not type_match(arg_value, expected_type):
                         raise TypeError(
-                            f"Argument '{arg_name}' must be {
-                                        expected_type}, but got {type(arg_value)}"
+                            f"Argument '{arg_name}' must be {expected_type}, but got {type(arg_value)}"
                         )
 
             # Execute the function and capture result
@@ -438,8 +437,7 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = No
             if "return" in hints:
                 if not type_match(result, hints["return"]):
                     raise TypeError(
-                        f"Return value must be {
-                                    hints['return']}, but got {type(result)}"
+                        f"Return value must be {hints['return']}, but got {type(result)}"
                     )
 
             return result

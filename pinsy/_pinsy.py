@@ -15,7 +15,6 @@ from pathlib import Path
 from datetime import datetime
 from time import sleep
 from calendar import month as calendar_month
-from itertools import batched
 from os.path import (
     isfile,
     isdir,
@@ -1333,9 +1332,10 @@ class Pins:
         print("\n".join(lines[:stop_]))
 
         # Print remaining lines (line by line)
+        batches = Batched(lines[stop_:], n)
         with HiddenCursor():
             try:
-                for batch in batched(lines[stop_:], n):
+                for batch in batches.iterate():
                     input(prompt)
                     utils.clear_lines_above(1)
                     print("\n".join(batch), flush=True)
@@ -2804,35 +2804,34 @@ class Pins:
         #### Keys in dictionary:
         `error` `info` `success` `warn`
         """
-        match self.COLORMODE:
-            case 4:
-                # return 4-bit standard colors
-                return {
-                    "info": "light_blue",
-                    "success": "light_green",
-                    "error": "light_red",
-                    "warn": "light_yellow",
-                }
-            case 8:
-                # Assign 8-bit 256 colors
-                return {
-                    "info": "sky_blue_deep_6",
-                    "success": "spring_green_3",
-                    "error": "indian_red_2",
-                    "warn": "orange_light_2",
-                }
+        if self.COLORMODE == 4:
+            # return 4-bit standard colors
+            return {
+                "info": "light_blue",
+                "success": "light_green",
+                "error": "light_red",
+                "warn": "light_yellow",
+            }
+        elif self.COLORMODE == 8:
+            # Assign 8-bit 256 colors
+            return {
+                "info": "sky_blue_deep_6",
+                "success": "spring_green_3",
+                "error": "indian_red_2",
+                "warn": "orange_light_2",
+            }
 
-            case 24:
-                # Assign 24-bit RGB colors (RGB TUPLES)
-                return {
-                    "info": (79, 195, 247),
-                    "success": (156, 204, 101),
-                    "error": (255, 23, 68),
-                    "warn": (255, 179, 0),
-                }
+        elif self.COLORMODE == 24:
+            # Assign 24-bit RGB colors (RGB TUPLES)
+            return {
+                "info": (79, 195, 247),
+                "success": (156, 204, 101),
+                "error": (255, 23, 68),
+                "warn": (255, 179, 0),
+            }
 
-            case _:
-                raise ValueError("Invalid COLORMODE:", self.COLORMODE)
+        else:
+            raise ValueError("Invalid COLORMODE:", self.COLORMODE)
 
     def _validate_colors(self, colors: List[Tuple]):
         """
@@ -3055,8 +3054,7 @@ class JsonHighlight:
             for i, (k, v) in enumerate(data.items()):
                 value = self._parse(v, level + 1)
                 items[i] = (
-                    f"{pad}{indent}{self.FMT['key'] %
-                                           (quote_fmt % k)}{self.COLON} {value}"
+                    f"{pad}{indent}{self.FMT['key'] % (quote_fmt % k)}{self.COLON} {value}"
                 )
 
             paren_fmt = f"{self.LEFT_PAREN}\n%s\n{pad}{self.RIGHT_PAREN}"
@@ -3475,10 +3473,7 @@ class Box:
         padding_lines = ""
         for _ in range(lines):
             padding_lines += (
-                border_fmt
-                % f"{charset['LEFT_V']}{
-                " "*(width-2)}{charset['RIGHT_V']}"
-                + "\n"
+                border_fmt % f"{charset['LEFT_V']}{' '*(width-2)}{charset['RIGHT_V']}\n"
             )
 
         return padding_lines.rstrip()
