@@ -521,6 +521,11 @@ It scrambles the text and then solves each letter using bruteforce method. `max_
 
 And there's much more that you can do...
 
+## Compatibility
+
+Tested on Windows, Mac, and Linux _(ubuntu)_ with python version `3.9`, `3.10`, `3.11`, `3.12`, `3.13`.
+
+
 ## Pinsy CLI
 
 #### Coming soon!
