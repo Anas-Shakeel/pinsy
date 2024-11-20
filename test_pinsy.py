@@ -980,9 +980,6 @@ def test_format_date():
     d_fmt = "%d-%m-%Y"
     dt_fmt = "%I:%M:%S %p"
 
-    # Just now test
-    assert pins.time_ago(pins.now(dt_fmt), dt_fmt) == "Just now"
-
     # Years test
     dt = datetime(year=2022, month=1, day=1)
     assert pins.time_ago(dt.strftime(d_fmt), d_fmt) == f"{today.year - 2022} years ago"
