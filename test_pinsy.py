@@ -1259,23 +1259,27 @@ def test_is_valid_filepath():
             str,
         )
 
-    else:  # Mac/Linux
+    else:  # Linux
+        home_dir = "home"
+        if CURRENT_OS == "Darwin":
+            home_dir = "User"
+            
         valid_paths = [
             "file.txt",  # just file
             "file.<txt>",
             "file.tx t",
             "file.*txt*",
-            "/home/username/Documents/file.txt",  # Normal fullpath
+            f"/{home_dir}/username/Documents/file.txt",  # Normal fullpath
             "/usr/local/bin/executable",  # Path to bin
-            "/home/username/Projects/My Project/file.txt",  # Contains space
+            f"/{home_dir}/username/Projects/My Project/file.txt",  # Contains space
             "/var/log/syslog",  # Sysmtem log file
-            "/home/username/Documents/folder/.hiddenfile",  # Hidden file
-            "/home/username/Documents/folder/",  # Trailing slash
+            f"/{home_dir}/username/Documents/folder/.hiddenfile",  # Hidden file
+            f"/{home_dir}/username/Documents/folder/",  # Trailing slash
             "/mnt/data/file with unicode ÆÓÇ│▓█▌▌τì←∞?♫¢.txt",  # Unicode chars
-            "/home//username//file.txt",  # Double slashes
-            "/home/username/Documents/Longpath/very/long/path/to/a/deeply/nested/file.txt",  # Long path
+            f"/{home_dir}//username//file.txt",  # Double slashes
+            f"/{home_dir}/username/Documents/Longpath/very/long/path/to/a/deeply/nested/file.txt",  # Long path
             "~/Documents/file.txt",  # tilde as home dir shorthand
-            "/home/username/symlink_to_file",  # symlink path
+            f"/{home_dir}/username/symlink_to_file",  # symlink path
         ]
         for fpath in valid_paths:
             assert Validator.is_valid_filepath(fpath, extension=None) == True
