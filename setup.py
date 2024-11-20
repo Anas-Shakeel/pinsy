@@ -12,7 +12,7 @@ def readme():
 
 setup(
     name="pinsy",
-    version="0.1.2",
+    version="0.2.0",
     description="A Python package to help speed up the workflow of creating beautiful CLI apps.",
     long_description=readme(),
     long_description_content_type="text/markdown",
@@ -41,5 +41,5 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.9",
 )
