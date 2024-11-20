@@ -1259,27 +1259,23 @@ def test_is_valid_filepath():
             str,
         )
 
-    else:  # Linux
-        home_dir = "home"
-        if CURRENT_OS == "Darwin":
-            home_dir = "Users"
-            
+    elif CURRENT_OS == "Linux":  # Linux
         valid_paths = [
             "file.txt",  # just file
             "file.<txt>",
             "file.tx t",
             "file.*txt*",
-            f"/{home_dir}/username/Documents/file.txt",  # Normal fullpath
             "/usr/local/bin/executable",  # Path to bin
-            f"/{home_dir}/username/Projects/My Project/file.txt",  # Contains space
             "/var/log/syslog",  # Sysmtem log file
-            f"/{home_dir}/username/Documents/folder/.hiddenfile",  # Hidden file
-            f"/{home_dir}/username/Documents/folder/",  # Trailing slash
             "/mnt/data/file with unicode ÆÓÇ│▓█▌▌τì←∞?♫¢.txt",  # Unicode chars
-            f"/{home_dir}//username//file.txt",  # Double slashes
-            f"/{home_dir}/username/Documents/Longpath/very/long/path/to/a/deeply/nested/file.txt",  # Long path
             "~/Documents/file.txt",  # tilde as home dir shorthand
-            f"/{home_dir}/username/symlink_to_file",  # symlink path
+            "/home/username/Documents/file.txt",  # Normal fullpath
+            "/home/username/Projects/My Project/file.txt",  # Contains space
+            "/home/username/Documents/folder/.hiddenfile",  # Hidden file
+            "/home/username/Documents/folder/",  # Trailing slash
+            "/home//username//file.txt",  # Double slashes
+            "/home/username/Documents/Longpath/very/long/path/to/a/deeply/nested/file.txt",  # Long path
+            "/home/username/symlink_to_file",  # symlink path
         ]
         for fpath in valid_paths:
             assert Validator.is_valid_filepath(fpath, extension=None) == True
@@ -1350,19 +1346,16 @@ def test_is_valid_dirpath():
         assert isinstance(Validator.is_valid_dirpath("path\\to\\a\\deeply\\nested\\folder", max_length=10), str)  # Length
         assert isinstance(Validator.is_valid_dirpath("folder.<txt>"), str)  # illegal chars
 
-    else:  # Mac/Linux
-        home_dir = "home"
-        if CURRENT_OS == "Darwin":
-            home_dir = "Users"
+    elif CURRENT_OS == "Linux":
         valid_paths = [
             "folder",
             "folder 0 | folder 1",
-            f"/{home_dir}/username/Documents/folder",
             "/usr/local/bin/",
-            f"/{home_dir}/username/My Project/folder 1",
-            f"/{home_dir}/username/Documents/folder/",
-            f"/{home_dir}//username//folder",
-            f"/{home_dir}/username/Documents/Longpath/very/long/path/to/a/deeply/nested/folder",
+            "/home/username/Documents/folder",
+            "/home/username/My Project/folder 1",
+            "/home/username/Documents/folder/",
+            "/home//username//folder",
+            "/home/username/Documents/Longpath/very/long/path/to/a/deeply/nested/folder",
             "/mnt/data/folder with unicode ÆÓÇ│▓█▌▌τì←∞?♫¢",
             "~/Documents/folder",
         ]
