@@ -3573,7 +3573,7 @@ class Validator:
     True
     ```
     """
-
+    # Windows, Darwin, Linux
     OS: str = platform.system()
 
     def __init__(self) -> None:
@@ -3767,6 +3767,8 @@ class Validator:
         d = Path(dirpath)
         if d.drive:
             root_parts = d.parts[1:]
+        elif cls.OS == "Linux" and d.parts[0] == "/":
+            root_parts = d.parts[1:]
         else:
             root_parts = d.parts
 
@@ -3778,11 +3780,11 @@ class Validator:
             if cls._contains(root_parts, r'\/:?*<>"|'):
                 return """Illegal characters are not allowed: '\\/:?*<>|"'"""
         elif cls.OS == "Darwin":
-            if cls._contains(root_parts, r"/:?"):
-                return """Illegal characters are not allowed: '/:?'"""
+            if cls._contains(root_parts, r"/:<>"):
+                return """Illegal characters are not allowed: '/:?<>'"""
         else:
-            if cls._contains(root_parts, r"/:?"):
-                return "Illegal characters are not allowed: '/:?'"
+            if cls._contains(root_parts, r"/:<>"):
+                return "Illegal characters are not allowed: '/:?<>'"
 
         return True
 

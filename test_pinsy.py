@@ -867,39 +867,46 @@ def test_contains_ansi():
 
 
 def test_shorten_path():
-    absolute_path = "C:\\users\\downloads\\files\\music\\song.mp3"
-    relative_path = ".\\downloads\\files\\music\\song.mp3"
-    relative_path_2 = "downloads\\files\\music\\song.mp3"
+    if CURRENT_OS == "Windows":
+        absolute_path = "C:\\users\\downloads\\files\\music\\song.mp3"
+        relative_path = ".\\downloads\\files\\music\\song.mp3"
+        relative_path_2 = "downloads\\files\\music\\song.mp3"
+    else:
+        absolute_path = "/home/username/files/music/song.mp3"
+        relative_path = "./username/files/music/song.mp3"
+        relative_path_2 = "username/files/music/song.mp3"
+        
 
     assert pins.shorten_path(absolute_path, 0) == absolute_path
     assert pins.shorten_path(absolute_path, -1) == absolute_path
-    assert pins.shorten_path(absolute_path, 8000) == "C:\\...\\song.mp3"
-    assert (
-        pins.shorten_path(absolute_path, n=1)
-        == "C:\\...\\downloads\\files\\music\\song.mp3"
-    )
-
     assert pins.shorten_path(relative_path, n=0) == relative_path
     assert pins.shorten_path(relative_path, n=-1) == relative_path
-    assert pins.shorten_path(relative_path, n=800) == "downloads\\...\\song.mp3"
-    assert pins.shorten_path(relative_path, n=1) == "downloads\\...\\music\\song.mp3"
-
     assert pins.shorten_path(relative_path_2, n=0) == relative_path_2
     assert pins.shorten_path(relative_path_2, n=-1) == relative_path_2
-    assert pins.shorten_path(relative_path_2, n=800) == "downloads\\...\\song.mp3"
-    assert pins.shorten_path(relative_path_2, n=1) == "downloads\\...\\music\\song.mp3"
+
+    if CURRENT_OS == "Windows":
+        assert pins.shorten_path(absolute_path, 8000) == "C:\\...\\song.mp3"
+        assert pins.shorten_path(absolute_path, n=1) == "C:\\...\\downloads\\files\\music\\song.mp3"
+        assert pins.shorten_path(relative_path, n=800) == "downloads\\...\\song.mp3"
+        assert pins.shorten_path(relative_path, n=1) == "downloads\\...\\music\\song.mp3"
+        assert pins.shorten_path(relative_path_2, n=800) == "downloads\\...\\song.mp3"
+        assert pins.shorten_path(relative_path_2, n=1) == "downloads\\...\\music\\song.mp3"
+        assert pins.shorten_path(absolute_path, n=3, replacement="") == "C:\\music\\song.mp3"
+        assert pins.shorten_path(absolute_path, n=3, replacement="123") == "C:\\123\\music\\song.mp3"
+    else:
+        assert pins.shorten_path(absolute_path, 8000) == "/.../song.mp3"
+        assert pins.shorten_path(absolute_path, n=1) == "/.../username/files/music/song.mp3"
+        assert pins.shorten_path(relative_path, n=800) == "username/.../song.mp3"
+        assert pins.shorten_path(relative_path, n=1) == "username/.../music/song.mp3"
+        assert pins.shorten_path(relative_path_2, n=800) == "username/.../song.mp3"
+        assert pins.shorten_path(relative_path_2, n=1) == "username/.../music/song.mp3"
+        assert pins.shorten_path(absolute_path, n=3, replacement="") == "/music/song.mp3"
+        assert pins.shorten_path(absolute_path, n=3, replacement="123") == "/123/music/song.mp3"
 
     assert pins.shorten_path("") == ""
     assert pins.shorten_path("somefolder") == "somefolder"
     assert pins.shorten_path("somefile.txt") == "somefile.txt"
 
-    assert (
-        pins.shorten_path(absolute_path, n=3, replacement="") == "C:\\music\\song.mp3"
-    )
-    assert (
-        pins.shorten_path(absolute_path, n=3, replacement="123")
-        == "C:\\123\\music\\song.mp3"
-    )
 
     with raises(TypeError):
         pins.shorten_path(123)
@@ -1260,7 +1267,6 @@ def test_is_valid_filepath():
             "file.*txt*",
             "/home/username/Documents/file.txt",  # Normal fullpath
             "/usr/local/bin/executable",  # Path to bin
-            "/home/username/Desktop/Valid<file>.txt",  # <> chars
             "/home/username/Projects/My Project/file.txt",  # Contains space
             "/var/log/syslog",  # Sysmtem log file
             "/home/username/Documents/folder/.hiddenfile",  # Hidden file
@@ -1273,6 +1279,13 @@ def test_is_valid_filepath():
         ]
         for fpath in valid_paths:
             assert Validator.is_valid_filepath(fpath, extension=None) == True
+
+        assert isinstance(
+            Validator.is_valid_filepath(
+                "/home/username/Desktop/InValid<file>.txt", extension=None
+            ),
+            str,
+        )
 
     # Other Tests
     assert Validator.is_valid_filepath("file", extension=None) == True
@@ -1330,6 +1343,8 @@ def test_is_valid_dirpath():
 
         # ILLEGAL CHARS <>
         assert isinstance(Validator.is_valid_dirpath("C:\\Invalid<file>.txt"), str)
+        assert isinstance(Validator.is_valid_dirpath("path\\to\\a\\deeply\\nested\\folder", max_length=10), str)  # Length
+        assert isinstance(Validator.is_valid_dirpath("folder.<txt>"), str)  # illegal chars
 
     else:  # Mac/Linux
         valid_paths = [
@@ -1337,7 +1352,6 @@ def test_is_valid_dirpath():
             "folder 0 | folder 1",
             "/home/username/Documents/folder",
             "/usr/local/bin/",
-            "/home/username/Desktop/Valid<folder>",
             "/home/username/My Project/folder 1",
             "/home/username/Documents/folder/",
             "/mnt/data/folder with unicode ÆÓÇ│▓█▌▌τì←∞?♫¢",
@@ -1348,15 +1362,12 @@ def test_is_valid_dirpath():
         for dpath in valid_paths:
             assert Validator.is_valid_dirpath(dpath)
 
+        assert isinstance(Validator.is_valid_dirpath("path/to/a/deepl/nested/folder", max_length=10), str)
+        assert isinstance(Validator.is_valid_dirpath("/home/username/Desktop/InValid<folder>",), str)  # illegal chars
+        assert isinstance(Validator.is_valid_dirpath("f<old>er"), str)  # illegal chars
+
     # Other Tests
-    assert isinstance(
-        Validator.is_valid_dirpath(
-            "path\\to\\a\\deeply\\nested\\folder", max_length=10
-        ),
-        str,
-    )  # Length
     assert isinstance(Validator.is_valid_dirpath(""), str)  # Empty not allowed
-    assert isinstance(Validator.is_valid_dirpath("folder.<txt>"), str)  # illegal chars
 
     with raises(AssertionError):
         Validator.is_valid_dirpath(123)
