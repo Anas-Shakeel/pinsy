@@ -1262,7 +1262,7 @@ def test_is_valid_filepath():
     else:  # Linux
         home_dir = "home"
         if CURRENT_OS == "Darwin":
-            home_dir = "User"
+            home_dir = "Users"
             
         valid_paths = [
             "file.txt",  # just file
@@ -1351,16 +1351,19 @@ def test_is_valid_dirpath():
         assert isinstance(Validator.is_valid_dirpath("folder.<txt>"), str)  # illegal chars
 
     else:  # Mac/Linux
+        home_dir = "home"
+        if CURRENT_OS == "Darwin":
+            home_dir = "Users"
         valid_paths = [
             "folder",
             "folder 0 | folder 1",
-            "/home/username/Documents/folder",
+            f"/{home_dir}/username/Documents/folder",
             "/usr/local/bin/",
-            "/home/username/My Project/folder 1",
-            "/home/username/Documents/folder/",
+            f"/{home_dir}/username/My Project/folder 1",
+            f"/{home_dir}/username/Documents/folder/",
+            f"/{home_dir}//username//folder",
+            f"/{home_dir}/username/Documents/Longpath/very/long/path/to/a/deeply/nested/folder",
             "/mnt/data/folder with unicode ÆÓÇ│▓█▌▌τì←∞?♫¢",
-            "/home//username//folder",
-            "/home/username/Documents/Longpath/very/long/path/to/a/deeply/nested/folder",
             "~/Documents/folder",
         ]
         for dpath in valid_paths:
