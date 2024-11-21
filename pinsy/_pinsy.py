@@ -39,6 +39,7 @@ from ansy import (
 )
 from ansy.exceptions import InvalidColorError
 from cursor import HiddenCursor
+import readchar
 from . import utils
 from .utils import get_terminal_size, typecheck
 from ._others import (
@@ -121,8 +122,8 @@ class Pins:
 
             just_fix_windows_console()
         except ModuleNotFoundError:
-            print(f"colorama is not installed")
-            exit(1)
+            print(f"colorama is not installed. (run 'pip install colorama')")
+            sys.exit(1)
 
     def enable_colors(self):
         """Enable Terminal Colors. Just a convenience function to enable colors."""
@@ -1072,16 +1073,13 @@ class Pins:
                 )
 
                 # Wait for a keypress
-                try:
-                    key = utils.read_key()
-                except UnicodeDecodeError:
-                    continue
+                key = readchar.readkey()
 
-                if key == utils.UP and selected_index > 0:  # UP
+                if key == readchar.key.UP and selected_index > 0:  # UP
                     selected_index -= 1
-                elif key == utils.DOWN and selected_index < total_options - 1:  # DOWN
+                elif key == readchar.key.DOWN and selected_index < total_options - 1:  # DOWN
                     selected_index += 1
-                elif key == "\r":  # ENTER
+                elif key == readchar.key.ENTER:
                     return selected_index + 1
 
     def print_error(self, error: str, quit_too: bool = False):
@@ -1111,7 +1109,7 @@ class Pins:
         )
 
         if quit_too:
-            exit(1)
+            sys.exit(1)
 
     def print_info(self, info: str):
         """
