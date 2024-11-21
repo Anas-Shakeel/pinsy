@@ -53,45 +53,6 @@ from typing import (
 from collections.abc import Iterable
 
 
-# ANSI Codes for cursor movement
-UP = "\x1b[A"
-DOWN = "\x1b[B"
-
-
-def read_key():
-    """Read a single keypress from stdin, handles arrow keys"""
-    if os.name == "nt":  # Windows
-        return read_key_windows()
-    else:  # Unix
-        return read_key_unix()
-
-
-def read_key_windows():
-    """Reads keypresses on Windows, supporting arrow keys"""
-    key = msvcrt.getch()
-    # Arrow keys are two bytes in Windows
-    # \xe0 OR \x00 and the keycode.
-    if key == b"\xe0" or key == b"\x00":
-        key = msvcrt.getch()
-        if key == b"H":  # UP
-            return UP
-        elif key == b"P":  # DOWN
-            return DOWN
-    return key.decode("utf-8")
-
-
-def read_key_unix():
-    """Reads keypresses on unix systems, supporting arrow keys"""
-    fd = sys.stdin.fileno()
-    old_settings = termios.tcgetattr(fd)
-    try:
-        tty.setraw(fd)
-        key = sys.stdin.read(3) if sys.stdin.read(1) == "\x1b" else sys.stdin.read(1)
-    finally:
-        termios.tcsetattr(fd, termios.TCSAFRAIN, old_settings)
-    return key
-
-
 def clear_lines_above(n):
     """Clears `n` lines above and including (current line).
     (only erase `n` lines that are is display)"""
