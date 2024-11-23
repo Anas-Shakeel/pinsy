@@ -1,18 +1,22 @@
-import codecs
 from os.path import join, abspath, dirname
 from setuptools import setup, find_packages
 
 
+# Current working directory
+cwd = abspath(dirname(__file__))
+
+
 def readme():
-    with codecs.open(
-        join(abspath(dirname(__file__)), "README.md"), encoding="utf-8"
-    ) as f:
-        return f.read()
+    with open(join(cwd, "README.md"), encoding="utf-8") as f:
+        try:
+            return f.read()
+        except:
+            return None
 
 
 setup(
     name="pinsy",
-    version="0.2.2",
+    version="0.2.3",
     description="A Python package to help speed up the workflow of creating beautiful CLI apps.",
     long_description=readme(),
     long_description_content_type="text/markdown",
