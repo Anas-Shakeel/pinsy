@@ -12,7 +12,7 @@ def readme():
 
 setup(
     name="pinsy",
-    version="0.2.0",
+    version="0.2.1",
     description="A Python package to help speed up the workflow of creating beautiful CLI apps.",
     long_description=readme(),
     long_description_content_type="text/markdown",
@@ -21,7 +21,7 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=["colorama", "cursor", "ansy"],
+    install_requires=["colorama", "cursor", "ansy", "readchar"],
     keywords=[
         "python",
         "cli",
@@ -37,9 +37,22 @@ setup(
     ],
     entry_points={"console_scripts": ["pinsy=pinsy.cli:main"]},
     classifiers=[
-        "Programming Language :: Python :: 3",
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
-        "Operating System :: OS Independent",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: POSIX :: Linux",
+        "Operating System :: MacOS",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: Implementation :: CPython",
+        "Topic :: Software Development",
+        "Topic :: Software Development :: User Interfaces",
     ],
     python_requires=">=3.9",
 )
