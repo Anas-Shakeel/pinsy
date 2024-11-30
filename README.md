@@ -2,7 +2,13 @@
   <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241106_012559_output.jpg" />
 </p>
 
-[![GitHub Repository](https://img.shields.io/badge/-GitHub-%230D0D0D?logo=github&labelColor=gray)](https://github.com/anas-shakeel/pinsy) [![Latest PyPi version](https://img.shields.io/pypi/v/pinsy.svg)](https://pypi.python.org/pypi/pinsy) [![supported Python versions](https://img.shields.io/pypi/pyversions/pinsy)](https://pypi.python.org/pypi/pinsy) [![Project licence](https://img.shields.io/pypi/l/pinsy?color=blue)](LICENSE) [![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](black) [![Automated testing results](https://img.shields.io/github/actions/workflow/status/anas-shakeel/pinsy/.github/workflows/test.yml?branch=main)](https://github.com/anas-shakeel/pinsy/actions/workflows/test.yml?query=branch%3Amain) [![Number of PyPi downloads](https://img.shields.io/pypi/dd/pinsy.svg)](https://pypi.python.org/pypi/pinsy)
+[![GitHub Repository](https://img.shields.io/badge/-GitHub-%230D0D0D?logo=github&labelColor=gray)](https://github.com/anas-shakeel/pinsy)
+[![Latest PyPi version](https://img.shields.io/pypi/v/pinsy.svg?color=slateblue)](https://pypi.python.org/pypi/pinsy)
+[![supported Python versions](https://img.shields.io/pypi/pyversions/pinsy)](https://pypi.python.org/pypi/pinsy)
+[![Project licence](https://img.shields.io/pypi/l/pinsy?color=blue)](LICENSE)
+[![Black](https://img.shields.io/badge/code%20style-black-000000.svg)](black) 
+[![Automated testing results](https://img.shields.io/github/actions/workflow/status/anas-shakeel/pinsy/.github/workflows/test.yml?branch=main)](https://github.com/anas-shakeel/pinsy/actions/workflows/test.yml?query=branch%3Amain) 
+[![PyPi downloads](https://img.shields.io/pypi/dm/pinsy.svg)](https://pypi.python.org/pypi/pinsy)
 
 `pinsy` (pronounced **pin-si**) _formerly `pins`_, is a powerful lightweight python package that helps speed up the workflow of creating visually apealing command-line applications.
 
@@ -410,6 +416,8 @@ print(jsh.highlight(data))
   <img src="https://raw.githubusercontent.com/Anas-Shakeel/pinsy/main/assets/20241105_180420_json_colored.png" />
 </p>
 
+There's a similar method called `print_markdown`, which highlights markdown syntax.
+
 ### How to print lengthy text for user to read easily
 
 You can use `pins.print_more()` to print a lengthy multiline text in the terminal.
@@ -527,7 +535,7 @@ And there's much more that you can do...
 
 ## Compatibility
 
-Tested on Windows, Mac, and Linux _(ubuntu)_ with python version `3.9`, `3.10`, `3.11`, `3.12`, `3.13`.
+`pinsy` has been well-tested on **Windows**, **Mac**, and **Linux** _(ubuntu)_ with python version `3.9` upto `3.13`.
 
 
 ## Pinsy CLI
