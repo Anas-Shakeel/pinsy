@@ -31,6 +31,18 @@ REGEX_PATTERNS = {
     "json_arrays": re.compile(
         r": \[((?:\s*?(?:.*?),*)*)\s*\]", (re.MULTILINE | re.DOTALL)
     ),
+    "md_headings": re.compile(r"(^#{1,6} .*)", re.MULTILINE),
+    "md_lists": re.compile(r"^(\s*[-*+] .*)", re.MULTILINE),
+    "md_lists_num": re.compile(r"^(\s*[0-9]+\. .*)", re.MULTILINE),
+    "md_bold": re.compile(r"(\*\*.+?\*\*|__.+?__)"),
+    "md_italic": re.compile(r"(\*.+\*|_.+_)"),
+    "md_inlinecodes": re.compile(r"(`[^`]*`)"),
+    "md_blockcodes": re.compile(r"(```[^`]*```|~~~[^~]*~~~)", re.MULTILINE),
+    "md_links": re.compile(r"\[.*?\]\(.*?\)"),
+    "md_urls_emails": re.compile(r"<.*?>"),
+    "md_comments": re.compile(r"<!\-\-.*?\-\->", re.DOTALL),
+    "md_hr": re.compile(r"^\-{3,}", re.MULTILINE),
+    "md_blockquotes": re.compile(r"^(\>.*)", re.MULTILINE),
 }
 
 

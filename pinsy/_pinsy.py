@@ -1522,6 +1522,86 @@ class Pins:
         )
         print(jsh.highlight(data))
 
+    def print_markdown(
+        self,
+        data: Any,
+        heading_color: Color = None,
+        list_color: Color = None,
+        bold_color: Color = None,
+        italic_color: Color = None,
+        inlinecode_color: Color = None,
+        blockcode_color: Color = None,
+        link_color: Color = None,
+        comment_color: Color = None,
+        hr_color: Color = None,
+        blockquote_color: Color = None,
+    ):
+        """
+        ### Print Markdown
+        Syntax highlight for Basic Markdown.
+
+        #### NOTE:
+        This method uses `pinsy.MarkdownHighlight` class under the hood.
+        It is not a proper markdown syntax highlight.
+
+        #### ARGS:
+        - `data`: the text to highlight
+        - `heading_color`: color of headings
+        - `list_color`: color of lists
+        - `bold_color`: color of bold text
+        - `italic_color`: color of italic text
+        - `inlinecode_color`: color of inlinecodes
+        - `blockcode_color`: color of blockcodes
+        - `link_color`: color of links
+        - `comment_color`: color of comments
+        - `hr_color`: color of hrs
+        - `blockquote_color`: color of blockquotes
+
+        #### Example:
+        ```
+        >> mdsh = MarkdownHighlight()
+        >> with open('temp.md') as file:
+        >>     new_md = mdsh.highlight(file.read())
+        >> print(new_json)
+        # Heading 1
+        1. item 1
+        2. item 2
+        **Bold**
+        __Bold__
+        *italic*
+        _italic_
+        ```
+        """
+        if str(data) == "":
+            return ""
+
+        if not self.USE_COLORS:
+            heading_color = None
+            list_color = None
+            bold_color = None
+            italic_color = None
+            inlinecode_color = None
+            blockcode_color = None
+            link_color = None
+            comment_color = None
+            hr_color = None
+            blockquote_color = None
+
+        mdsh = MarkdownHighlight(
+            self.COLORMODE,
+            heading_color,
+            list_color,
+            bold_color,
+            italic_color,
+            inlinecode_color,
+            blockcode_color,
+            link_color,
+            comment_color,
+            hr_color,
+            blockquote_color,
+        )
+        print(mdsh.highlight(data))
+
     def typewrite(self, text: str, interval: float = 0.01, hide_cursor: bool = True):
         """
         ### Typewrite
@@ -3093,6 +3173,180 @@ class JsonHighlight:
         return self._parse(data)
 
 
+class MarkdownHighlight:
+    """
+    ### Markdown Highlight
+    Syntax highlight for Basic Markdown.
+
+    #### NOTE:
+    It uses several regular expressions and not every optimized.
+    Use only if absolutely necessary and use it only for basic markdown.
+
+    #### ARGS:
+    - `color_mode`: the color mode to use
+    - `heading_color`: color of headings
+    - `list_color`: color of lists
+    - `bold_color`: color of bold text
+    - `italic_color`: color of italic text
+    - `inlinecode_color`: color of inlinecodes
+    - `blockcode_color`: color of blockcodes
+    - `link_color`: color of links
+    - `comment_color`: color of comments
+    - `hr_color`: color of hrs
+    - `blockquote_color`: color of blockquotes
+
+    #### Example:
+    ```
+    >> mdsh = MarkdownHighlight()
+    >> with open('temp.md') as file:
+    >>     new_md = mdsh.highlight(file.read())
+    >> print(new_json)
+    # Heading 1
+    1. item 1
+    2. item 2
+    **Bold**
+    __Bold__
+    *italic*
+    _italic_
+    ```
+    """
+
+    def __init__(
+        self,
+        color_mode: ColorMode = 8,
+        heading_color: Color = "light_red",
+        list_color: Color = "light_yellow",
+        bold_color: Color = "plum",
+        italic_color: Color = "cyan",
+        inlinecode_color: Color = "light_green",
+        blockcode_color: Color = "dark_grey",
+        link_color: Color = "light_blue",
+        comment_color: Color = "grey_15",
+        hr_color: Color = "gold",
+        blockquote_color: Color = "dark_grey",
+    ) -> None:
+
+        self.heading_fmt = self._create_ansi_fmt(
+            fg=heading_color,
+            color_mode=color_mode,
+        )
+        self.list_fmt = self._create_ansi_fmt(
+            fg=list_color,
+            color_mode=color_mode,
+        )
+        self.bold_fmt = self._create_ansi_fmt(
+            fg=bold_color,
+            attrs=["bold"],
+            color_mode=color_mode,
+        )
+        self.italic_fmt = self._create_ansi_fmt(
+            fg=italic_color,
+            attrs=["italic"],
+            color_mode=color_mode,
+        )
+        self.inlinecode_fmt = self._create_ansi_fmt(
+            fg=inlinecode_color,
+            color_mode=color_mode,
+        )
+        self.blockcode_fmt = self._create_ansi_fmt(
+            fg=blockcode_color,
+            color_mode=color_mode,
+        )
+        self.link_fmt = self._create_ansi_fmt(
+            fg=link_color,
+            color_mode=color_mode,
+        )
+        self.comment_fmt = self._create_ansi_fmt(
+            fg=comment_color,
+            color_mode=color_mode,
+        )
+        self.hr_fmt = self._create_ansi_fmt(
+            fg=hr_color,
+            color_mode=color_mode,
+        )
+        self.blockquote_fmt = self._create_ansi_fmt(
+            fg=blockquote_color,
+            color_mode=color_mode,
+        )
+
+    def highlight(self, data: Any) -> str:
+        """Highlights markdown syntax and returns the formatted string."""
+        formatted = self._colorize(
+            text=str(data),
+            pattern=REGEX_PATTERNS["md_headings"],
+            ansi_fmt=self.heading_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_urls_emails"],
+            ansi_fmt=self.link_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_comments"],
+            ansi_fmt=self.comment_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_hr"],
+            ansi_fmt=self.hr_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_blockquotes"],
+            ansi_fmt=self.blockquote_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_italic"],
+            ansi_fmt=self.italic_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_bold"],
+            ansi_fmt=self.bold_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_lists"],
+            ansi_fmt=self.list_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_lists_num"],
+            ansi_fmt=self.list_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_inlinecodes"],
+            ansi_fmt=self.inlinecode_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_blockcodes"],
+            ansi_fmt=self.blockcode_fmt,
+        )
+        formatted = self._colorize(
+            text=formatted,
+            pattern=REGEX_PATTERNS["md_links"],
+            ansi_fmt=self.link_fmt,
+        )
+
+        return formatted
+
+    def _colorize(self, text, pattern, ansi_fmt):
+        """Colorize `text` using pattern."""
+
+        def colorize_match_(m):
+            return ansi_fmt % m.group(0)
+
+        return re.sub(pattern, colorize_match_, text)
+
+    def _create_ansi_fmt(self, fg=None, bg=None, attrs=None, color_mode=4):
+        ansi_seq = make_ansi(fg, bg, attrs, color_mode)
+        return f"{ansi_seq}%s{ANSI_CODES['reset']}" if ansi_seq else "%s"
+
+
 class Typewriter:
     """
     ### Typewriter
@@ -3573,6 +3827,7 @@ class Validator:
     True
     ```
     """
+
     # Windows, Darwin, Linux
     OS: str = platform.system()
 
