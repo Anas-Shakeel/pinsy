@@ -388,7 +388,7 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = No
                     expected_type = hints[arg_name]
                     if not type_match(arg_value, expected_type):
                         raise TypeError(
-                            f"Argument '{arg_name}' must be {expected_type}, but got {type(arg_value)}"
+                            f"Argument '{arg_name}' must be {expected_type}, but got {type(arg_value).__name__}"
                         )
 
             # Execute the function and capture result
@@ -398,7 +398,7 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = No
             if "return" in hints:
                 if not type_match(result, hints["return"]):
                     raise TypeError(
-                        f"Return value must be {hints['return']}, but got {type(result)}"
+                        f"Return value must be {hints['return']}, but got {type(result).__name__}"
                     )
 
             return result
@@ -411,42 +411,3 @@ def typecheck(func=None, *, skip: Iterable[str] = None, only: Iterable[str] = No
 
     # If used with arguments
     return decorator
-
-
-def _normalize_hint(hint) -> str:
-    """
-    Normalize a hint name to a more readable format.
-
-    ```
-    # Hint name
-    >> type(123)
-    <class 'int'>
-
-    # Normalized hint name
-    >> _normalize_hint(type(123))
-    'int'
-    ```
-    """
-    if hint == int:
-        return "int"
-    if hint == float:
-        return "floa"
-    if hint == str:
-        return "str"
-    if hint == bool:
-        return "bool"
-    if hint == bytes:
-        return "byte"
-    if hint == list:
-        return "list"
-    if hint == tuple:
-        return "tuple"
-    if hint == dict:
-        return "dict"
-    if hint == set:
-        return "set"
-    if hint == type(None):
-        return "None"
-
-    # IF Not from above, return back
-    return hint
