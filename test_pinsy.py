@@ -1,56 +1,4 @@
-"""
-### Tests for Pinsy 
-These are all the tests for pinsy module. 
-
-#### How to run?
-```
-# Some functions rely on the terminal width/height (pytest conflicts)
->> python ./test_pinsy.py
-```
-
-#### pinsy.Pins()
-- `test_boxify`
-- `test_colorize_4bit`
-- `test_colorize_8bit`
-- `test_colorize_24bit`
-- `test_colorize_regex`
-- `test_contains_ansi`
-- `test_create_ansi_fmt`
-- `test_create_hr`
-- `test_create_list_ordered`
-- `test_create_list_unordered`
-- `test_create_status`
-- `test_create_table`
-- `test_for_each`
-- `test_format_date`
-- `test_get_calendar`
-- `test_indent_text`
-- `test_now`
-- `test_promptize`
-- `test_shorten_path`
-- `test_ellipsis`
-- `test_splice_text`
-- `test_textalign_x`
-- `test_textalign_y`
-- `test__longest_string`
-- `test__validate_types`
-- `test__validate_colors`
-- `test__validate_attrs`
-
-#### pinsy.Validator()
-- `test_is_strong_password`
-- `test_is_valid_extension`
-- `test_is_valid_filepath`
-- `test_is_valid_dirpath`
-- `test_is_valid_ip`
-- `test_is_valid_url`
-- `test_is_valid_email`
-
-#### pinsy.utils
-- `test_type_match`
-- `test_type_check`
-
-"""
+"""Tests for Pinsy"""
 
 from pinsy import Pins, Validator
 from pinsy.utils import typecheck, type_match
@@ -875,7 +823,6 @@ def test_shorten_path():
         absolute_path = "/home/username/files/music/song.mp3"
         relative_path = "./username/files/music/song.mp3"
         relative_path_2 = "username/files/music/song.mp3"
-        
 
     assert pins.shorten_path(absolute_path, 0) == absolute_path
     assert pins.shorten_path(absolute_path, -1) == absolute_path
@@ -886,27 +833,47 @@ def test_shorten_path():
 
     if CURRENT_OS == "Windows":
         assert pins.shorten_path(absolute_path, 8000) == "C:\\...\\song.mp3"
-        assert pins.shorten_path(absolute_path, n=1) == "C:\\...\\downloads\\files\\music\\song.mp3"
+        assert (
+            pins.shorten_path(absolute_path, n=1)
+            == "C:\\...\\downloads\\files\\music\\song.mp3"
+        )
         assert pins.shorten_path(relative_path, n=800) == "downloads\\...\\song.mp3"
-        assert pins.shorten_path(relative_path, n=1) == "downloads\\...\\music\\song.mp3"
+        assert (
+            pins.shorten_path(relative_path, n=1) == "downloads\\...\\music\\song.mp3"
+        )
         assert pins.shorten_path(relative_path_2, n=800) == "downloads\\...\\song.mp3"
-        assert pins.shorten_path(relative_path_2, n=1) == "downloads\\...\\music\\song.mp3"
-        assert pins.shorten_path(absolute_path, n=3, replacement="") == "C:\\music\\song.mp3"
-        assert pins.shorten_path(absolute_path, n=3, replacement="123") == "C:\\123\\music\\song.mp3"
+        assert (
+            pins.shorten_path(relative_path_2, n=1) == "downloads\\...\\music\\song.mp3"
+        )
+        assert (
+            pins.shorten_path(absolute_path, n=3, replacement="")
+            == "C:\\music\\song.mp3"
+        )
+        assert (
+            pins.shorten_path(absolute_path, n=3, replacement="123")
+            == "C:\\123\\music\\song.mp3"
+        )
     else:
         assert pins.shorten_path(absolute_path, 8000) == "/.../song.mp3"
-        assert pins.shorten_path(absolute_path, n=1) == "/.../username/files/music/song.mp3"
+        assert (
+            pins.shorten_path(absolute_path, n=1)
+            == "/.../username/files/music/song.mp3"
+        )
         assert pins.shorten_path(relative_path, n=800) == "username/.../song.mp3"
         assert pins.shorten_path(relative_path, n=1) == "username/.../music/song.mp3"
         assert pins.shorten_path(relative_path_2, n=800) == "username/.../song.mp3"
         assert pins.shorten_path(relative_path_2, n=1) == "username/.../music/song.mp3"
-        assert pins.shorten_path(absolute_path, n=3, replacement="") == "/music/song.mp3"
-        assert pins.shorten_path(absolute_path, n=3, replacement="123") == "/123/music/song.mp3"
+        assert (
+            pins.shorten_path(absolute_path, n=3, replacement="") == "/music/song.mp3"
+        )
+        assert (
+            pins.shorten_path(absolute_path, n=3, replacement="123")
+            == "/123/music/song.mp3"
+        )
 
     assert pins.shorten_path("") == ""
     assert pins.shorten_path("somefolder") == "somefolder"
     assert pins.shorten_path("somefile.txt") == "somefile.txt"
-
 
     with raises(TypeError):
         pins.shorten_path(123)
@@ -1340,8 +1307,15 @@ def test_is_valid_dirpath():
 
         # ILLEGAL CHARS <>
         assert isinstance(Validator.is_valid_dirpath("C:\\Invalid<file>.txt"), str)
-        assert isinstance(Validator.is_valid_dirpath("path\\to\\a\\deeply\\nested\\folder", max_length=10), str)  # Length
-        assert isinstance(Validator.is_valid_dirpath("folder.<txt>"), str)  # illegal chars
+        assert isinstance(
+            Validator.is_valid_dirpath(
+                "path\\to\\a\\deeply\\nested\\folder", max_length=10
+            ),
+            str,
+        )  # Length
+        assert isinstance(
+            Validator.is_valid_dirpath("folder.<txt>"), str
+        )  # illegal chars
 
     elif CURRENT_OS == "Linux":
         valid_paths = [
@@ -1359,8 +1333,16 @@ def test_is_valid_dirpath():
         for dpath in valid_paths:
             assert Validator.is_valid_dirpath(dpath)
 
-        assert isinstance(Validator.is_valid_dirpath("path/to/a/deepl/nested/folder", max_length=10), str)
-        assert isinstance(Validator.is_valid_dirpath("/home/username/Desktop/InValid<folder>",), str)  # illegal chars
+        assert isinstance(
+            Validator.is_valid_dirpath("path/to/a/deepl/nested/folder", max_length=10),
+            str,
+        )
+        assert isinstance(
+            Validator.is_valid_dirpath(
+                "/home/username/Desktop/InValid<folder>",
+            ),
+            str,
+        )  # illegal chars
         assert isinstance(Validator.is_valid_dirpath("f<old>er"), str)  # illegal chars
 
     # Other Tests
@@ -1772,82 +1754,3 @@ def test_type_check():
 
     except AssertionError:
         pass
-
-
-if __name__ == "__main__":
-    all_functions = [
-        (test_pins, "test_pins"),
-        (test_colorize_4bit, "test_colorize_4bit"),
-        (test_colorize_8bit, "test_colorize_8bit"),
-        (test_colorize_24bit, "test_colorize_24bit"),
-        (test_colorize_regex, "test_colorize_regex"),
-        (test_create_hr, "test_create_hr"),
-        (test_create_status, "test_create_status"),
-        (test_boxify, "test_boxify"),
-        (test_create_list_ordered, "test_create_list_ordered"),
-        (test_create_list_unordered, "test_create_list_unordered"),
-        (test_create_table, "test_create_table"),
-        (test_promptize, "test_promptize"),
-        (test_textalign_x, "test_textalign_x"),
-        (test_textalign_y, "test_textalign_y"),
-        (test_indent_text, "test_indent_text"),
-        (test_splice_text, "test_splice_text"),
-        (test_contains_ansi, "test_contains_ansi"),
-        (test_shorten_path, "test_shorten_path"),
-        (test_ellipsis, "test_ellipsis"),
-        (test_now, "test_now"),
-        (test_for_each, "test_for_each"),
-        (test_format_date, "test_format_date"),
-        (test_get_calendar, "test_get_calendar"),
-        (test_create_ansi_fmt, "test_create_ansi_fmt"),
-        (test__validate_colors, "test__validate_colors"),
-        (test__validate_attrs, "test__validate_attrs"),
-        (test__longest_string, "test__longest_string"),
-        (test_is_strong_password, "test_is_strong_password"),
-        (test_is_valid_extension, "test_is_valid_extension"),
-        (test_is_valid_filepath, "test_is_valid_filepath"),
-        (test_is_valid_dirpath, "test_is_valid_dirpath"),
-        (test_is_valid_ip, "test_is_valid_ip"),
-        (test_is_valid_url, "test_is_valid_url"),
-        (test_is_valid_email, "test_is_valid_email"),
-        (test_type_match, "test_type_match"),
-        (test_type_check, "test_type_check"),
-    ]
-
-    # Skip these tests
-    to_skip = []
-
-    failed = []
-    passed = []
-    for func, name in all_functions:
-        if name in to_skip:
-            print(colored(f"Skipping: {name}()", "light_yellow"))
-            print()
-            continue
-
-        try:
-            func()
-            passed.append(name)
-        except AssertionError:
-            failed.append(name)
-
-    printc(f"Total Tests: {len(all_functions):<3}", "light_blue", end="\n\n")
-
-    if passed:
-        printc(f"Tests Passed: {len(passed):<3}", "green", end=" ")
-        printc("." * len(passed), "light_green", end="\n\n")
-
-    if failed:
-        printc(f"Tests Failed: {len(failed):<3}", "red", end=" ")
-        printc("." * len(failed), "red")
-        for name in failed:
-            print("Failed:", colored(f"{name}()", "red"))
-
-    if len(all_functions) - len(to_skip) == len(passed):
-        printc("All Tests Passed :)", "light_green")
-
-    if len(all_functions) == len(failed):
-        printc("All Tests Failed :(", "light_red")
-
-    # Exit with a code same as failed tests...
-    sys.exit(len(failed))
