@@ -1077,7 +1077,9 @@ class Pins:
 
                 if key == readchar.key.UP and selected_index > 0:  # UP
                     selected_index -= 1
-                elif key == readchar.key.DOWN and selected_index < total_options - 1:  # DOWN
+                elif (
+                    key == readchar.key.DOWN and selected_index < total_options - 1
+                ):  # DOWN
                     selected_index += 1
                 elif key == readchar.key.ENTER:
                     return selected_index + 1
@@ -3765,7 +3767,7 @@ class Validator:
         d = Path(dirpath)
         if d.drive:
             root_parts = d.parts[1:]
-        elif cls.OS == "Linux" and d.parts[0] == "/":
+        elif cls.OS == "Linux" and (d.parts and d.parts[0] == "/"):
             root_parts = d.parts[1:]
         else:
             root_parts = d.parts
